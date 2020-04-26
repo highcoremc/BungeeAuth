@@ -1,0 +1,4 @@
+name: BungeeAuth
+version: ${project.version}
+main: ru.yooxa.bungee.auth.Main
+description: Simple authentication for bungeecord offline.
