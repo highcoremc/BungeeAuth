@@ -22,22 +22,20 @@ public class AuthManager {
 
     public List<String> admins;
     public BotManager botManager;
-    private Main main;
-    private HashMap<String, AuthPlayer> players;
-    private Database database;
-    private Set<String> blacklist;
-    private YIterator<String> lobbyIterator;
+    private final Main main;
+    private final HashMap<String, AuthPlayer> players = new HashMap<>();
+    private final Set<String> blacklist = new HashSet<>();
+    private final YIterator<String> lobbyIterator;
+    private final Database database;
 
     public AuthManager(Main main)
     {
         instance = this;
         this.main = main;
-        this.players = new HashMap();
-        this.blacklist = new HashSet();
 
         loadConfig();
 
-        this.lobbyIterator = new YIterator(getConfig().getStringList("Lobby"));
+        this.lobbyIterator = new YIterator<>(getConfig().getStringList("Lobby"));
         this.admins = getConfig().getStringList("Admins");
         this.ipProtect = new IpProtect(this);
         this.database = new Database(this);
@@ -174,7 +172,7 @@ public class AuthManager {
     public long lastLogin(String name) throws SQLException
     {
         Object[] data = this.database.loadData(name);
-        return ((Long) data[1]).longValue();
+        return (Long) data[1];
     }
 }
 

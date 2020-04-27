@@ -66,13 +66,13 @@ public class BotManager implements Listener {
             client = new Client(name.toLowerCase(), ip);
             this.clients.put(ip, client);
         } else {
-            Set temp = client.getNames();
+            Set<String> temp = client.getNames();
             if (!temp.contains(name.toLowerCase())) {
                 if (temp.size() >= this.limit) {
-                    String nicks = "";
+                    StringBuilder nicks = new StringBuilder();
 
 
-                    for (String nick : client.getNames()) nicks = nicks + "\n§a" + nick;
+                    for (String nick : client.getNames()) nicks.append("\n§a").append(nick);
 
 
                     e.setCancelled(true);
@@ -103,7 +103,7 @@ public class BotManager implements Listener {
 
     public void check()
     {
-        HashMap<String, Client> temp = new HashMap<String, Client>();
+        HashMap<String, Client> temp = new HashMap<>();
 
         for (Client client : this.clients.values()) {
             if (System.currentTimeMillis() / 1000L - client.getTime() < this.time) {

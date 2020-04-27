@@ -12,14 +12,15 @@ import net.md_5.bungee.api.event.ServerConnectEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 
-public class LoginListener implements Listener {
+public class LoginListener implements Listener
+{
     String whitelist;
 
     public LoginListener(AuthManager manager)
     {
         this.whitelist = "abcdefghijklmnopqrstuvwxyz_ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         this.manager = manager;
-        this.servers = new YIterator(manager.getConfig().getStringList("Login"));
+        this.servers = new YIterator<>(manager.getConfig().getStringList("Login"));
     }
 
     private final AuthManager manager;
@@ -67,7 +68,7 @@ public class LoginListener implements Listener {
 
     private void loadPlayer(final ProxiedPlayer p)
     {
-        ProxyServer.getInstance().getScheduler().schedule(Main.getInstance(), (Runnable) () -> {
+        ProxyServer.getInstance().getScheduler().schedule(Main.getInstance(), () -> {
             try {
                 AuthPlayer authPlayer = LoginListener.this.manager.loadPlayer(p);
                 if (authPlayer.getLastIp().equals(p.getAddress().getAddress().getHostAddress()) &&
@@ -124,7 +125,7 @@ public class LoginListener implements Listener {
             ServerInfo server = null;
 
             for (int i = 0; i < this.servers.size(); i++) {
-                server = ProxyServer.getInstance().getServerInfo((String) this.servers.getNext());
+                server = ProxyServer.getInstance().getServerInfo(this.servers.getNext());
                 if (server != null) {
                     break;
                 }
@@ -141,7 +142,10 @@ public class LoginListener implements Listener {
 
 
     @EventHandler
-    public void onQuit(PlayerDisconnectEvent e) { this.manager.savePlayer(e.getPlayer()); }
+    public void onQuit(PlayerDisconnectEvent e)
+    {
+        this.manager.savePlayer(e.getPlayer());
+    }
 }
 
 

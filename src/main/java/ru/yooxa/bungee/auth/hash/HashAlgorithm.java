@@ -8,11 +8,8 @@ public enum HashAlgorithm
 
   Class cls;
 
-
   HashAlgorithm(Class cls) { this.cls = cls; }
 
-
-  
   public Class getclass() { return this.cls; }
 }
 

@@ -19,13 +19,13 @@ public class AuthPlayer
     ScheduledTask task;
     String hash;
 
-    private ProxiedPlayer player;
-    private String name;
+    private final ProxiedPlayer player;
+    private final String lastIp;
+    private final String name;
     private boolean authorize;
     private int errors;
     private long session;
     private boolean save;
-    private String lastIp;
 
     public AuthPlayer(final ProxiedPlayer player) throws SQLException
     {
@@ -192,7 +192,7 @@ public class AuthPlayer
             {
                 public void done(Boolean aBoolean, Throwable throwable)
                 {
-                    if (!aBoolean.booleanValue()) {
+                    if (!aBoolean) {
                         AuthPlayer.this.player.disconnect("§cОшибка при телепортации в Lobby");
                     }
                 }
