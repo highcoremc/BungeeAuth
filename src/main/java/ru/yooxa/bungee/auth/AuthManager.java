@@ -14,8 +14,8 @@ import net.md_5.bungee.config.ConfigurationProvider;
 import ru.yooxa.bungee.auth.antibot.BotManager;
 import ru.yooxa.bungee.auth.hash.PasswordSecurity;
 
-
-public class AuthManager {
+public class AuthManager
+{
     private static AuthManager instance;
     public IpProtect ipProtect;
     public Configuration config;
@@ -74,9 +74,7 @@ public class AuthManager {
     {
         AuthPlayer auth = getPlayer(player);
         if (auth != null) {
-            if (this.players.containsKey(player.getName().toLowerCase())) {
-                this.players.remove(player.getName().toLowerCase());
-            }
+            this.players.remove(player.getName().toLowerCase());
 
             if (auth.isSave() || auth.isAuth()) {
                 this.database.saveData(auth, auth.isAuth());
@@ -102,14 +100,7 @@ public class AuthManager {
     public void addBlackIp(final String ip)
     {
         this.blacklist.add(ip);
-        this.main.getProxy().getScheduler().schedule(this.main, new Runnable() {
-            public void run()
-            {
-                if (AuthManager.this.blacklist.contains(ip)) {
-                    AuthManager.this.blacklist.remove(ip);
-                }
-            }
-        }, 10L, TimeUnit.MINUTES);
+        this.main.getProxy().getScheduler().schedule(this.main, () -> AuthManager.this.blacklist.remove(ip), 10L, TimeUnit.MINUTES);
     }
 
     public void loadConfig()
@@ -129,7 +120,7 @@ public class AuthManager {
             this.config = provider.load(file);
 
             addDefault("hash", "SHA256");
-            addDefault("mail", Boolean.valueOf(true));
+            addDefault("mail", Boolean.TRUE);
 
             provider.save(this.config, file);
         } catch (Exception var2) {
