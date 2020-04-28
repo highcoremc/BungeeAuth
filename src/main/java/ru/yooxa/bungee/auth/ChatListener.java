@@ -7,13 +7,12 @@ import net.md_5.bungee.api.event.ChatEvent;
 import net.md_5.bungee.api.plugin.Event;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
-import net.md_5.bungee.event.EventPriority;
-import ru.yooxa.bungee.auth.hash.RandomString;
 
 public class ChatListener implements Listener {
-    String whitelist = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_\u00b8abcdefghijklmnopqrstuvwxyz{|}~\u0410\u0411\u0412\u0413\u0414\u0415\u0401\u0416\u0417\u0418\u0419\u041a\u041b\u041c\u041d\u041e\u041f\u0420\u0421\u0422\u0423\u0424\u0425\u0426\u0427\u0428\u0429\u042b\u042d\u042e\u042f\u0430\u0431\u0432\u0433\u0434\u0435\u0451\u0436\u0437\u0438\u0439\u043a\u043b\u043c\u043d\u043e\u043f\u0440\u0441\u0442\u0443\u0444\u0445\u0446\u0447\u0448\u0449\u044a\u044b\u044c\u044d\u044e\u044f";
-    String mailWhiteList = "abcdefghijklmnopqrstuvwxyz-_ABCDEFGHIJKLMNOPQRSTUVWXYZ.@0123456789";
-    private AuthManager manager;
+
+    String whitelist = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_¸abcdefghijklmnopqrstuvwxyz{|}~АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЫЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя";
+
+    private final AuthManager manager;
 
     public ChatListener(AuthManager manager) {
         this.manager = manager;
@@ -23,9 +22,9 @@ public class ChatListener implements Listener {
         for (int i = 0; i < message.length(); ++i) {
             if (allowed.contains(String.valueOf(message.charAt(i))))
                 continue;
-            return false;
+            return true;
         }
-        return true;
+        return false;
     }
 
     @EventHandler(priority = 64)
@@ -53,7 +52,6 @@ public class ChatListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
     public void onCommand(CommandEvent e) {
         ProxiedPlayer player = e.getPlayer();
         AuthPlayer authPlayer = this.manager.getPlayer(player);
@@ -61,9 +59,8 @@ public class ChatListener implements Listener {
             e.setCanceled(true);
             e.used();
         } else {
-            String command;
             block17:
-            switch (command = e.getCommand().toLowerCase()) {
+            switch (e.getCommand().toLowerCase()) {
                 case "auth": {
                     String subCommand;
                     e.used();
@@ -88,7 +85,7 @@ public class ChatListener implements Listener {
                         player.sendMessage(new TextComponent("\u041f\u043e\u0441\u043b\u0435\u0434\u043d\u0438\u0439 \u0432\u0445\u043e\u0434 - /auth lastlogin [\u043d\u0438\u043a]"));
                         return;
                     }
-                    switch (subCommand = e.getArgs()[0]) {
+                    switch (e.getArgs()[0]) {
                         case "lastlogin": {
                             if (e.getArgs().length < 2) {
                                 player.sendMessage(new TextComponent("\u0417\u0430\u0440\u0435\u0433\u0438\u0441\u0442\u0440\u0438\u0440\u043e\u0432\u0430\u0442\u044c \u0438\u0433\u0440\u043e\u043a\u0430 - /auth register [\u043d\u0438\u043a] [\u043f\u0430\u0440\u043e\u043b\u044c]"));
@@ -193,15 +190,15 @@ public class ChatListener implements Listener {
                 case "l": {
                     e.used();
                     if (!authPlayer.isRegister()) {
-                        player.sendMessage((BaseComponent) new TextComponent("\u00a7c\u0412\u044b \u043d\u0435 \u0437\u0430\u0440\u0435\u0433\u0438\u0441\u0442\u0440\u0438\u0440\u043e\u0432\u0430\u043d\u044b"));
+                        player.sendMessage(new TextComponent("\u00a7c\u0412\u044b \u043d\u0435 \u0437\u0430\u0440\u0435\u0433\u0438\u0441\u0442\u0440\u0438\u0440\u043e\u0432\u0430\u043d\u044b"));
                         return;
                     }
                     if (authPlayer.isAuth()) {
-                        player.sendMessage((BaseComponent) new TextComponent("\u00a7a\u0422\u044b \u0443\u0436\u0435 \u0432 \u0438\u0433\u0440\u0435 \u043b\u0430\u043b\u043a\u0430))"));
+                        player.sendMessage(new TextComponent("\u00a7a\u0422\u044b \u0443\u0436\u0435 \u0432 \u0438\u0433\u0440\u0435 \u043b\u0430\u043b\u043a\u0430))"));
                         return;
                     }
                     if (e.getArgs().length != 1) {
-                        player.sendMessage((BaseComponent) new TextComponent("\u00a7e\u0412\u043e\u0439\u0434\u0438\u0442\u0435 - \u00a7c/login \u00a7f[\u00a7c\u043f\u0430\u0440\u043e\u043b\u044c\u00a7f]"));
+                        player.sendMessage(new TextComponent("\u00a7e\u0412\u043e\u0439\u0434\u0438\u0442\u0435 - \u00a7c/login \u00a7f[\u00a7c\u043f\u0430\u0440\u043e\u043b\u044c\u00a7f]"));
                         return;
                     }
                     authPlayer.tryAuth(e.getArgs()[0]);
@@ -211,27 +208,27 @@ public class ChatListener implements Listener {
                 case "reg": {
                     e.used();
                     if (authPlayer.isAuth()) {
-                        player.sendMessage((BaseComponent) new TextComponent("\u00a7a\u0422\u044b \u0443\u0436\u0435 \u0432 \u0438\u0433\u0440\u0435 \u043b\u0430\u043b\u043a\u0430))"));
+                        player.sendMessage(new TextComponent("\u00a7a\u0422\u044b \u0443\u0436\u0435 \u0432 \u0438\u0433\u0440\u0435 \u043b\u0430\u043b\u043a\u0430))"));
                         return;
                     }
                     if (e.getArgs().length < 2) {
-                        player.sendMessage((BaseComponent) new TextComponent("\u00a7e\u0417\u0430\u0440\u0435\u0433\u0438\u0441\u0442\u0440\u0438\u0440\u0443\u0439\u0442\u0435\u0441\u044c - \u00a7c/register \u00a7f[\u00a7c\u043f\u0430\u0440\u043e\u043b\u044c\u00a7f] [\u00a7c\u043f\u0430\u0440\u043e\u043b\u044c\u00a7f]"));
+                        player.sendMessage(new TextComponent("\u00a7e\u0417\u0430\u0440\u0435\u0433\u0438\u0441\u0442\u0440\u0438\u0440\u0443\u0439\u0442\u0435\u0441\u044c - \u00a7c/register \u00a7f[\u00a7c\u043f\u0430\u0440\u043e\u043b\u044c\u00a7f] [\u00a7c\u043f\u0430\u0440\u043e\u043b\u044c\u00a7f]"));
                         return;
                     }
                     if (!e.getArgs()[0].equals(e.getArgs()[1])) {
-                        player.sendMessage((BaseComponent) new TextComponent("\u00a7c\u041f\u0430\u0440\u043e\u043b\u0438 \u043e\u0442\u043b\u0438\u0447\u0430\u044e\u0442\u0441\u044f"));
+                        player.sendMessage(new TextComponent("\u00a7c\u041f\u0430\u0440\u043e\u043b\u0438 \u043e\u0442\u043b\u0438\u0447\u0430\u044e\u0442\u0441\u044f"));
                         return;
                     }
                     if (e.getArgs()[0].length() < 4) {
-                        player.sendMessage((BaseComponent) new TextComponent("\u00a7c\u041c\u0438\u043d\u0438\u043c\u0430\u043b\u044c\u043d\u0430\u044f \u0434\u043b\u0438\u043d\u0430 \u043f\u0430\u0440\u043e\u043b\u044f - 4 \u0441\u0438\u043c\u0432\u043e\u043b\u0430"));
+                        player.sendMessage(new TextComponent("\u00a7c\u041c\u0438\u043d\u0438\u043c\u0430\u043b\u044c\u043d\u0430\u044f \u0434\u043b\u0438\u043d\u0430 \u043f\u0430\u0440\u043e\u043b\u044f - 4 \u0441\u0438\u043c\u0432\u043e\u043b\u0430"));
                         return;
                     }
                     if (e.getArgs()[0].length() > 16) {
-                        player.sendMessage((BaseComponent) new TextComponent("\u00a7c\u041c\u0430\u043a\u0441\u0438\u043c\u0430\u043b\u044c\u043d\u0430\u044f \u0434\u043b\u0438\u043d\u0430 \u043f\u0430\u0440\u043e\u043b\u044f - 16 \u0441\u0438\u043c\u0432\u043e\u043b\u043e\u0432"));
+                        player.sendMessage(new TextComponent("\u00a7c\u041c\u0430\u043a\u0441\u0438\u043c\u0430\u043b\u044c\u043d\u0430\u044f \u0434\u043b\u0438\u043d\u0430 \u043f\u0430\u0440\u043e\u043b\u044f - 16 \u0441\u0438\u043c\u0432\u043e\u043b\u043e\u0432"));
                         return;
                     }
-                    if (!this.checkMessage(this.whitelist, e.getArgs()[0])) {
-                        player.sendMessage((BaseComponent) new TextComponent("\u00a7c\u0412 \u043f\u0430\u0440\u043e\u043b\u0435 \u0435\u0441\u0442\u044c \u043d\u0435\u0434\u043e\u043f\u0443\u0441\u0442\u0438\u043c\u044b\u0435 \u0441\u0438\u043c\u0432\u043e\u043b\u044b!"));
+                    if (this.checkMessage(this.whitelist, e.getArgs()[0])) {
+                        player.sendMessage(new TextComponent("\u00a7c\u0412 \u043f\u0430\u0440\u043e\u043b\u0435 \u0435\u0441\u0442\u044c \u043d\u0435\u0434\u043e\u043f\u0443\u0441\u0442\u0438\u043c\u044b\u0435 \u0441\u0438\u043c\u0432\u043e\u043b\u044b!"));
                         return;
                     }
                     authPlayer.register(e.getArgs()[0]);
@@ -243,30 +240,30 @@ public class ChatListener implements Listener {
                         break;
                     e.used();
                     if (e.getArgs().length != 2) {
-                        player.sendMessage((BaseComponent) new TextComponent("\u00a7e\u0421\u043c\u0435\u043d\u0438\u0442\u044c \u043f\u0430\u0440\u043e\u043b\u044c - \u00a7c/changepassword \u00a7f[\u00a7c\u0441\u0442\u0430\u0440\u044b\u0439 \u043f\u0430\u0440\u043e\u043b\u044c\u00a7f] [\u00a7c\u043d\u043e\u0432\u044b\u0439 \u043f\u0430\u0440\u043e\u043b\u044c\u00a7f]"));
+                        player.sendMessage(new TextComponent("\u00a7e\u0421\u043c\u0435\u043d\u0438\u0442\u044c \u043f\u0430\u0440\u043e\u043b\u044c - \u00a7c/changepassword \u00a7f[\u00a7c\u0441\u0442\u0430\u0440\u044b\u0439 \u043f\u0430\u0440\u043e\u043b\u044c\u00a7f] [\u00a7c\u043d\u043e\u0432\u044b\u0439 \u043f\u0430\u0440\u043e\u043b\u044c\u00a7f]"));
                         return;
                     }
                     String subCommand = e.getArgs()[0];
                     String newPass = e.getArgs()[1];
                     if (!authPlayer.checkPassword(subCommand)) {
-                        player.sendMessage((BaseComponent) new TextComponent("\u00a7c\u0412\u044b \u043d\u0435 \u0432\u0435\u0440\u043d\u043e \u0432\u0432\u0435\u043b\u0438 \u0441\u0442\u0430\u0440\u044b\u0439 \u043f\u0430\u0440\u043e\u043b\u044c"));
+                        player.sendMessage(new TextComponent("\u00a7c\u0412\u044b \u043d\u0435 \u0432\u0435\u0440\u043d\u043e \u0432\u0432\u0435\u043b\u0438 \u0441\u0442\u0430\u0440\u044b\u0439 \u043f\u0430\u0440\u043e\u043b\u044c"));
                         return;
                     }
                     if (newPass.length() < 4) {
-                        player.sendMessage((BaseComponent) new TextComponent("\u00a7c\u041c\u0438\u043d\u0438\u043c\u0430\u043b\u044c\u043d\u0430\u044f \u0434\u043b\u0438\u043d\u0430 \u043f\u0430\u0440\u043e\u043b\u044f - 4 \u0441\u0438\u043c\u0432\u043e\u043b\u0430"));
+                        player.sendMessage(new TextComponent("\u00a7c\u041c\u0438\u043d\u0438\u043c\u0430\u043b\u044c\u043d\u0430\u044f \u0434\u043b\u0438\u043d\u0430 \u043f\u0430\u0440\u043e\u043b\u044f - 4 \u0441\u0438\u043c\u0432\u043e\u043b\u0430"));
                         return;
                     }
                     if (newPass.length() > 16) {
-                        player.sendMessage((BaseComponent) new TextComponent("\u00a7c\u041c\u0430\u043a\u0441\u0438\u043c\u0430\u043b\u044c\u043d\u0430\u044f \u0434\u043b\u0438\u043d\u0430 \u043f\u0430\u0440\u043e\u043b\u044f - 16 \u0441\u0438\u043c\u0432\u043e\u043b\u043e\u0432"));
+                        player.sendMessage(new TextComponent("\u00a7c\u041c\u0430\u043a\u0441\u0438\u043c\u0430\u043b\u044c\u043d\u0430\u044f \u0434\u043b\u0438\u043d\u0430 \u043f\u0430\u0440\u043e\u043b\u044f - 16 \u0441\u0438\u043c\u0432\u043e\u043b\u043e\u0432"));
                         return;
                     }
-                    if (!this.checkMessage(this.whitelist, newPass)) {
-                        player.sendMessage((BaseComponent) new TextComponent("\u00a7c\u0412 \u043d\u043e\u0432\u043e\u043c \u043f\u0430\u0440\u043e\u043b\u0435 \u0435\u0441\u0442\u044c \u043d\u0435\u0434\u043e\u043f\u0443\u0441\u0442\u0438\u043c\u044b\u0435 \u0441\u0438\u043c\u0432\u043e\u043b\u044b!"));
+                    if (this.checkMessage(this.whitelist, newPass)) {
+                        player.sendMessage(new TextComponent("\u00a7c\u0412 \u043d\u043e\u0432\u043e\u043c \u043f\u0430\u0440\u043e\u043b\u0435 \u0435\u0441\u0442\u044c \u043d\u0435\u0434\u043e\u043f\u0443\u0441\u0442\u0438\u043c\u044b\u0435 \u0441\u0438\u043c\u0432\u043e\u043b\u044b!"));
                         return;
                     }
                     String pass = e.getArgs()[1];
                     authPlayer.setPassword(pass);
-                    player.sendMessage((BaseComponent) new TextComponent("\u00a7a\u041f\u0430\u0440\u043e\u043b\u044c \u0443\u0441\u043f\u0435\u0448\u043d\u043e \u0438\u0437\u043c\u0435\u043d\u0435\u043d"));
+                    player.sendMessage(new TextComponent("\u00a7a\u041f\u0430\u0440\u043e\u043b\u044c \u0443\u0441\u043f\u0435\u0448\u043d\u043e \u0438\u0437\u043c\u0435\u043d\u0435\u043d"));
                     break;
                 }
                 case "logout": {
@@ -276,108 +273,12 @@ public class ChatListener implements Listener {
                     authPlayer.logout();
                     break;
                 }
-                case "email":
-                case "mail": {
-                    String subCommand;
-                    e.used();
-                    if (e.getArgs().length < 2 || e.getArgs()[0].equalsIgnoreCase("help")) {
-                        if (authPlayer.isAuth()) {
-                            player.sendMessage(new TextComponent("\u00a7e\u041f\u0440\u0438\u0432\u044f\u0437\u0430\u0442\u044c \u043f\u043e\u0447\u0442\u0443 - \u00a7c/email add \u00a7f[\u00a7c\u0412\u0410\u0428_EMAIL\u00a7f] [\u00a7c\u0412\u0410\u0428_EMAIL\u00a7f]"));
-                            player.sendMessage(new TextComponent("\u00a7e\u0421\u043c\u0435\u043d\u0438\u0442\u044c \u043f\u043e\u0447\u0442\u0443 - \u00a7c/email change \u00a7f[\u00a7c\u0421\u0422\u0410\u0420\u042b\u0419_EMAIL\u00a7f] [\u00a7c\u041d\u041e\u0412\u042b\u0419_EMAIL\u00a7f]"));
-                        }
-                        player.sendMessage(new TextComponent("\u00a7e\u0412\u043e\u0441\u0441\u0442\u0430\u043d\u043e\u0432\u0438\u0442\u044c \u043f\u0430\u0440\u043e\u043b\u044c - \u00a7c/email recovery \u00a7f[\u00a7c\u0412\u0410\u0428_EMAIL\u00a7f]"));
-                        return;
-                    }
-                    switch (subCommand = e.getArgs()[0]) {
-                        case "add": {
-                            if (e.getArgs().length < 3) {
-                                player.sendMessage(new TextComponent("\u00a7e\u041f\u0440\u0438\u0432\u044f\u0437\u0430\u0442\u044c \u043f\u043e\u0447\u0442\u0443 - \u00a7c/email add \u00a7f[\u00a7c\u0412\u0410\u0428_EMAIL\u00a7f] [\u00a7c\u0412\u0410\u0428_EMAIL\u00a7f]"));
-                                return;
-                            }
-                            if (!authPlayer.isAuth())
-                                break;
-                            if (authPlayer.hasMail()) {
-                                player.sendMessage(new TextComponent("\u00a7c\u0423 \u0432\u0430\u0441 \u0443\u0436\u0435 \u043f\u0440\u0438\u0432\u044f\u0437\u0430\u043d\u0430 \u043f\u043e\u0447\u0442\u0430!"));
-                                player.sendMessage(new TextComponent("\u00a7e\u0421\u043c\u0435\u043d\u0438\u0442\u044c \u043f\u043e\u0447\u0442\u0443 - \u00a7c/email change \u00a7f[\u00a7c\u0421\u0422\u0410\u0420\u042b\u0419_EMAIL\u00a7f] [\u00a7c\u041d\u041e\u0412\u042b\u0419_EMAIL\u00a7f]"));
-                                break;
-                            }
-                            if (!this.checkMessage(this.mailWhiteList, e.getArgs()[1])) {
-                                player.sendMessage(new TextComponent("\u00a7c\u041d\u0435\u0432\u0435\u0440\u043d\u0430\u044f \u043f\u043e\u0447\u0442\u0430"));
-                                break;
-                            }
-                            if (e.getArgs()[1].contains(".") && e.getArgs()[1].contains("@")) {
-                                if (!e.getArgs()[1].equals(e.getArgs()[2])) {
-                                    player.sendMessage((BaseComponent) new TextComponent("\u00a7c\u041f\u043e\u0447\u0442\u044b \u043d\u0435 \u0441\u043e\u0432\u043f\u0430\u0434\u0430\u044e\u0442"));
-                                    break;
-                                }
-                                authPlayer.mail = e.getArgs()[1];
-                                player.sendMessage(new TextComponent("\u00a7e\u0412\u044b \u0443\u0441\u043f\u0435\u0448\u043d\u043e \u043f\u0440\u0438\u0432\u044f\u0437\u0430\u043b\u0438 \u043f\u043e\u0447\u0442\u0443 - \u00a7c" + e.getArgs()[1]));
-                                break;
-                            }
-                            player.sendMessage(new TextComponent("\u00a7c\u041d\u0435\u0432\u0435\u0440\u043d\u0430\u044f \u043f\u043e\u0447\u0442\u0430"));
-                            break;
-                        }
-                        case "change": {
-                            if (!authPlayer.isAuth())
-                                break;
-                            if (e.getArgs().length < 3) {
-                                player.sendMessage(new TextComponent("\u00a7e\u0421\u043c\u0435\u043d\u0438\u0442\u044c \u043f\u043e\u0447\u0442\u0443 - \u00a7c/email change \u00a7f[\u00a7c\u0421\u0422\u0410\u0420\u042b\u0419_EMAIL\u00a7f] [\u00a7c\u041d\u041e\u0412\u042b\u0419_EMAIL\u00a7f]"));
-                                break;
-                            }
-                            if (!authPlayer.hasMail()) {
-                                player.sendMessage(new TextComponent("\u00a7c\u0423 \u0432\u0430\u0441 \u0435\u0449\u0435 \u043d\u0435 \u043f\u0440\u0438\u0432\u044f\u0437\u0430\u043d\u0430 \u043f\u043e\u0447\u0442\u0430"));
-                                player.sendMessage(new TextComponent("\u00a7e\u041f\u0440\u0438\u0432\u044f\u0437\u0430\u0442\u044c \u043f\u043e\u0447\u0442\u0443 - \u00a7c/email add \u00a7f[\u00a7c\u0412\u0410\u0428_EMAIL\u00a7f] [\u00a7c\u0412\u0410\u0428_EMAIL\u00a7f]"));
-                                break;
-                            }
-                            if (!authPlayer.mail.equalsIgnoreCase(e.getArgs()[1])) {
-                                player.sendMessage(new TextComponent("\u00a7c\u041d\u0435\u0432\u0435\u0440\u043d\u043e \u0432\u0432\u0435\u0434\u0435\u043d\u0430 \u0441\u0442\u0430\u0440\u0430\u044f \u043f\u043e\u0447\u0442\u0430"));
-                                break;
-                            }
-                            if (!this.checkMessage(this.mailWhiteList, e.getArgs()[2])) {
-                                player.sendMessage(new TextComponent("\u00a7c\u041d\u0435\u0432\u0435\u0440\u043d\u0430\u044f \u043f\u043e\u0447\u0442\u0430"));
-                                break;
-                            }
-                            if (e.getArgs()[2].contains(".") && e.getArgs()[2].contains("@")) {
-                                authPlayer.mail = e.getArgs()[2];
-                                player.sendMessage(new TextComponent("\u00a7e\u0412\u044b \u0443\u0441\u043f\u0435\u0448\u043d\u043e \u0438\u0437\u043c\u0435\u043d\u0438\u043b\u0438 \u043f\u043e\u0447\u0442\u0443 \u043d\u0430 - \u00a7c" + e.getArgs()[2]));
-                                break;
-                            }
-                            player.sendMessage(new TextComponent("\u00a7c\u041d\u0435\u0432\u0435\u0440\u043d\u0430\u044f \u043f\u043e\u0447\u0442\u0430"));
-                            break;
-                        }
-                        case "recovery": {
-                            if (!authPlayer.isAuth()) {
-                                if (!authPlayer.hasMail()) {
-                                    player.sendMessage(new TextComponent("\u00a7c\u0423 \u0432\u0430\u0441 \u043d\u0435 \u043f\u0440\u0438\u0432\u044f\u0437\u0430\u043d\u0430 \u043f\u043e\u0447\u0442\u0430"));
-                                    return;
-                                }
-                                if (!authPlayer.mail.equals(e.getArgs()[1])) {
-                                    player.sendMessage(new TextComponent("\u00a7c\u041d\u0435\u0432\u0435\u0440\u043d\u0430\u044f \u043f\u043e\u0447\u0442\u0430"));
-                                    return;
-                                }
-                                String generatedPassword = new RandomString(8).nextString();
-                                authPlayer.setPassword(generatedPassword);
-                                this.manager.savePlayer(player);
-                                player.sendMessage(new TextComponent("\u00a7a\u0421\u043e\u043e\u0431\u0449\u0435\u043d\u0438\u0435 \u0441 \u043d\u043e\u0432\u044b\u043c \u043f\u0430\u0440\u043e\u043b\u0435\u043c \u043e\u0442\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u043e \u043d\u0430 \u043f\u043e\u0447\u0442\u0443"));
-                                return;
-                            }
-                            player.sendMessage(new TextComponent("\u00a7a\u0422\u044b \u0443\u0436\u0435 \u0432 \u0438\u0433\u0440\u0435 \u043b\u0430\u043b\u043a\u0430))"));
-                            break;
-                        }
-                        default: {
-                            player.sendMessage(new TextComponent("\u00a7e\u041f\u0440\u0438\u0432\u044f\u0437\u0430\u0442\u044c \u043f\u043e\u0447\u0442\u0443 - \u00a7c/email add \u00a7f[\u00a7c\u0412\u0410\u0428_EMAIL\u00a7f] [\u00a7c\u0412\u0410\u0428_EMAIL\u00a7f]"));
-                            player.sendMessage(new TextComponent("\u00a7e\u0421\u043c\u0435\u043d\u0438\u0442\u044c \u043f\u043e\u0447\u0442\u0443 - \u00a7c/email change \u00a7f[\u00a7c\u0421\u0422\u0410\u0420\u042b\u0419_EMAIL\u00a7f] [\u00a7c\u041d\u041e\u0412\u042b\u0419_EMAIL\u00a7f]"));
-                            player.sendMessage(new TextComponent("\u00a7e\u0412\u043e\u0441\u0441\u0442\u0430\u043d\u043e\u0432\u0438\u0442\u044c \u043f\u0430\u0440\u043e\u043b\u044c - \u00a7c/email recovery \u00a7f[\u00a7c\u0412\u0410\u0428_EMAIL\u00a7f]"));
-                            return;
-                        }
-                    }
-                }
                 default: {
                     if (authPlayer.isAuth())
                         break;
                     e.used();
                     e.setCanceled(true);
-                    player.sendMessage((BaseComponent) new TextComponent("\u00a7c\u0412\u044b \u043d\u0435 \u0430\u0432\u0442\u043e\u0440\u0438\u0437\u043e\u0432\u0430\u043d\u044b!"));
+                    player.sendMessage(new TextComponent("§cВы не аутентифицированы!"));
                 }
             }
         }

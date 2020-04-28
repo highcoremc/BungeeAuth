@@ -164,17 +164,17 @@ public class AuthPlayer {
 
     private void redirect() {
         ServerInfo srv = ProxyServer.getInstance().getServerInfo(AuthManager.getInstance().getLobby());
+
         if (srv == null) {
-            player.sendMessage(new TextComponent("Лобби недоступно :c"));
-        } else {
-            player.connect(srv, new Callback<Boolean>() {
-                public void done(Boolean aBoolean, Throwable throwable) {
-                    if (!aBoolean) {
-                        player.disconnect("§cОшибка при телепортации в Lobby");
-                    }
-                }
-            });
+            player.sendMessage(new TextComponent("Lobby is not available :c"));
+            return;
         }
+
+        player.connect(srv, (connected, throwable) -> {
+            if (!connected) {
+                player.disconnect(new TextComponent("§cОшибка при телепортации в Lobby"));
+            }
+        });
     }
 
 
@@ -193,8 +193,9 @@ public class AuthPlayer {
             return PasswordSecurity.comparePasswordWithHash(pass, hash, name);
         } catch (Exception var3) {
             var3.printStackTrace();
-            return false;
         }
+
+        return false;
     }
 
 
