@@ -1,9 +1,5 @@
 package ru.yooxa.bungee.auth;
 
-import java.sql.SQLException;
-import java.util.concurrent.TimeUnit;
-
-import net.md_5.bungee.api.Callback;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.config.ServerInfo;
@@ -11,6 +7,8 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.scheduler.ScheduledTask;
 import ru.yooxa.bungee.auth.hash.PasswordSecurity;
 
+import java.sql.SQLException;
+import java.util.concurrent.TimeUnit;
 
 public class AuthPlayer {
     public String mail;
@@ -63,7 +61,6 @@ public class AuthPlayer {
             }
         }, 0L, 10L, TimeUnit.SECONDS);
     }
-
 
     public ProxiedPlayer getPlayer() {
         return player;

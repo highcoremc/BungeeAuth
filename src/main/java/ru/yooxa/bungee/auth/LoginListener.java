@@ -117,9 +117,8 @@ public class LoginListener implements Listener
 
         if (player == null) {
             loadPlayer(e.getPlayer());
+            return;
         }
-
-        assert player != null;
 
         if (player.isAuth()) {
             return;
