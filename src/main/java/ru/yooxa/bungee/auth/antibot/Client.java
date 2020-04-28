@@ -8,19 +8,24 @@ public class Client {
     private long time;
     private Set<String> names;
 
-    public Client(String name, String ip)
-    {
+    public Client(String name, String ip) {
         this.ip = ip;
         this.time = System.currentTimeMillis() / 1000L;
         this.names = new HashSet();
         this.names.add(name);
     }
 
-    public Set<String> getNames() { return this.names; }
+    public Set<String> getNames() {
+        return this.names;
+    }
 
-    public String getIp() { return this.ip; }
+    public String getIp() {
+        return this.ip;
+    }
 
-    public long getTime() { return this.time; }
+    public long getTime() {
+        return this.time;
+    }
 }
 
 

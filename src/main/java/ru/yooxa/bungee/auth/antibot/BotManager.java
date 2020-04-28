@@ -18,8 +18,7 @@ public class BotManager implements Listener {
     private int limit;
     private Map<String, Client> clients;
 
-    public BotManager(AuthManager manager)
-    {
+    public BotManager(AuthManager manager) {
         this.clients = new HashMap();
 
         startScheduler();
@@ -31,10 +30,8 @@ public class BotManager implements Listener {
     }
 
     @EventHandler
-    public void onCommand(CommandEvent e)
-    {
-        if (!e.isCancelled() &&
-                e.getCommand().toLowerCase().equals("antibot")) {
+    public void onCommand(CommandEvent e) {
+        if (!e.isCanceled() && e.getCommand().toLowerCase().equals("antibot")) {
             int bots = 0;
             int suspicious = 0;
 
@@ -57,8 +54,7 @@ public class BotManager implements Listener {
     }
 
 
-    public void checkClient(PreLoginEvent e)
-    {
+    public void checkClient(PreLoginEvent e) {
         String name = e.getConnection().getName();
         String ip = e.getConnection().getAddress().getHostString();
         Client client = (Client) this.clients.get(ip);
@@ -72,7 +68,8 @@ public class BotManager implements Listener {
                     StringBuilder nicks = new StringBuilder();
 
 
-                    for (String nick : client.getNames()) nicks.append("\n§a").append(nick);
+                    for (String nick : client.getNames())
+                        nicks.append("\n§a").append(nick);
 
 
                     e.setCancelled(true);
@@ -85,8 +82,7 @@ public class BotManager implements Listener {
     }
 
 
-    public void startScheduler()
-    {
+    public void startScheduler() {
         ProxyServer.getInstance().getScheduler().schedule(Main.getInstance(), () -> {
             while (true) {
                 try {
@@ -101,8 +97,7 @@ public class BotManager implements Listener {
     }
 
 
-    public void check()
-    {
+    public void check() {
         HashMap<String, Client> temp = new HashMap<>();
 
         for (Client client : this.clients.values()) {

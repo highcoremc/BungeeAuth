@@ -14,8 +14,7 @@ import net.md_5.bungee.config.ConfigurationProvider;
 import ru.yooxa.bungee.auth.antibot.BotManager;
 import ru.yooxa.bungee.auth.hash.PasswordSecurity;
 
-public class AuthManager
-{
+public class AuthManager {
     private static AuthManager instance;
     public IpProtect ipProtect;
     public Configuration config;
@@ -28,8 +27,7 @@ public class AuthManager
     private final YIterator<String> lobbyIterator;
     private final Database database;
 
-    public AuthManager(Main main)
-    {
+    public AuthManager(Main main) {
         instance = this;
         this.main = main;
 
@@ -48,30 +46,25 @@ public class AuthManager
         }
     }
 
-    public static AuthManager getInstance()
-    {
+    public static AuthManager getInstance() {
         return instance;
     }
 
-    public Configuration getConfig()
-    {
+    public Configuration getConfig() {
         return this.config;
     }
 
-    public AuthPlayer loadPlayer(ProxiedPlayer player) throws SQLException
-    {
+    public AuthPlayer loadPlayer(ProxiedPlayer player) throws SQLException {
         AuthPlayer authPlayer = new AuthPlayer(player);
         this.players.put(player.getName().toLowerCase(), authPlayer);
         return authPlayer;
     }
 
-    public String getLobby()
-    {
+    public String getLobby() {
         return (String) this.lobbyIterator.getNext();
     }
 
-    public void savePlayer(ProxiedPlayer player)
-    {
+    public void savePlayer(ProxiedPlayer player) {
         AuthPlayer auth = getPlayer(player);
         if (auth != null) {
             this.players.remove(player.getName().toLowerCase());
@@ -82,29 +75,24 @@ public class AuthManager
         }
     }
 
-    public AuthPlayer getPlayer(ProxiedPlayer player)
-    {
+    public AuthPlayer getPlayer(ProxiedPlayer player) {
         return (AuthPlayer) this.players.get(player.getName().toLowerCase());
     }
 
-    public Object[] loadData(ProxiedPlayer player) throws SQLException
-    {
+    public Object[] loadData(ProxiedPlayer player) throws SQLException {
         return this.database.loadData(player);
     }
 
-    public boolean isBlackIp(String ip)
-    {
+    public boolean isBlackIp(String ip) {
         return this.blacklist.contains(ip);
     }
 
-    public void addBlackIp(final String ip)
-    {
+    public void addBlackIp(final String ip) {
         this.blacklist.add(ip);
         this.main.getProxy().getScheduler().schedule(this.main, () -> AuthManager.this.blacklist.remove(ip), 10L, TimeUnit.MINUTES);
     }
 
-    public void loadConfig()
-    {
+    public void loadConfig() {
         try {
             if (!this.main.getDataFolder().exists()) {
                 this.main.getDataFolder().mkdir();
@@ -128,20 +116,18 @@ public class AuthManager
         }
     }
 
-    private void addDefault(String key, Object value)
-    {
-        if (!this.config.getKeys().contains(key)) this.config.set(key, value);
+    private void addDefault(String key, Object value) {
+        if (!this.config.getKeys().contains(key))
+            this.config.set(key, value);
     }
 
-    public void register(String name, String password) throws Exception
-    {
+    public void register(String name, String password) throws Exception {
         String hash = PasswordSecurity.getHash(password, name);
         String sql = "INSERT INTO `authme` (`username`, `password`, `session`, `ip`, `server`, `email`) VALUES ('" + name.toLowerCase() + "'," + "'" + hash + "'," + "'0'," + "'1.2.3.4'," + "''," + "'')";
         this.database.execute(sql);
     }
 
-    public void unregister(String name)
-    {
+    public void unregister(String name) {
         try {
             database.execute("DELETE FROM `authme` WHERE `username`='" + name + "'");
         } catch (Exception e) {
@@ -149,19 +135,16 @@ public class AuthManager
         }
     }
 
-    public void changePassword(String name, String newPassword) throws Exception
-    {
+    public void changePassword(String name, String newPassword) throws Exception {
         String hash = PasswordSecurity.getHash(newPassword, name);
         this.database.execute("UPDATE `authme` SET `password`='" + hash + "'  WHERE `username`='" + name + "' ");
     }
 
-    public void changeMail(String name, String newMail) throws Exception
-    {
+    public void changeMail(String name, String newMail) throws Exception {
         this.database.execute("UPDATE `authme` SET `email`='" + newMail + "'  WHERE `username`='" + name + "' ");
     }
 
-    public long lastLogin(String name) throws SQLException
-    {
+    public long lastLogin(String name) throws SQLException {
         Object[] data = this.database.loadData(name);
         return (Long) data[1];
     }

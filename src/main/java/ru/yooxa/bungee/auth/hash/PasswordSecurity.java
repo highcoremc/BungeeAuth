@@ -22,7 +22,7 @@ public class PasswordSecurity
     String salt;
     EncryptionMethod method;
     try {
-      method = (EncryptionMethod)Main.getAlgorithm().getclass().newInstance();
+      method = (EncryptionMethod)Main.getAlgorithm().getСlass().newInstance();
     } catch (InstantiationException|IllegalAccessException e) {
       throw new NoSuchAlgorithmException("Problem with this hash algorithm");
     } 
@@ -51,7 +51,7 @@ public class PasswordSecurity
   public static boolean comparePasswordWithHash(String password, String hash, String playerName) throws NoSuchAlgorithmException {
     EncryptionMethod method;
     try {
-      method = (EncryptionMethod)Main.getAlgorithm().getclass().newInstance();
+      method = (EncryptionMethod)Main.getAlgorithm().getСlass().newInstance();
     } catch (InstantiationException|IllegalAccessException e) {
       throw new NoSuchAlgorithmException("Problem with this hash algorithm");
     } 

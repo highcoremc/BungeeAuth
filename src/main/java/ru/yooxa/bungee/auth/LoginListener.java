@@ -11,6 +11,7 @@ import net.md_5.bungee.api.event.PreLoginEvent;
 import net.md_5.bungee.api.event.ServerConnectEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
+import net.md_5.bungee.event.EventPriority;
 
 public class LoginListener implements Listener
 {
@@ -38,7 +39,7 @@ public class LoginListener implements Listener
     }
 
 
-    @EventHandler(priority = -64)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onLogin(PreLoginEvent e)
     {
         if (e.isCancelled()) {
@@ -72,10 +73,12 @@ public class LoginListener implements Listener
             try {
                 AuthPlayer authPlayer = LoginListener.this.manager.loadPlayer(p);
                 if (authPlayer.getLastIp().equals(p.getAddress().getAddress().getHostAddress()) &&
-                        System.currentTimeMillis() / 1000L - authPlayer.getSession() < 86400L) {
+                    System.currentTimeMillis() / 1000L - authPlayer.getSession() < 86400L
+                ) {
                     authPlayer.authSession();
-                    String lobby = (Main.getInstance()).manager.getLobby();
+                    String lobby = Main.getInstance().manager.getLobby();
                     ServerInfo server = ProxyServer.getInstance().getServerInfo(lobby);
+
                     if (server == null) {
                         p.disconnect(new TextComponent("§cЛобби недоступно"));
                     } else {
@@ -103,40 +106,45 @@ public class LoginListener implements Listener
     }
 
 
-    @EventHandler(priority = 64)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onServerConnect(ServerConnectEvent e)
     {
-        if (e.getTarget() == null || !e.getTarget().getName().toLowerCase().startsWith("gg")) {
-            AuthPlayer player = manager.getPlayer(e.getPlayer());
-            if (player == null) {
-                loadPlayer(e.getPlayer());
-            } else {
-                if (player.isAuth()) {
-                    return;
-                }
+        if (e.getTarget() != null) {
+            return;
+        }
 
-                if (player.isRegister()) {
-                    e.getPlayer().sendMessage(new TextComponent("§f[§c*§f] Авторизируйтесь - §c/login §f[§cпароль§f]"));
-                } else {
-                    e.getPlayer().sendMessage(new TextComponent("§f[§c*§f] Зарегистрируйтесь - §c/register §f[§cпароль§f] [§cповтор пароля§f]"));
-                }
+        AuthPlayer player = manager.getPlayer(e.getPlayer());
+
+        if (player == null) {
+            loadPlayer(e.getPlayer());
+        }
+
+        assert player != null;
+
+        if (player.isAuth()) {
+            return;
+        }
+
+        if (player.isRegister()) {
+            e.getPlayer().sendMessage(new TextComponent("§f[§c*§f] Please, authenticate with - §c/login §f[§cпароль§f]"));
+        } else {
+            e.getPlayer().sendMessage(new TextComponent("§f[§c*§f] Please register with - §c/register §f[§cпароль§f] [§cповтор пароля§f]"));
+        }
+
+        ServerInfo server = null;
+
+        for (int i = 0; i < this.servers.size(); i++) {
+            server = ProxyServer.getInstance().getServerInfo(this.servers.getNext());
+            if (server != null) {
+                break;
             }
+        }
 
-            ServerInfo server = null;
-
-            for (int i = 0; i < this.servers.size(); i++) {
-                server = ProxyServer.getInstance().getServerInfo(this.servers.getNext());
-                if (server != null) {
-                    break;
-                }
-            }
-
-            if (server == null) {
-                e.getPlayer().disconnect(new TextComponent("§cСервера авторизации недоступны!"));
-                e.setCancelled(true);
-            } else {
-                e.setTarget(server);
-            }
+        if (server == null) {
+            e.getPlayer().disconnect(new TextComponent("§cСервера аутентиикации недоступны!"));
+            e.setCancelled(true);
+        } else {
+            e.setTarget(server);
         }
     }
 

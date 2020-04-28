@@ -8,12 +8,11 @@ import net.md_5.bungee.api.event.PreLoginEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.event.EventHandler;
+import net.md_5.bungee.event.EventPriority;
 
-public class IpProtect implements Listener
-{
-    public IpProtect(AuthManager manager)
-    {
-        this.ips = new HashMap();
+public class IpProtect implements Listener {
+    public IpProtect(AuthManager manager) {
+        this.ips = new HashMap<>();
 
         load(manager.getConfig());
         ProxyServer.getInstance().getPluginManager().registerListener(Main.getInstance(), this);
@@ -21,17 +20,15 @@ public class IpProtect implements Listener
 
     Map<String, String> ips;
 
-    public void load(Configuration config)
-    {
+    public void load(Configuration config) {
         for (String line : config.getStringList("IpProtect")) {
             String[] s = line.split(";");
             this.ips.put(s[0].toLowerCase(), s[1]);
         }
     }
 
-    @EventHandler(priority = -64)
-    public void onLogin(PreLoginEvent e)
-    {
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onLogin(PreLoginEvent e) {
         String name = e.getConnection().getName().toLowerCase();
         String ip = e.getConnection().getAddress().getAddress().getHostAddress();
         if (this.ips.containsKey(name) && !((String) this.ips.get(name)).equals(ip)) {

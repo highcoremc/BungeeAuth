@@ -12,8 +12,7 @@ import net.md_5.bungee.api.scheduler.ScheduledTask;
 import ru.yooxa.bungee.auth.hash.PasswordSecurity;
 
 
-public class AuthPlayer
-{
+public class AuthPlayer {
     public String mail;
 
     ScheduledTask task;
@@ -27,8 +26,7 @@ public class AuthPlayer
     private long session;
     private boolean save;
 
-    public AuthPlayer(final ProxiedPlayer p) throws SQLException
-    {
+    public AuthPlayer(final ProxiedPlayer p) throws SQLException {
         player = p;
         name = player.getName();
         authorize = false;
@@ -46,10 +44,8 @@ public class AuthPlayer
             mail = (String) data[3];
         }
 
-        ProxyServer.getInstance().getScheduler().schedule(Main.getInstance(), new Runnable()
-        {
-            public void run()
-            {
+        ProxyServer.getInstance().getScheduler().schedule(Main.getInstance(), new Runnable() {
+            public void run() {
                 if (!isAuth()) {
                     player.disconnect(new TextComponent("§cТы не успел войти в игру"));
                 }
@@ -69,50 +65,42 @@ public class AuthPlayer
     }
 
 
-    public ProxiedPlayer getPlayer()
-    {
+    public ProxiedPlayer getPlayer() {
         return player;
     }
 
 
-    public boolean hasMail()
-    {
+    public boolean hasMail() {
         return (mail != null && !mail.isEmpty());
     }
 
 
-    public boolean isSave()
-    {
+    public boolean isSave() {
         return save;
     }
 
 
-    public String getLastIp()
-    {
+    public String getLastIp() {
         return lastIp;
     }
 
 
-    public long getSession()
-    {
+    public long getSession() {
         return session;
     }
 
 
-    public String getHash()
-    {
+    public String getHash() {
         return hash;
     }
 
 
-    public void logout()
-    {
+    public void logout() {
         session = -1L;
         player.disconnect(new TextComponent("§cВы вышли"));
     }
 
-    public void tryAuth(String pass)
-    {
+    public void tryAuth(String pass) {
         boolean hash;
         try {
             hash = PasswordSecurity.comparePasswordWithHash(pass, this.hash, name);
@@ -140,28 +128,24 @@ public class AuthPlayer
     }
 
 
-    public boolean isRegister()
-    {
+    public boolean isRegister() {
         return (hash != null);
     }
 
 
-    private void onLogin()
-    {
+    private void onLogin() {
         if (Main.isMail() && !hasMail()) {
             player.sendMessage(new TextComponent("§eДобавьте свой email для восстановления пароля - §c/email add §f[§cВАШ_EMAIL§f] §f[§cВАШ_EMAIL§f]"));
         }
     }
 
 
-    public void authSession()
-    {
+    public void authSession() {
         authorize = true;
         onLogin();
     }
 
-    public void register(String password)
-    {
+    public void register(String password) {
         if (hash != null) {
             player.sendMessage(new TextComponent("§cВы уже зарегистрированы"));
         } else {
@@ -178,16 +162,13 @@ public class AuthPlayer
         }
     }
 
-    private void redirect()
-    {
+    private void redirect() {
         ServerInfo srv = ProxyServer.getInstance().getServerInfo(AuthManager.getInstance().getLobby());
         if (srv == null) {
             player.sendMessage(new TextComponent("Лобби недоступно :c"));
         } else {
-            player.connect(srv, new Callback<Boolean>()
-            {
-                public void done(Boolean aBoolean, Throwable throwable)
-                {
+            player.connect(srv, new Callback<Boolean>() {
+                public void done(Boolean aBoolean, Throwable throwable) {
                     if (!aBoolean) {
                         player.disconnect("§cОшибка при телепортации в Lobby");
                     }
@@ -197,8 +178,7 @@ public class AuthPlayer
     }
 
 
-    public void setPassword(String password)
-    {
+    public void setPassword(String password) {
         try {
             hash = PasswordSecurity.getHash(password, name);
             save = true;
@@ -208,8 +188,7 @@ public class AuthPlayer
     }
 
 
-    public boolean checkPassword(String pass)
-    {
+    public boolean checkPassword(String pass) {
         try {
             return PasswordSecurity.comparePasswordWithHash(pass, hash, name);
         } catch (Exception var3) {
@@ -219,14 +198,12 @@ public class AuthPlayer
     }
 
 
-    public String getName()
-    {
+    public String getName() {
         return name;
     }
 
 
-    public boolean isAuth()
-    {
+    public boolean isAuth() {
         return authorize;
     }
 }
