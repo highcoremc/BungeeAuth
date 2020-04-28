@@ -37,13 +37,6 @@ public class AuthManager {
         this.admins = getConfig().getStringList("Admins");
         this.ipProtect = new IpProtect(this);
         this.database = new Database(this);
-
-        main.getProxy().getPluginManager().registerListener(main, new ChatListener(this));
-        main.getProxy().getPluginManager().registerListener(main, new LoginListener(this));
-
-        if (getConfig().getBoolean("AntiBot.enable")) {
-            this.botManager = new BotManager(this);
-        }
     }
 
     public static AuthManager getInstance() {
@@ -61,7 +54,7 @@ public class AuthManager {
     }
 
     public String getLobby() {
-        return (String) this.lobbyIterator.getNext();
+        return this.lobbyIterator.getNext();
     }
 
     public void savePlayer(ProxiedPlayer player) {
@@ -76,7 +69,7 @@ public class AuthManager {
     }
 
     public AuthPlayer getPlayer(ProxiedPlayer player) {
-        return (AuthPlayer) this.players.get(player.getName().toLowerCase());
+        return this.players.get(player.getName().toLowerCase());
     }
 
     public Object[] loadData(ProxiedPlayer player) throws SQLException {

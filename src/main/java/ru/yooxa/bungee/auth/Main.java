@@ -1,6 +1,7 @@
 package ru.yooxa.bungee.auth;
 
 import net.md_5.bungee.api.plugin.Plugin;
+import ru.yooxa.bungee.auth.antibot.BotManager;
 import ru.yooxa.bungee.auth.hash.HashAlgorithm;
 
 public class Main extends Plugin {
@@ -22,6 +23,13 @@ public class Main extends Plugin {
     public void onEnable() {
         instance = this;
         this.manager = new AuthManager(this);
+
+        getProxy().getPluginManager().registerListener(this, new ChatListener(this.manager));
+        getProxy().getPluginManager().registerListener(this, new LoginListener(this.manager));
+
+        if (this.manager.getConfig().getBoolean("AntiBot.enable")) {
+            this.manager.botManager = new BotManager(this.manager);
+        }
     }
 }
 
