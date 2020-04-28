@@ -8,7 +8,6 @@ import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
 import org.nocraft.renay.bungee.auth.Player.AuthPlayer;
 import org.nocraft.renay.bungee.auth.BungeeAuth;
-import org.nocraft.renay.bungee.auth.Event.CommandEvent;
 
 public class ChatListener implements Listener {
 
