@@ -1,4 +1,4 @@
-package org.nocraft.renay.bungee.auth.Player;
+package org.nocraft.renay.bungee.auth.exception;
 
 public class InvalidNicknameException extends RuntimeException {
     public InvalidNicknameException() {
