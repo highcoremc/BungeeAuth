@@ -1,7 +1,7 @@
 package org.nocraft.renay.bungee.auth.storage;
 
 import org.nocraft.renay.bungee.auth.BungeeAuth;
-import org.nocraft.renay.bungee.auth.model.user.User;
+import org.nocraft.renay.bungee.auth.user.User;
 import org.nocraft.renay.bungee.auth.storage.implementation.StorageImplementation;
 import org.nocraft.renay.bungee.auth.util.Throwing;
 

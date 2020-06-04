@@ -9,6 +9,7 @@ import java.util.function.Function;
 public final class Iterators {
     private Iterators() {}
 
+    @SuppressWarnings("UnusedReturnValue")
     public static <E> boolean tryIterate(Iterable<E> iterable, Throwing.Consumer<E> action) {
         boolean success = true;
         for (E element : iterable) {

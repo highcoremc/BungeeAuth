@@ -2,7 +2,7 @@ package org.nocraft.renay.bungee.auth.storage.implementation;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.nocraft.renay.bungee.auth.BungeeAuth;
-import org.nocraft.renay.bungee.auth.model.user.User;
+import org.nocraft.renay.bungee.auth.user.User;
 
 import java.util.*;
 

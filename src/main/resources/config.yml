@@ -1,0 +1,10 @@
+# servers for login players
+login:
+- 'Login-1'
+
+# servers which accept player after login
+lobby:
+- 'Lobby-1'
+
+# can be SHA256, SHA1, BCRYPT
+hash-method: BCRYPT

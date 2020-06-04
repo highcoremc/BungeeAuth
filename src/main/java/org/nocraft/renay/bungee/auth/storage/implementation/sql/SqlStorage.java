@@ -2,7 +2,7 @@ package org.nocraft.renay.bungee.auth.storage.implementation.sql;
 
 import com.google.gson.reflect.TypeToken;
 import org.nocraft.renay.bungee.auth.BungeeAuth;
-import org.nocraft.renay.bungee.auth.model.user.User;
+import org.nocraft.renay.bungee.auth.user.User;
 import org.nocraft.renay.bungee.auth.storage.implementation.StorageImplementation;
 import org.nocraft.renay.bungee.auth.storage.implementation.sql.connection.ConnectionFactory;
 import org.sql2o.Connection;

@@ -1,4 +1,4 @@
-package org.nocraft.renay.bungee.auth.model.scheduler;
+package org.nocraft.renay.bungee.auth.scheduler;
 
 import net.md_5.bungee.api.scheduler.ScheduledTask;
 import org.nocraft.renay.bungee.auth.BungeeAuth;

@@ -1,4 +1,4 @@
-package org.nocraft.renay.bungee.auth.model.user;
+package org.nocraft.renay.bungee.auth.user;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 

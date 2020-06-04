@@ -4,14 +4,14 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>ru.yooxa.bungee</groupId>
-    <artifactId>auth</artifactId>
+    <groupId>org.nocraft.loperd</groupId>
+    <artifactId>bungeeauth</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>Auth</name>
+    <name>BungeeAuth</name>
 
-    <description>Simple authentication for bungeecord offline.</description>
+    <description>Bungeecord Authentication for players.</description>
     <properties>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

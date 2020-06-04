@@ -8,17 +8,14 @@ import org.nocraft.renay.bungee.auth.config.Configuration;
 import org.nocraft.renay.bungee.auth.config.adapter.ConfigurationAdapter;
 import org.nocraft.renay.bungee.auth.listener.ChatListener;
 import org.nocraft.renay.bungee.auth.listener.LoginListener;
-import org.nocraft.renay.bungee.auth.model.scheduler.Scheduler;
+import org.nocraft.renay.bungee.auth.scheduler.Scheduler;
 import org.nocraft.renay.bungee.auth.storage.Storage;
 import org.nocraft.renay.bungee.auth.storage.StorageFactory;
-import org.nocraft.renay.bungee.auth.storage.StorageType;
-import org.nocraft.renay.bungee.auth.storage.implementation.StorageImplementation;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.util.Set;
 
 public class BungeeAuth extends Plugin {
 
@@ -34,17 +31,19 @@ public class BungeeAuth extends Plugin {
 
         this.scheduler = new Scheduler(this);
 
-        this.pluginManager().registerListener(this, new ChatListener(this));
-        this.pluginManager().registerListener(this, new LoginListener(this, storage));
+        this.getPluginManager().registerListener(this, new ChatListener(this));
+        this.getPluginManager().registerListener(this, new LoginListener(this, storage));
     }
 
-    public PluginManager pluginManager() {
+    public PluginManager getPluginManager() {
         return this.getProxy().getPluginManager();
     }
+
     protected ConfigurationAdapter provideConfigurationAdapter() {
         return new BungeeConfigAdapter(this, resolveConfig());
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     private File resolveConfig() {
         File configFile = new File(this.getDataFolder(), "config.yml");
 

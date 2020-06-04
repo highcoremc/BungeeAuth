@@ -10,9 +10,9 @@ import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
 import org.nocraft.renay.bungee.auth.BungeeAuth;
 import org.nocraft.renay.bungee.auth.exception.InvalidNicknameException;
-import org.nocraft.renay.bungee.auth.model.user.Session;
-import org.nocraft.renay.bungee.auth.model.user.SessionTime;
-import org.nocraft.renay.bungee.auth.model.user.User;
+import org.nocraft.renay.bungee.auth.user.Session;
+import org.nocraft.renay.bungee.auth.user.SessionTime;
+import org.nocraft.renay.bungee.auth.user.User;
 import org.nocraft.renay.bungee.auth.storage.Storage;
 
 import java.net.InetSocketAddress;

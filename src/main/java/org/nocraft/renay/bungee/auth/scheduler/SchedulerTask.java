@@ -1,4 +1,4 @@
-package org.nocraft.renay.bungee.auth.model.scheduler;
+package org.nocraft.renay.bungee.auth.scheduler;
 
 public interface SchedulerTask {
 
