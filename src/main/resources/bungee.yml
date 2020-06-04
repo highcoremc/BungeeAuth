@@ -1,4 +1,4 @@
 name: BungeeAuth
 version: ${project.version}
-main: org.nocraft.renay.bungee.auth.BugeeAuth
+main: org.nocraft.renay.bungeeauth.BugeeAuth
 description: Simple authentication for bungeecord offline.

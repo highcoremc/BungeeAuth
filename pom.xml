@@ -88,5 +88,10 @@
             <artifactId>checker</artifactId>
             <version>3.3.0</version>
         </dependency>
+        <dependency>
+            <groupId>biz.paluch.redis</groupId>
+            <artifactId>lettuce</artifactId>
+            <version>4.5.0.Final</version>
+        </dependency>
     </dependencies>
 </project>
