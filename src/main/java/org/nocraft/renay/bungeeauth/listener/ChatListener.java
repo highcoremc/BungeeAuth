@@ -5,13 +5,13 @@ import net.md_5.bungee.api.event.ChatEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
-import org.nocraft.renay.bungeeauth.BungeeAuth;
+import org.nocraft.renay.bungeeauth.BungeeAuthPlugin;
 
 public class ChatListener implements Listener {
 
-    private final BungeeAuth plugin;
+    private final BungeeAuthPlugin plugin;
 
-    public ChatListener(BungeeAuth plugin) {
+    public ChatListener(BungeeAuthPlugin plugin) {
         this.plugin = plugin;
     }
 

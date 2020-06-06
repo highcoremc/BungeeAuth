@@ -87,7 +87,7 @@ data:
 
 # The following block defines the settings for remote database cache storage methods.
 #
-cache:
+session:
 
   # Define the address and port for the database.
   # - The standard DB engine port is used by default

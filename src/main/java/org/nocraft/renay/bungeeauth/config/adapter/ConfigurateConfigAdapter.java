@@ -28,7 +28,7 @@ package org.nocraft.renay.bungeeauth.config.adapter;
 import com.google.common.base.Splitter;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
-import org.nocraft.renay.bungeeauth.BungeeAuth;
+import org.nocraft.renay.bungeeauth.BungeeAuthPlugin;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -38,11 +38,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public abstract class ConfigurateConfigAdapter implements ConfigurationAdapter {
-    private final BungeeAuth plugin;
+    private final BungeeAuthPlugin plugin;
     private final Path path;
     private ConfigurationNode root;
 
-    public ConfigurateConfigAdapter(BungeeAuth plugin, Path path) {
+    public ConfigurateConfigAdapter(BungeeAuthPlugin plugin, Path path) {
         this.plugin = plugin;
         this.path = path;
         reload();
@@ -116,7 +116,7 @@ public abstract class ConfigurateConfigAdapter implements ConfigurationAdapter {
     }
 
     @Override
-    public BungeeAuth getPlugin() {
+    public BungeeAuthPlugin getPlugin() {
         return this.plugin;
     }
 }

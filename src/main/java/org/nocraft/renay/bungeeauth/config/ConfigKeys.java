@@ -34,6 +34,7 @@ import org.nocraft.renay.bungeeauth.util.ImmutableCollectors;
 
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -47,6 +48,9 @@ import static org.nocraft.renay.bungeeauth.config.ConfigKeyTypes.enduringKey;
  * to function a bit like an enum, but with generics.</p>
  */
 public final class ConfigKeys {
+
+    public static final ConfigKey<Integer> SESSION_TIMEOUT = enduringKey(customKey(
+            c -> c.getInteger("session.channel", 3600)));
 
     private ConfigKeys() {}
 
@@ -70,17 +74,17 @@ public final class ConfigKeys {
     }));
 
     /**
-     * The cache settings, username, password, etc for use by any database
+     * The session settings, username, password, etc for use by any database
      */
     public static final ConfigKey<CacheStorageCredentials> CACHE_VALUES = enduringKey(customKey(c -> {
-        int maxPoolSize = c.getInteger("cache.maximum-pool-size", c.getInteger("cache.pool-size", 3));
-        int connectionTimeout = c.getInteger("cache.connection-timeout", 5000);
+        int maxPoolSize = c.getInteger("session.maximum-pool-size", c.getInteger("session.pool-size", 3));
+        int connectionTimeout = c.getInteger("session.connection-timeout", 5000);
 
         return new CacheStorageCredentials(
-                c.getString("cache.address", null),
-                c.getString("cache.database", null),
-                c.getString("cache.username", null),
-                c.getString("cache.password", null),
+                c.getString("session.address", null),
+                c.getString("session.database", null),
+                c.getString("session.username", null),
+                c.getString("session.password", null),
                 connectionTimeout//, maxPoolSize,
         );
     }));
@@ -90,7 +94,7 @@ public final class ConfigKeys {
      */
     public static final ConfigKey<String> DATA_SQL_TABLE_PREFIX = enduringKey(customKey(c -> c.getString("data.table-prefix", c.getString("data.table_prefix", "bungeeauth_"))));
 
-    public static final ConfigKey<String> CACHE_CHANNEL_PREFIX = enduringKey(customKey(c -> c.getString("cache.channel", c.getString("cache.channel", "bungeeauth"))));
+    public static final ConfigKey<String> CACHE_CHANNEL_PREFIX = enduringKey(customKey(c -> c.getString("session.channel", c.getString("session.channel", "bungeeauth"))));
 
     /**
      * The name of the storage method being used for data
@@ -98,9 +102,9 @@ public final class ConfigKeys {
     public static final ConfigKey<DataStorageType> DATA_STORAGE_METHOD = enduringKey(customKey(c -> DataStorageType.parse(c.getString("data-storage-method", "postgresql"), DataStorageType.POSTGRESQL)));
 
     /**
-     * The name of the storage method being used for cache
+     * The name of the storage method being used for session
      */
-    public static final ConfigKey<SessionStorageType> CACHE_STORAGE_METHOD = enduringKey(customKey(c -> SessionStorageType.parse(c.getString("cache-storage-method", "redis"), SessionStorageType.REDIS)));
+    public static final ConfigKey<SessionStorageType> CACHE_STORAGE_METHOD = enduringKey(customKey(c -> SessionStorageType.parse(c.getString("session-storage-method", "redis"), SessionStorageType.REDIS)));
 
     private static final List<ConfigKeyTypes.BaseConfigKey<?>> KEYS;
 

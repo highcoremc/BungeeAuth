@@ -1,6 +1,6 @@
 package org.nocraft.renay.bungeeauth.config;
 
-import org.nocraft.renay.bungeeauth.BungeeAuth;
+import org.nocraft.renay.bungeeauth.BungeeAuthPlugin;
 import org.nocraft.renay.bungeeauth.config.adapter.ConfigurationAdapter;
 
 /**
@@ -18,10 +18,10 @@ public class AbstractConfiguration implements Configuration {
      */
     private Object[] values = null;
 
-    private final BungeeAuth plugin;
+    private final BungeeAuthPlugin plugin;
     private final ConfigurationAdapter adapter;
 
-    public AbstractConfiguration(BungeeAuth plugin, ConfigurationAdapter adapter) {
+    public AbstractConfiguration(BungeeAuthPlugin plugin, ConfigurationAdapter adapter) {
         this.plugin = plugin;
         this.adapter = adapter;
 
@@ -64,7 +64,7 @@ public class AbstractConfiguration implements Configuration {
     }
 
     @Override
-    public BungeeAuth getPlugin() {
+    public BungeeAuthPlugin getPlugin() {
         return this.plugin;
     }
 }

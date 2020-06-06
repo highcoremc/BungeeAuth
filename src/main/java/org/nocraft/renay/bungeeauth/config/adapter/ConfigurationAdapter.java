@@ -1,13 +1,13 @@
 package org.nocraft.renay.bungeeauth.config.adapter;
 
-import org.nocraft.renay.bungeeauth.BungeeAuth;
+import org.nocraft.renay.bungeeauth.BungeeAuthPlugin;
 
 import java.util.List;
 import java.util.Map;
 
 public interface ConfigurationAdapter {
 
-    BungeeAuth getPlugin();
+    BungeeAuthPlugin getPlugin();
 
     void reload();
 

@@ -1,6 +1,6 @@
 package org.nocraft.renay.bungeeauth.config;
 
-import org.nocraft.renay.bungeeauth.BungeeAuth;
+import org.nocraft.renay.bungeeauth.BungeeAuthPlugin;
 
 /**
  * The master configuration used by LuckPerms.
@@ -12,7 +12,7 @@ public interface Configuration {
      *
      * @return the plugin instance
      */
-    BungeeAuth getPlugin();
+    BungeeAuthPlugin getPlugin();
 
     /**
      * Reloads the configuration.

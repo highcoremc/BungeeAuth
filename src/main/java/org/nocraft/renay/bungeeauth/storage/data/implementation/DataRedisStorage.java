@@ -2,21 +2,21 @@ package org.nocraft.renay.bungeeauth.storage.data.implementation;
 
 import com.lambdaworks.redis.api.StatefulRedisConnection;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.nocraft.renay.bungeeauth.BungeeAuth;
 import org.nocraft.renay.bungeeauth.storage.data.DataStorage;
 import org.nocraft.renay.bungeeauth.storage.implementation.nosql.RedisConnectionFactory;
-import org.nocraft.renay.bungeeauth.user.User;
+import org.nocraft.renay.bungeeauth.storage.entity.User;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-public class DataNoSqlStorage implements DataStorage {
+public class DataRedisStorage implements DataStorage {
 
     private final static String STORAGE_KEY = "datasync";
 
-    private final RedisConnectionFactory connectionFactory;
+    private final RedisConnectionFactory<User> connectionFactory;
 
-    public DataNoSqlStorage(BungeeAuth plugin, RedisConnectionFactory factory) {
+    public DataRedisStorage(RedisConnectionFactory<User> factory) {
         this.connectionFactory = factory;
     }
 
@@ -28,7 +28,7 @@ public class DataNoSqlStorage implements DataStorage {
     @Override
     public void init() {
         this.connectionFactory.init();
-        try (StatefulRedisConnection<String, byte[]> conn = this.connectionFactory.getConnection()) {
+        try (StatefulRedisConnection<String, User> conn = this.connectionFactory.getConnection()) {
             String result = conn.sync().ping();
             if (!result.equals("PONG")) {
                 throw new IllegalStateException("Can not get connection.");
@@ -37,41 +37,39 @@ public class DataNoSqlStorage implements DataStorage {
     }
 
     @Override
-    public User loadUser(UUID uniqueId) {
-        try (StatefulRedisConnection<String, byte[]> conn = this.connectionFactory.getConnection()) {
-            byte[] result = conn.sync().hget(STORAGE_KEY, uniqueId.toString());
-
-            // get user from bytes result
+    public Optional<User> loadUser(UUID uniqueId) {
+        try (StatefulRedisConnection<String, User> conn = this.connectionFactory.getConnection()) {
+            User result = conn.sync().hget(STORAGE_KEY, uniqueId.toString());
 
             if (result == null) {
-                return null;
+                return Optional.empty();
             }
 
-            return null;// result;
+            return Optional.of(result);
         }
     }
 
     @Override
-    public void saveUser(User player) {
-        try (StatefulRedisConnection<String, byte[]> conn = this.connectionFactory.getConnection()) {
-//            conn.sync().hset(STORAGE_KEY, player.getPlayerId().toString(), player.getData());
+    public void saveUser(User user) {
+        try (StatefulRedisConnection<String, User> conn = this.connectionFactory.getConnection()) {
+            conn.sync().hset(STORAGE_KEY, user.getUniqueId().toString(), user);
         }
     }
 
     @Override
-    public Set<UUID> getUniqueUsers() throws Exception {
+    public Set<UUID> getUniqueUsers() {
         // TODO: implement or delete this method
         return null;
     }
 
     @Override
-    public @Nullable UUID getPlayerUniqueId(String username) throws Exception {
+    public @Nullable UUID getPlayerUniqueId(String username) {
         // TODO: implement or delete this method
         return null;
     }
 
     @Override
-    public @Nullable String getPlayerName(UUID uniqueId) throws Exception {
+    public @Nullable String getPlayerName(UUID uniqueId) {
         // TODO: implement or delete this method
         return null;
     }

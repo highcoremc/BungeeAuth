@@ -1,7 +1,7 @@
 package org.nocraft.renay.bungeeauth.storage.data;
 
 import com.google.common.collect.ImmutableSet;
-import org.nocraft.renay.bungeeauth.BungeeAuth;
+import org.nocraft.renay.bungeeauth.BungeeAuthPlugin;
 import org.nocraft.renay.bungeeauth.config.ConfigKeys;
 import org.nocraft.renay.bungeeauth.storage.data.implementation.DataSqlStorage;
 import org.nocraft.renay.bungeeauth.storage.implementation.custom.CustomStorageProviders;
@@ -10,9 +10,9 @@ import org.nocraft.renay.bungeeauth.storage.implementation.sql.connection.hikari
 import java.util.Set;
 
 public class DataStorageFactory {
-    private final BungeeAuth plugin;
+    private final BungeeAuthPlugin plugin;
 
-    public DataStorageFactory(BungeeAuth plugin) {
+    public DataStorageFactory(BungeeAuthPlugin plugin) {
         this.plugin = plugin;
     }
 

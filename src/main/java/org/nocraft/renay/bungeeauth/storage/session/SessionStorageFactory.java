@@ -1,17 +1,18 @@
 package org.nocraft.renay.bungeeauth.storage.session;
 
 import com.google.common.collect.ImmutableSet;
-import org.nocraft.renay.bungeeauth.BungeeAuth;
+import org.nocraft.renay.bungeeauth.BungeeAuthPlugin;
 import org.nocraft.renay.bungeeauth.config.ConfigKeys;
+import org.nocraft.renay.bungeeauth.storage.entity.SimpleSessionStorage;
 import org.nocraft.renay.bungeeauth.storage.implementation.nosql.RedisConnectionFactory;
 
 import java.util.Set;
 
 public class SessionStorageFactory {
 
-    private final BungeeAuth plugin;
+    private final BungeeAuthPlugin plugin;
 
-    public SessionStorageFactory(BungeeAuth plugin) {
+    public SessionStorageFactory(BungeeAuthPlugin plugin) {
         this.plugin = plugin;
     }
 
@@ -31,9 +32,9 @@ public class SessionStorageFactory {
     private SessionStorage createNewImplementation(SessionStorageType method) {
         switch (method) {
             case REDIS:
-                return new SessionNosqlStorage<>(
+                return new SessionRedisStorage(
                         this.plugin,
-                        new RedisConnectionFactory(this.plugin.getConfiguration().get(ConfigKeys.CACHE_VALUES)),
+                        new RedisConnectionFactory<>(this.plugin.getConfiguration().get(ConfigKeys.CACHE_VALUES)),
                         this.plugin.getConfiguration().get(ConfigKeys.CACHE_CHANNEL_PREFIX)
                 );
             default:

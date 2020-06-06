@@ -7,12 +7,15 @@ import com.lambdaworks.redis.codec.RedisCodec;
 import org.nocraft.renay.bungeeauth.storage.ConnectionFactory;
 import org.nocraft.renay.bungeeauth.storage.StorageCredentials;
 
+import java.io.*;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.function.Function;
+import java.nio.charset.StandardCharsets;
 
-public class RedisConnectionFactory implements ConnectionFactory<StatefulRedisConnection<String, byte[]>> {
+public class RedisConnectionFactory<T> implements ConnectionFactory<StatefulRedisConnection<String, T>> {
 
-    private StatefulRedisConnection<String, byte[]> connection;
+    private StatefulRedisConnection<String, T> connection;
     private final StorageCredentials credentials;
     private RedisClient client;
 
@@ -54,9 +57,9 @@ public class RedisConnectionFactory implements ConnectionFactory<StatefulRedisCo
     }
 
     @Override
-    public StatefulRedisConnection<String, byte[]> getConnection() {
+    public StatefulRedisConnection<String, T> getConnection() {
         if (connection == null || !connection.isOpen()) {
-            connection = client.connect(new UserByteArrayCodec());
+            connection = client.connect(new ObjectTypeByteArrayCodec());
         }
 
         return this.connection;
@@ -67,26 +70,43 @@ public class RedisConnectionFactory implements ConnectionFactory<StatefulRedisCo
         return null;
     }
 
-    public static class UserByteArrayCodec implements RedisCodec<String, byte[]> {
+    private class ObjectTypeByteArrayCodec implements RedisCodec<String, T> {
+
+        private final Charset charset = StandardCharsets.UTF_8;
 
         @Override
         public String decodeKey(ByteBuffer bytes) {
-            return null;
+            return charset.decode(bytes).toString();
         }
 
+        @SuppressWarnings("unchecked")
         @Override
-        public byte[] decodeValue(ByteBuffer bytes) {
-            return new byte[0];
+        public T decodeValue(ByteBuffer bytes) {
+            try {
+                byte[] array = new byte[bytes.remaining()];
+                bytes.get(array);
+                ObjectInputStream is = new ObjectInputStream(new ByteArrayInputStream(array));
+                return (T) is.readObject();
+            } catch (Exception e) {
+                return null;
+            }
         }
 
         @Override
         public ByteBuffer encodeKey(String key) {
-            return null;
+            return charset.encode(key);
         }
 
         @Override
-        public ByteBuffer encodeValue(byte[] value) {
-            return null;
+        public ByteBuffer encodeValue(T value) {
+            try {
+                ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+                ObjectOutputStream os = new ObjectOutputStream(bytes);
+                os.writeObject(value);
+                return ByteBuffer.wrap(bytes.toByteArray());
+            } catch (IOException e) {
+                return null;
+            }
         }
     }
 }

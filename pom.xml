@@ -56,6 +56,14 @@
 
     <repositories>
         <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+        <repository>
+            <id>luck-ci-repo</id>
+            <url>https://ci.lucko.me/plugin/repository/everything/</url>
+        </repository>
+        <repository>
             <id>sonatype</id>
             <url>https://oss.sonatype.org/content/groups/public/</url>
         </repository>
@@ -68,30 +76,62 @@
             <version>1.15-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
+
+        <dependency>
+            <groupId>net.md-5</groupId>
+            <artifactId>bungeecord-proxy</artifactId>
+            <version>1.15-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+
         <dependency>
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
             <version>2.6.1</version>
         </dependency>
+
         <dependency>
             <groupId>org.sql2o</groupId>
             <artifactId>sql2o</artifactId>
             <version>1.5.4</version>
         </dependency>
+
         <dependency>
             <groupId>ninja.leaping.configurate</groupId>
             <artifactId>configurate-yaml</artifactId>
             <version>3.3</version>
         </dependency>
+
         <dependency>
             <groupId>org.checkerframework</groupId>
             <artifactId>checker</artifactId>
             <version>3.3.0</version>
         </dependency>
+
         <dependency>
             <groupId>biz.paluch.redis</groupId>
             <artifactId>lettuce</artifactId>
             <version>4.5.0.Final</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>9.4-1200-jdbc41</version>
+            <scope>сompile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>de.svenkubiak</groupId>
+            <artifactId>jBCrypt</artifactId>
+            <version>0.4.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.games647</groupId>
+            <artifactId>fastlogin.bungee</artifactId>
+            <version>1.11-SNAPSHOT</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

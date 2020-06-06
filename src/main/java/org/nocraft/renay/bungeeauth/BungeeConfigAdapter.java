@@ -11,11 +11,11 @@ import java.io.IOException;
 import java.util.*;
 
 public class BungeeConfigAdapter implements ConfigurationAdapter {
-    private final BungeeAuth plugin;
+    private final BungeeAuthPlugin plugin;
     private final File file;
     private Configuration configuration;
 
-    public BungeeConfigAdapter(BungeeAuth plugin, File file) {
+    public BungeeConfigAdapter(BungeeAuthPlugin plugin, File file) {
         this.plugin = plugin;
         this.file = file;
         reload();
@@ -76,7 +76,7 @@ public class BungeeConfigAdapter implements ConfigurationAdapter {
     }
 
     @Override
-    public BungeeAuth getPlugin() {
+    public BungeeAuthPlugin getPlugin() {
         return this.plugin;
     }
 }

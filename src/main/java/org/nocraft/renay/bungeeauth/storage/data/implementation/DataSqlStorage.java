@@ -1,9 +1,9 @@
 package org.nocraft.renay.bungeeauth.storage.data.implementation;
 
-import org.nocraft.renay.bungeeauth.BungeeAuth;
+import org.nocraft.renay.bungeeauth.BungeeAuthPlugin;
 import org.nocraft.renay.bungeeauth.storage.data.DataStorage;
 import org.nocraft.renay.bungeeauth.storage.implementation.sql.SchemaReader;
-import org.nocraft.renay.bungeeauth.user.User;
+import org.nocraft.renay.bungeeauth.storage.entity.User;
 import org.nocraft.renay.bungeeauth.storage.implementation.sql.connection.SqlConnectionFactory;
 import org.sql2o.Connection;
 import org.sql2o.Query;
@@ -18,18 +18,18 @@ import java.util.stream.Collectors;
 
 public class DataSqlStorage implements DataStorage {
 
-    private static final String USER_SELECT_ID_BY_USERNAME = "SELECT id FROM '{prefix}players' WHERE username=? LIMIT 1";
-    private static final String USER_SELECT_USERNAME_BY_ID = "SELECT username FROM '{prefix}players' WHERE id=? LIMIT 1";
-    private static final String USER_INSERT = "INSERT INTO '{prefix}users' (id, username, active_session) VALUES(?, ?, ?)";
-    private static final String USER_SELECT_BY_ID = "SELECT username, primary_group FROM '{prefix}players' WHERE id=?";
+    private static final String USER_SELECT_ID_BY_USERNAME = "SELECT id FROM '{prefix}players' WHERE username=:p1 LIMIT 1";
+    private static final String USER_SELECT_USERNAME_BY_ID = "SELECT username FROM '{prefix}players' WHERE unique_id=:p1 LIMIT 1";
+    private static final String USER_INSERT = "INSERT INTO '{prefix}users' (id, username, active_session) VALUES(:p1, :p2, :p3)";
+    private static final String USER_SELECT_BY_ID = "SELECT username FROM '{prefix}users' WHERE unique_id=:p1";
     private static final String USER_SELECT_ALL_IDS = "SELECT id FROM '{prefix}users'";
 
-    private final BungeeAuth plugin;
+    private final BungeeAuthPlugin plugin;
     
     private final SqlConnectionFactory connectionFactory;
     private final Function<String, String> statementProcessor;
 
-    public DataSqlStorage(BungeeAuth plugin, SqlConnectionFactory connectionFactory, String tablePrefix) {
+    public DataSqlStorage(BungeeAuthPlugin plugin, SqlConnectionFactory connectionFactory, String tablePrefix) {
         this.plugin = plugin;
         this.connectionFactory = connectionFactory;
         this.statementProcessor = connectionFactory.getStatementProcessor().compose(s -> s.replace("{prefix}", tablePrefix));
@@ -54,8 +54,15 @@ public class DataSqlStorage implements DataStorage {
         }
     }
 
-    private boolean tableExists(Connection c, String apply) {
-        return false;
+    private boolean tableExists(Connection connection, String table) throws SQLException {
+        try (ResultSet rs = connection.getJdbcConnection().getMetaData().getTables(null, null, "%", null)) {
+            while (rs.next()) {
+                if (rs.getString(3).equalsIgnoreCase(table)) {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 
     private void applySchema() throws IOException, SQLException {
@@ -114,16 +121,18 @@ public class DataSqlStorage implements DataStorage {
     }
 
     @Override
-    public User loadUser(UUID uniqueId) {
+    public Optional<User> loadUser(UUID uniqueId) {
         try (Connection c = this.connectionFactory.getConnection()) {
             try (Query query = c.createQuery(this.statementProcessor.apply(USER_SELECT_BY_ID))) {
-                return query.withParams(uniqueId).executeAndFetchFirst(User.class);
+                User user = query.withParams(uniqueId).executeAndFetchFirst(User.class);
+
+                return user == null ? Optional.empty() : Optional.of(user);
             }
         } catch (SQLException | Sql2oException ex) {
             ex.printStackTrace();
         }
 
-        return null;
+        return Optional.empty();
     }
 
     @Override
@@ -145,7 +154,7 @@ public class DataSqlStorage implements DataStorage {
                 List<User> rs = query.executeAndFetch(User.class);
 
                 if (!rs.isEmpty()) {
-                    rs.forEach(u -> uuids.add(u.userId()));
+                    rs.forEach(u -> uuids.add(u.getUniqueId()));
                 }
             }
         } catch (SQLException | Sql2oException ex) {
@@ -163,7 +172,7 @@ public class DataSqlStorage implements DataStorage {
             try (Query query = c.createQuery(this.statementProcessor.apply(USER_SELECT_ID_BY_USERNAME))) {
                 return query.withParams(username)
                         .executeAndFetchFirst(User.class)
-                        .userId();
+                        .getUniqueId();
             }
         } catch (SQLException | Sql2oException ex) {
             ex.printStackTrace();
@@ -176,7 +185,7 @@ public class DataSqlStorage implements DataStorage {
     public String getPlayerName(UUID uniqueId) {
         try (Connection c = this.connectionFactory.getConnection()) {
             try (Query query = c.createQuery(this.statementProcessor.apply(USER_SELECT_USERNAME_BY_ID))) {
-                return query.withParams(uniqueId).executeAndFetchFirst(User.class).userName();
+                return query.withParams(uniqueId).executeAndFetchFirst(User.class).getName();
             }
         } catch (SQLException | Sql2oException ex) {
             ex.printStackTrace();

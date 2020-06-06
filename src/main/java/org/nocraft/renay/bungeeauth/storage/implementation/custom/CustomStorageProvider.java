@@ -1,6 +1,6 @@
 package org.nocraft.renay.bungeeauth.storage.implementation.custom;
 
-import org.nocraft.renay.bungeeauth.BungeeAuth;
+import org.nocraft.renay.bungeeauth.BungeeAuthPlugin;
 import org.nocraft.renay.bungeeauth.storage.data.DataStorage;
 
 /**
@@ -8,5 +8,5 @@ import org.nocraft.renay.bungeeauth.storage.data.DataStorage;
  */
 @FunctionalInterface
 public interface CustomStorageProvider {
-    DataStorage provide(BungeeAuth plugin);
+    DataStorage provide(BungeeAuthPlugin plugin);
 }

@@ -3,41 +3,56 @@ package org.nocraft.renay.bungeeauth.listener;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.PendingConnection;
-import net.md_5.bungee.api.event.PreLoginEvent;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
+import net.md_5.bungee.api.event.LoginEvent;
+import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.event.ServerConnectEvent;
 import net.md_5.bungee.api.plugin.Listener;
+import net.md_5.bungee.connection.InitialHandler;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
-import org.nocraft.renay.bungeeauth.BungeeAuth;
+import org.nocraft.renay.bungeeauth.BungeeAuthPlugin;
+import org.nocraft.renay.bungeeauth.SessionFactory;
 import org.nocraft.renay.bungeeauth.exception.InvalidNicknameException;
-import org.nocraft.renay.bungeeauth.user.Session;
-import org.nocraft.renay.bungeeauth.user.SessionTime;
-import org.nocraft.renay.bungeeauth.user.User;
+import org.nocraft.renay.bungeeauth.storage.entity.SimpleSessionStorage;
+import org.nocraft.renay.bungeeauth.storage.session.Session;
 import org.nocraft.renay.bungeeauth.storage.data.SimpleDataStorage;
+import org.nocraft.renay.bungeeauth.storage.entity.SessionTime;
 
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.Calendar;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 public class LoginListener implements Listener {
 
-    private final BungeeAuth plugin;
-    private final SimpleDataStorage storage;
+    private final ConcurrentHashMap<UUID, Session> pendingConnections = new ConcurrentHashMap<UUID, Session>();
 
-    public LoginListener(BungeeAuth plugin, SimpleDataStorage storage) {
-        this.storage = storage;
+    private final SimpleSessionStorage sessionStorage;
+    private final SimpleDataStorage dataStorage;
+
+    private final BungeeAuthPlugin plugin;
+
+    public LoginListener(BungeeAuthPlugin plugin, SimpleDataStorage dataStorage, SimpleSessionStorage sessionStorage) {
+        this.sessionStorage = sessionStorage;
+        this.dataStorage = dataStorage;
         this.plugin = plugin;
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onLogin(PreLoginEvent e) {
-        PendingConnection c = e.getConnection();
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    @EventHandler(priority = EventPriority.NORMAL)
+    public void onLogin(LoginEvent e) {
+        InitialHandler c = (InitialHandler) e.getConnection();
 
-        try {
-            this.connectionValidate(c);
-        } catch(RuntimeException ex) {
-            c.disconnect(TextComponent.fromLegacyText(ChatColor.RED + ex.getMessage()));
+        plugin.getLogger().info(String.format("Player with uuid %s has joined to the network", c.getUniqueId()));
+
+        // if the player is premium, we do not process him
+        if (plugin.isPremiumProfile(e.getConnection())) {
+            plugin.getLogger().info(String.format("Player %s successfully login as Premium player", c.getName()));
+            return;
         }
 
         e.registerIntent(this.plugin);
@@ -45,46 +60,51 @@ public class LoginListener implements Listener {
         // load player from database
         this.plugin.getProxy().getScheduler().runAsync(plugin, () -> {
             try {
-                User u = this.saveIfUnique(c.getUniqueId(), c.getName(), c.getAddress());
+                UUID uniqueId = c.getUniqueId();
+
+                Optional<Session> session = this.sessionStorage.loadSession(uniqueId).join();
+                session.orElse(this.plugin.getSessionFactory().create(c));
+
+                //noinspection OptionalGetWithoutIsPresent
+                this.pendingConnections.put(uniqueId, session.get());
             } catch (Exception ex) {
                 this.plugin.getLogger().severe("Exception occurred whilst loading data for " + c.getUniqueId() + " - " + c.getName());
                 ex.printStackTrace();
 
                 e.setCancelReason(TextComponent.fromLegacyText(ChatColor.RED + "Sorry, but the server cannot process your request."));
                 e.setCancelled(true);
+            } finally {
+                // finally, complete our intent to modify state, so the proxy can continue handling the connection.
+                e.completeIntent(this.plugin);
             }
-
-            // finally, complete our intent to modify state, so the proxy can continue handling the connection.
-            e.completeIntent(this.plugin);
         });
     }
 
-    private User saveIfUnique(UUID uniqueId, String name, InetSocketAddress address) {
-        User user = this.storage.loadUser(uniqueId).join();
 
-        if (user != null) {
-            Calendar startTime = Calendar.getInstance();
-            Calendar endTime = (Calendar) startTime.clone();
-            endTime.add(Calendar.SECOND, 86400);
+    @EventHandler(priority = EventPriority.NORMAL)
+    public void onLogin(PostLoginEvent e) {
+        UUID uniqueId = e.getPlayer().getUniqueId();
 
-            user = new User(uniqueId, name);
-
-            SessionTime time = new SessionTime(startTime.getTime(), endTime.getTime());
-            Session session = new Session(user, time, address.getHostString());
-
-            user.changeActiveSession(session);
-        }
-
-        return user;
-    }
-
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void onServerConnect(ServerConnectEvent e) {
-        if (e.getTarget() != null) {
+        if (!this.pendingConnections.containsKey(uniqueId)) {
             return;
         }
-        // check user authentication, if him authenticated - connect user to one of lobby or another server
-        // else - connect user to login server and ask him password
+
+        Session session = this.pendingConnections.get(uniqueId);
+    }
+
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onConnect(ServerConnectEvent e) {
+        ProxiedPlayer p = e.getPlayer();
+
+        // Check if the target equals login server
+        // then skip if true
+        if ("login".equals(e.getTarget().getName())) {
+            return;
+        }
+
+        // check if the player has authenticated - and pass him to target
+        // else - send him to the login server and sent title with helps message.
     }
 
     private void connectionValidate(PendingConnection c) {

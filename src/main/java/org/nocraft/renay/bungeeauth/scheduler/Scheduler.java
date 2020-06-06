@@ -1,7 +1,7 @@
 package org.nocraft.renay.bungeeauth.scheduler;
 
 import net.md_5.bungee.api.scheduler.ScheduledTask;
-import org.nocraft.renay.bungeeauth.BungeeAuth;
+import org.nocraft.renay.bungeeauth.BungeeAuthPlugin;
 import org.nocraft.renay.bungeeauth.util.Iterators;
 
 import java.util.Collections;
@@ -11,12 +11,12 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 public class Scheduler  {
-    private final BungeeAuth plugin;
+    private final BungeeAuthPlugin plugin;
 
     private final Executor executor;
     private final Set<ScheduledTask> tasks = Collections.newSetFromMap(new WeakHashMap<>());
 
-    public Scheduler(BungeeAuth plugin) {
+    public Scheduler(BungeeAuthPlugin plugin) {
         this.plugin = plugin;
         this.executor = r -> plugin.getProxy().getScheduler().runAsync(plugin, r);
     }

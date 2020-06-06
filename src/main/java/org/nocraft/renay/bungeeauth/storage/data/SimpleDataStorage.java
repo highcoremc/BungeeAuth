@@ -1,25 +1,21 @@
 package org.nocraft.renay.bungeeauth.storage.data;
 
-import org.nocraft.renay.bungeeauth.BungeeAuth;
-import org.nocraft.renay.bungeeauth.user.User;
-import org.nocraft.renay.bungeeauth.util.Throwing;
+import org.nocraft.renay.bungeeauth.BungeeAuthPlugin;
+import org.nocraft.renay.bungeeauth.storage.AbstractStorage;
+import org.nocraft.renay.bungeeauth.storage.entity.User;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.Callable;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 
 /**
  * Provides a {@link CompletableFuture} based API for interacting with a {@link DataStorage}.
  */
-public class SimpleDataStorage {
-    private final BungeeAuth plugin;
+public class SimpleDataStorage extends AbstractStorage {
+    private final BungeeAuthPlugin plugin;
     private final DataStorage implementation;
 
-    public SimpleDataStorage(BungeeAuth plugin, DataStorage implementation) {
+    public SimpleDataStorage(BungeeAuthPlugin plugin, DataStorage implementation) {
+        super(plugin);
         this.plugin = plugin;
         this.implementation = implementation;
     }
@@ -30,32 +26,6 @@ public class SimpleDataStorage {
 
     public Collection<DataStorage> getImplementations() {
         return Collections.singleton(this.implementation);
-    }
-
-    private <T> CompletableFuture<T> makeFuture(Callable<T> supplier) {
-        return CompletableFuture.supplyAsync(() -> {
-            try {
-                return supplier.call();
-            } catch (Exception e) {
-                if (e instanceof RuntimeException) {
-                    throw (RuntimeException) e;
-                }
-                throw new CompletionException(e);
-            }
-        }, this.plugin.getScheduler().async());
-    }
-
-    private CompletableFuture<Void> makeFuture(Throwing.Runnable runnable) {
-        return CompletableFuture.runAsync(() -> {
-            try {
-                runnable.run();
-            } catch (Exception e) {
-                if (e instanceof RuntimeException) {
-                    throw (RuntimeException) e;
-                }
-                throw new CompletionException(e);
-            }
-        }, this.plugin.getScheduler().async());
     }
 
     public String getName() {
@@ -80,7 +50,7 @@ public class SimpleDataStorage {
         }
     }
 
-    public CompletableFuture<User> loadUser(UUID uniqueId) {
+    public CompletableFuture<Optional<User>> loadUser(UUID uniqueId) {
         return makeFuture(() -> this.implementation.loadUser(uniqueId));
     }
 

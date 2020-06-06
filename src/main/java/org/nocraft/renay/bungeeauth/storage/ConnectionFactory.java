@@ -1,10 +1,8 @@
 package org.nocraft.renay.bungeeauth.storage;
 
-import org.nocraft.renay.bungeeauth.BungeeAuth;
-
 import java.util.function.Function;
 
-public interface ConnectionFactory <E> {
+public interface ConnectionFactory <E extends AutoCloseable> {
     String getImplementationName();
 
     void init();
