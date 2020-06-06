@@ -7,7 +7,7 @@ public interface HashMethod {
      * @param entry String
      * @return String
      */
-    String createHash(String entry);
+    String hash(String entry);
 
     /**
      * Verify string value with passed entry.

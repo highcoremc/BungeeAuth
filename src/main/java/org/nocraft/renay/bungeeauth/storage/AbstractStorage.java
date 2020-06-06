@@ -1,6 +1,7 @@
 package org.nocraft.renay.bungeeauth.storage;
 
 import org.nocraft.renay.bungeeauth.BungeeAuthPlugin;
+import org.nocraft.renay.bungeeauth.storage.session.Session;
 import org.nocraft.renay.bungeeauth.util.Throwing;
 
 import java.util.concurrent.Callable;
@@ -40,4 +41,6 @@ public abstract class AbstractStorage {
             }
         }, this.plugin.getScheduler().async());
     }
+
+    public abstract void shutdown();
 }

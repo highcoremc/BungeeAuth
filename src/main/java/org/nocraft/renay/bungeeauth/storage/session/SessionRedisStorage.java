@@ -8,14 +8,17 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class SessionRedisStorage implements SessionStorage {
+
     private final RedisConnectionFactory<Session> connectionFactory;
     private final BungeeAuthPlugin plugin;
-    private final String channel;
+
+    private final String SESSION_KEY;
 
     public SessionRedisStorage(BungeeAuthPlugin plugin, RedisConnectionFactory<Session> factory, String channel) {
         this.connectionFactory = factory;
-        this.channel = channel;
         this.plugin = plugin;
+
+        SESSION_KEY = channel + ":session";
     }
 
     @Override
@@ -26,6 +29,7 @@ public class SessionRedisStorage implements SessionStorage {
     @Override
     public void init() {
         this.connectionFactory.init();
+        this.connectionFactory.getConnection();
     }
 
     @Override
@@ -34,18 +38,24 @@ public class SessionRedisStorage implements SessionStorage {
     }
 
     @Override
-    public Optional<Session> loadSession(UUID uniqueId) {
+    public Optional<Session> loadSession(UUID uniqueId, String key) {
         try (StatefulRedisConnection<String, Session> conn = this.connectionFactory.getConnection()) {
-            Session result = conn.sync().get(uniqueId.toString());
-
+            Session result = conn.sync().hget(craftKey(uniqueId), key);
             return null == result ? Optional.empty() : Optional.of(result);
         }
     }
 
     @Override
     public void saveSession(Session session) {
+        session.getIOLock().lock();
         try (StatefulRedisConnection<String, Session> conn = this.connectionFactory.getConnection()) {
-            conn.sync().set(session.userId.toString(), session);
+            conn.sync().hset(craftKey(session.userId), session.ipAddress, session);
+        } finally {
+            session.getIOLock().unlock();
         }
+    }
+
+    public String craftKey(UUID id) {
+        return SESSION_KEY + ':' + id.toString();
     }
 }

@@ -60,11 +60,23 @@ public abstract class HikariConnectionFactory implements SqlConnectionFactory {
         config.setMaxLifetime(this.configuration.getMaxLifetime());
         config.setConnectionTimeout(this.configuration.getConnectionTimeout());
 
-
         config.setInitializationFailTimeout(-1);
 
         this.hikari = new HikariDataSource(config);
         this.sql2o = new Sql2o(this.hikari, new PostgresQuirks());
+        this.sql2o.setDefaultColumnMappings(getColumnMappings());
+    }
+
+    private Map<String, String> getColumnMappings() {
+        Map<String, String> colMaps = new HashMap<>();
+
+        colMaps.put("unique_id", "uniqueId");
+        colMaps.put("created_at", "createdAt");
+        colMaps.put("updated_at", "updatedAt");
+        colMaps.put("registered_ip", "registeredIp");
+        colMaps.put("registered_at", "registeredAt");
+
+        return colMaps;
     }
 
     @Override

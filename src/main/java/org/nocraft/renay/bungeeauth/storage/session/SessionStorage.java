@@ -7,7 +7,7 @@ import java.util.UUID;
 
 public interface SessionStorage extends Storage {
 
-    Optional<Session> loadSession(UUID uniqueId);
+    Optional<Session> loadSession(UUID uniqueId, String key);
 
     void saveSession(Session session);
 

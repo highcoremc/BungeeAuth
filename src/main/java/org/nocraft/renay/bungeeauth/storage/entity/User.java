@@ -2,60 +2,65 @@ package org.nocraft.renay.bungeeauth.storage.entity;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.lang.reflect.Field;
+import java.util.Date;
 import java.util.UUID;
-
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class User {
 
-    private final UUID uniqueId;
-    private final String username;
-    private final String realname;
+    public final UUID uniqueId;
+    public final String username;
+    public final String realname;
+    private UserPassword password;
 
-    private final String registeredIp;
-    private final long registeredAt;
+    /**
+     * Lock used by Storage implementations to prevent concurrent read/writes
+     * @see #getOILock()
+     */
+    private Lock ioLock = new ReentrantLock();
 
-    private String lastSeenIp;
-    private long lastSeen;
+    public final String registeredIp;
+    private Date registeredAt;
 
-    public User(UUID uniqueId, String username, String registeredIp) {
+    public User(@NonNull UUID uniqueId, @NonNull String username, @NonNull String registeredIp) {
         this.uniqueId = uniqueId;
-        this.username = username;
+        this.username = username.toLowerCase();
         this.registeredIp = registeredIp;
-        this.realname = username.toLowerCase();
-        this.registeredAt = System.currentTimeMillis();
-        this.updateLastSeen(registeredIp);
+        this.realname = username;
     }
 
-    public @NonNull UUID getUniqueId() {
-        return this.uniqueId;
+    public boolean isRegistered() {
+        return null != this.registeredAt;
     }
 
-    public @NonNull String getName() {
-        return this.username;
+    public void changePassword(UserPassword password) {
+        this.password = password;
     }
 
-    public long getRegisteredAt() {
-        return this.registeredAt;
+    public UserPassword getPassword() {
+        return password;
     }
 
-    public String getRegisteredIp() {
-        return this.registeredIp;
+    public boolean hasPassword() {
+        return null != password;
     }
 
-    public long getLastSeen() {
-        return this.lastSeen;
+    public String toString() {
+        String passwd = null == password ? null : password.toString();
+
+        return String.format("%s, %s, %s, %s, %s",
+                uniqueId.toString(), username,
+                realname, registeredIp, passwd
+        );
     }
 
-    public String getLastSeenIp() {
-        return this.lastSeenIp;
-    }
+    public Lock getOILock() {
+        if (null == this.ioLock) {
+            this.ioLock = new ReentrantLock();
+        }
 
-    public void updateLastSeen(String ip) {
-        this.lastSeen = System.currentTimeMillis();
-        this.lastSeenIp = ip;
-    }
-
-    public String getRealname() {
-        return realname;
+        return this.ioLock;
     }
 }

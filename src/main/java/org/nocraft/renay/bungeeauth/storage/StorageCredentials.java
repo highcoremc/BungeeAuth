@@ -11,4 +11,6 @@ public interface StorageCredentials {
     String getPassword();
 
     int getConnectionTimeout();
+
+    int getMaxPoolSize();
 }

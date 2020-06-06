@@ -2,15 +2,24 @@ package org.nocraft.renay.bungeeauth.storage.misc;
 
 import org.nocraft.renay.bungeeauth.storage.StorageCredentials;
 
-public class CacheStorageCredentials implements StorageCredentials {
+public class SessionStorageCredentials implements StorageCredentials {
 
     private final String address;
     private final String database;
     private final String username;
     private final String password;
     private final int timeout;
+    private final int maxPoolSize;
 
-    public CacheStorageCredentials(String address, String database, String username, String password, int timeout) {
+    public SessionStorageCredentials(
+            String address,
+            String database,
+            String username,
+            String password,
+            int timeout,
+            int maxPoolSize
+    ) {
+        this.maxPoolSize = maxPoolSize;
         this.address = address;
         this.database = database;
         this.username = username;
@@ -41,5 +50,10 @@ public class CacheStorageCredentials implements StorageCredentials {
     @Override
     public int getConnectionTimeout() {
         return this.timeout;
+    }
+
+    @Override
+    public int getMaxPoolSize() {
+        return maxPoolSize;
     }
 }

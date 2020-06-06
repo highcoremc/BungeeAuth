@@ -3,6 +3,7 @@ package org.nocraft.renay.bungeeauth.storage.data.implementation;
 import com.lambdaworks.redis.api.StatefulRedisConnection;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.nocraft.renay.bungeeauth.storage.data.DataStorage;
+import org.nocraft.renay.bungeeauth.storage.entity.UserPassword;
 import org.nocraft.renay.bungeeauth.storage.implementation.nosql.RedisConnectionFactory;
 import org.nocraft.renay.bungeeauth.storage.entity.User;
 
@@ -52,8 +53,12 @@ public class DataRedisStorage implements DataStorage {
     @Override
     public void saveUser(User user) {
         try (StatefulRedisConnection<String, User> conn = this.connectionFactory.getConnection()) {
-            conn.sync().hset(STORAGE_KEY, user.getUniqueId().toString(), user);
+            conn.sync().hset(STORAGE_KEY, user.uniqueId.toString(), user);
         }
+    }
+
+    @Override
+    public void changeUserPassword(UserPassword password) {
     }
 
     @Override

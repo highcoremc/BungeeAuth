@@ -2,9 +2,11 @@ package org.nocraft.renay.bungeeauth.storage.entity;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class SessionTime {
+public class SessionTime implements Serializable {
+    private static final long serialVersionUID = -5511720394017086753L;
 
     public final Date startTime;
     public final Date endTime;

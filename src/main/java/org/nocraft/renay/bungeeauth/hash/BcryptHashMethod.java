@@ -4,7 +4,7 @@ import org.mindrot.jbcrypt.BCrypt;
 
 public class BcryptHashMethod implements HashMethod {
     @Override
-    public String createHash(String entry) {
+    public String hash(String entry) {
         return BCrypt.hashpw(entry, BCrypt.gensalt());
     }
 

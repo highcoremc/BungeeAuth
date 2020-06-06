@@ -29,7 +29,16 @@ public class SimpleSessionStorage extends AbstractStorage {
         }
     }
 
-    public CompletableFuture<Optional<Session>> loadSession(UUID uniqueId) {
-        return makeFuture(() -> this.implementation.loadSession(uniqueId));
+    public CompletableFuture<Optional<Session>> loadSession(UUID uniqueId, String key) {
+        return makeFuture(() -> this.implementation.loadSession(uniqueId, key));
+    }
+
+    public CompletableFuture<Void> save(Session session) {
+        return makeFuture(() -> this.implementation.saveSession(session));
+    }
+
+    @Override
+    public void shutdown() {
+        this.implementation.shutdown();
     }
 }

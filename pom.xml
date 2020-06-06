@@ -6,7 +6,7 @@
 
     <groupId>org.nocraft.loperd</groupId>
     <artifactId>bungeeauth</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
     <packaging>jar</packaging>
 
     <name>BungeeAuth</name>
@@ -33,6 +33,9 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>3.1.0</version>
+                <configuration>
+                    <finalName>${project.name}</finalName>
+                </configuration>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -117,7 +120,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>9.4-1200-jdbc41</version>
+            <version>9.4-1206-jdbc42</version>
             <scope>сompile</scope>
         </dependency>
 
@@ -132,6 +135,18 @@
             <artifactId>fastlogin.bungee</artifactId>
             <version>1.11-SNAPSHOT</version>
             <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.7.21</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.10</version>
         </dependency>
     </dependencies>
 </project>

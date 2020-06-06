@@ -29,6 +29,17 @@ public enum HashMethodType {
         return def;
     }
 
+    public static HashMethodType parse(String name) {
+        for (HashMethodType t : values()) {
+            for (String id : t.getIdentifiers()) {
+                if (id.equalsIgnoreCase(name)) {
+                    return t;
+                }
+            }
+        }
+        throw new IllegalStateException("Unable to parse hash method type.");
+    }
+
     public String getName() {
         return this.name;
     }

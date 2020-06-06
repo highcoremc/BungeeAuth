@@ -1,8 +1,10 @@
 package org.nocraft.renay.bungeeauth.storage.data;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.nocraft.renay.bungeeauth.BungeeAuthPlugin;
 import org.nocraft.renay.bungeeauth.storage.AbstractStorage;
 import org.nocraft.renay.bungeeauth.storage.entity.User;
+import org.nocraft.renay.bungeeauth.storage.entity.UserPassword;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -54,8 +56,12 @@ public class SimpleDataStorage extends AbstractStorage {
         return makeFuture(() -> this.implementation.loadUser(uniqueId));
     }
 
-    public CompletableFuture<Void> saveUser(User user) {
+    public CompletableFuture<Void> saveUser(@NonNull User user) {
         return makeFuture(() -> this.implementation.saveUser(user));
+    }
+
+    public CompletableFuture<Void> changeUserPassword(@NonNull UserPassword password) {
+        return makeFuture(() -> this.implementation.changeUserPassword(password));
     }
 
     public CompletableFuture<Set<UUID>> getUniqueUsers() {

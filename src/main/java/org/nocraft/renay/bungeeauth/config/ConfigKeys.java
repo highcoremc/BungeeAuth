@@ -1,40 +1,15 @@
-/*
- * This file is part of LuckPerms, licensed under the MIT License.
- *
- *  Copyright (c) lucko (Luck) <luck@lucko.me>
- *  Copyright (c) contributors
- *
- *  Permission is hereby granted, free of charge, to any person obtaining a copy
- *  of this software and associated documentation files (the "Software"), to deal
- *  in the Software without restriction, including without limitation the rights
- *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- *  copies of the Software, and to permit persons to whom the Software is
- *  furnished to do so, subject to the following conditions:
- *
- *  The above copyright notice and this permission notice shall be included in all
- *  copies or substantial portions of the Software.
- *
- *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- *  SOFTWARE.
- */
-
 package org.nocraft.renay.bungeeauth.config;
 
 import com.google.common.collect.ImmutableMap;
+import org.nocraft.renay.bungeeauth.hash.HashMethodType;
 import org.nocraft.renay.bungeeauth.storage.data.DataStorageType;
-import org.nocraft.renay.bungeeauth.storage.misc.CacheStorageCredentials;
+import org.nocraft.renay.bungeeauth.storage.misc.SessionStorageCredentials;
 import org.nocraft.renay.bungeeauth.storage.misc.DatabaseStorageCredentials;
 import org.nocraft.renay.bungeeauth.storage.session.SessionStorageType;
 import org.nocraft.renay.bungeeauth.util.ImmutableCollectors;
 
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -48,9 +23,6 @@ import static org.nocraft.renay.bungeeauth.config.ConfigKeyTypes.enduringKey;
  * to function a bit like an enum, but with generics.</p>
  */
 public final class ConfigKeys {
-
-    public static final ConfigKey<Integer> SESSION_TIMEOUT = enduringKey(customKey(
-            c -> c.getInteger("session.channel", 3600)));
 
     private ConfigKeys() {}
 
@@ -76,18 +48,24 @@ public final class ConfigKeys {
     /**
      * The session settings, username, password, etc for use by any database
      */
-    public static final ConfigKey<CacheStorageCredentials> CACHE_VALUES = enduringKey(customKey(c -> {
+    public static final ConfigKey<SessionStorageCredentials> CACHE_VALUES = enduringKey(customKey(c -> {
         int maxPoolSize = c.getInteger("session.maximum-pool-size", c.getInteger("session.pool-size", 3));
         int connectionTimeout = c.getInteger("session.connection-timeout", 5000);
 
-        return new CacheStorageCredentials(
+        return new SessionStorageCredentials(
                 c.getString("session.address", null),
                 c.getString("session.database", null),
                 c.getString("session.username", null),
                 c.getString("session.password", null),
-                connectionTimeout//, maxPoolSize,
+                connectionTimeout, maxPoolSize
         );
     }));
+
+    public static final ConfigKey<HashMethodType> HASH_METHOD_TYPE = enduringKey(customKey(
+            c -> HashMethodType.parse(c.getString("hash-method", "bcrypt"))));;
+
+    public static final ConfigKey<Integer> SESSION_TIMEOUT = enduringKey(customKey(
+            c -> c.getInteger("session.channel", 3600)));
 
     /**
      * The prefix for any SQL tables
@@ -105,6 +83,7 @@ public final class ConfigKeys {
      * The name of the storage method being used for session
      */
     public static final ConfigKey<SessionStorageType> CACHE_STORAGE_METHOD = enduringKey(customKey(c -> SessionStorageType.parse(c.getString("session-storage-method", "redis"), SessionStorageType.REDIS)));
+
 
     private static final List<ConfigKeyTypes.BaseConfigKey<?>> KEYS;
 

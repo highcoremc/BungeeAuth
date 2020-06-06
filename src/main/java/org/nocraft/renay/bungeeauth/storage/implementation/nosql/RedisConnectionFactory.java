@@ -1,9 +1,11 @@
 package org.nocraft.renay.bungeeauth.storage.implementation.nosql;
 
+import com.lambdaworks.redis.ClientOptions;
 import com.lambdaworks.redis.RedisClient;
 import com.lambdaworks.redis.RedisURI;
 import com.lambdaworks.redis.api.StatefulRedisConnection;
 import com.lambdaworks.redis.codec.RedisCodec;
+import com.lambdaworks.redis.resource.DefaultClientResources;
 import org.nocraft.renay.bungeeauth.storage.ConnectionFactory;
 import org.nocraft.renay.bungeeauth.storage.StorageCredentials;
 
@@ -17,6 +19,7 @@ public class RedisConnectionFactory<T> implements ConnectionFactory<StatefulRedi
 
     private StatefulRedisConnection<String, T> connection;
     private final StorageCredentials credentials;
+    private DefaultClientResources resources;
     private RedisClient client;
 
     public RedisConnectionFactory(StorageCredentials credentials) {
@@ -30,29 +33,40 @@ public class RedisConnectionFactory<T> implements ConnectionFactory<StatefulRedi
 
     @Override
     public void init() {
+        this.resources = DefaultClientResources.builder()
+                .ioThreadPoolSize(credentials.getMaxPoolSize())
+                .computationThreadPoolSize(credentials.getMaxPoolSize())
+                .build();
+
+        this.client = RedisClient.create(resources, createRedisURI(credentials));
+        this.client.setOptions(ClientOptions.builder().autoReconnect(true).build());
+    }
+
+    private RedisURI createRedisURI(StorageCredentials credentials) {
         RedisURI uri = new RedisURI();
 
-        String address = this.credentials.getAddress();
+        String address = credentials.getAddress();
         String[] addressSplit = address.split(":");
         address = addressSplit[0];
         int port = addressSplit.length > 1 ? Integer.parseInt(addressSplit[1]) : 6379;
 
-        String password = this.credentials.getPassword();
+        String password = credentials.getPassword();
 
         uri.setHost(address);
         uri.setPort(port);
-        uri.setTimeout(this.credentials.getConnectionTimeout());
+        uri.setTimeout(credentials.getConnectionTimeout());
 
         if (null != password && 0 != password.length()) {
             uri.setPassword(password);
         }
 
-        client = RedisClient.create(uri);
+        return uri;
     }
 
     @Override
     public void shutdown() {
         this.connection.close();
+        this.resources.shutdown();
         this.client.shutdown();
     }
 
@@ -87,8 +101,8 @@ public class RedisConnectionFactory<T> implements ConnectionFactory<StatefulRedi
                 bytes.get(array);
                 ObjectInputStream is = new ObjectInputStream(new ByteArrayInputStream(array));
                 return (T) is.readObject();
-            } catch (Exception e) {
-                return null;
+            } catch (Exception ex) {
+                throw new IllegalStateException(ex);
             }
         }
 
@@ -104,8 +118,8 @@ public class RedisConnectionFactory<T> implements ConnectionFactory<StatefulRedi
                 ObjectOutputStream os = new ObjectOutputStream(bytes);
                 os.writeObject(value);
                 return ByteBuffer.wrap(bytes.toByteArray());
-            } catch (IOException e) {
-                return null;
+            } catch (IOException ex) {
+                throw new IllegalStateException(ex);
             }
         }
     }

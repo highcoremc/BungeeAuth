@@ -1,5 +1,7 @@
 package org.nocraft.renay.bungeeauth.storage.implementation.sql;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,7 +24,19 @@ public final class SchemaReader {
                     continue;
                 }
 
-                sb.append(line);
+                sb.append(" ").append(line.toLowerCase());
+
+                // only used for PostgreSQL
+                if (StringUtils.contains(sb, "create") &&
+                    StringUtils.contains(sb, "function") &&
+                    line.endsWith(";")
+                ) {
+                    int matches = StringUtils.countMatches(sb, "$$");
+
+                    if (2 != matches) {
+                        continue;
+                    }
+                }
 
                 // check for end of declaration
                 if (line.endsWith(";")) {

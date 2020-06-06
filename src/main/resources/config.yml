@@ -19,7 +19,7 @@
 # - A PostgreSQL database is the default option.
 data-storage-method: PotgreSQL
 
-cache-storage-method: Redis
+session-storage-method: Redis
 
 # The following block defines the settings for remote database storage methods.
 #
@@ -93,7 +93,7 @@ session:
   # - The standard DB engine port is used by default
   #   (Redis: 6379)
   # - Specify as "host:port" if differs
-  address: localhost
+  address: redis
 
   # The name of the database to store NoDataSync data in.
   # - This must be created already. Don't worry about this setting if you're using MongoDB.
