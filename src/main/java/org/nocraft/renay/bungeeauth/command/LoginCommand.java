@@ -4,21 +4,22 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
-import net.md_5.bungee.api.plugin.Command;
-import org.nocraft.renay.bungeeauth.Authentication;
+import org.nocraft.renay.bungeeauth.authentication.AttemptManager;
+import org.nocraft.renay.bungeeauth.authentication.Authentication;
 import org.nocraft.renay.bungeeauth.BungeeAuthPlayer;
 import org.nocraft.renay.bungeeauth.BungeeAuthPlugin;
-import org.nocraft.renay.bungeeauth.event.LoginSuccessfulEvent;
-
-import static org.nocraft.renay.bungeeauth.Authentication.Result.*;
+import org.nocraft.renay.bungeeauth.event.PlayerLoginFailed;
+import org.nocraft.renay.bungeeauth.event.PlayerSuccessfulLoginEvent;
 
 public class LoginCommand extends BungeeAuthCommand {
 
 	private final BungeeAuthPlugin plugin;
+	private final AttemptManager attemptManager;
 
 	public LoginCommand(BungeeAuthPlugin plugin) {
 		super(plugin, "login", null, "l");
 		this.plugin = plugin;
+		this.attemptManager = plugin.getAttemptManager();
 	}
 
 	@Override
@@ -41,23 +42,36 @@ public class LoginCommand extends BungeeAuthCommand {
 
 		switch (result) {
 			case SUCCESS_LOGIN:
-				String msg = ChatColor.GREEN + "Successfully authenticated!";
-				player.sendMessage(TextComponent.fromLegacyText(msg));
+				try {
+					BungeeAuthPlayer bap = this.plugin.getAuthPlayers().get(player.getUniqueId());
+					PlayerSuccessfulLoginEvent event = new PlayerSuccessfulLoginEvent(player.getUniqueId());
 
-				BungeeAuthPlayer bap = this.plugin.getAuthPlayers().get(player.getUniqueId());
-				this.plugin.updateAuthSession(bap).thenAccept(s -> {
-					this.plugin.getPluginManager().callEvent(
-							new LoginSuccessfulEvent(player.getUniqueId()));
-				});
+					this.plugin.updateAuthSession(bap).thenAccept(s ->
+							this.plugin.getPluginManager().callEvent(event));
+				} catch (IllegalStateException ex) {
+					ex.printStackTrace();
+					PlayerLoginFailed event = new PlayerLoginFailed(player.getUniqueId());
+					this.plugin.getPluginManager().callEvent(event);
+				}
 				return;
 			case WRONG_PASSWORD:
-				String wrong = ChatColor.RED + "Wrong password, you have %d attempts..";
-				sender.sendMessage(TextComponent.fromLegacyText(String.format(wrong, 1)));
+				this.handleWrongPassword(player, this.attemptManager.handle(player));
 				return;
-			case ALREADY_AUTHENTICATED:
-				return;
-			case ACCOUNT_NOT_FOUND:
-				player.disconnect(TextComponent.fromLegacyText("Please rejoin to the server."));
+			case ACCOUNT_NOT_FOUND: handleAccountNotFound(player);
 		}
+	}
+
+	private void handleWrongPassword(ProxiedPlayer player, int attemptsLeft) {
+		String message = ChatColor.translateAlternateColorCodes('&',
+				"\n&c&lFAILURE&f: Wrong password. You have &e" + attemptsLeft + "&r attempts.\n");
+		player.sendMessage(TextComponent.fromLegacyText(message));
+	}
+
+	private void handleAccountNotFound(ProxiedPlayer player) {
+		String message = ChatColor.translateAlternateColorCodes('&',
+				"&6&lFAILURE AUTHENTICATION\n" +
+				"&fSorry for the inconvenience,\n"+
+				"&fPlease re-enter to the server");
+		player.disconnect(TextComponent.fromLegacyText(message));
 	}
 }

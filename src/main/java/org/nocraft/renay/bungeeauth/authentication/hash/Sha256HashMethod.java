@@ -1,4 +1,4 @@
-package org.nocraft.renay.bungeeauth.hash;
+package org.nocraft.renay.bungeeauth.authentication.hash;
 
 import com.google.common.base.Charsets;
 import com.google.common.hash.Hashing;

@@ -1,7 +1,7 @@
 package org.nocraft.renay.bungeeauth.config;
 
 import com.google.common.collect.ImmutableMap;
-import org.nocraft.renay.bungeeauth.hash.HashMethodType;
+import org.nocraft.renay.bungeeauth.authentication.hash.HashMethodType;
 import org.nocraft.renay.bungeeauth.storage.data.DataStorageType;
 import org.nocraft.renay.bungeeauth.storage.misc.SessionStorageCredentials;
 import org.nocraft.renay.bungeeauth.storage.misc.DatabaseStorageCredentials;
@@ -66,6 +66,15 @@ public final class ConfigKeys {
 
     public static final ConfigKey<Integer> SESSION_TIMEOUT = enduringKey(customKey(
             c -> c.getInteger("session.channel", 3600)));
+
+    public static final ConfigKey<Integer> MAX_AUTH_ATTEMPTS = enduringKey(customKey(
+            c -> c.getInteger("settings.max-auth-attempts", 5)));
+
+    public static final ConfigKey<Integer> BAN_TIME_MINUTES = enduringKey(customKey(
+            c -> c.getInteger("settings.ban-time-minutes", 10)));
+
+    public static final ConfigKey<Integer> MIN_PASSWORD_LENGTH = enduringKey(customKey(
+            c -> c.getInteger("settings.min-password-length", 4)));
 
     /**
      * The prefix for any SQL tables

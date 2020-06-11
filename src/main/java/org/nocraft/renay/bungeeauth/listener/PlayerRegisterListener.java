@@ -5,11 +5,12 @@ import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
 import org.nocraft.renay.bungeeauth.BungeeAuthPlayer;
 import org.nocraft.renay.bungeeauth.BungeeAuthPlugin;
-import org.nocraft.renay.bungeeauth.event.FailedCreateSessionEvent;
-import org.nocraft.renay.bungeeauth.event.LoginFailedEvent;
-import org.nocraft.renay.bungeeauth.event.LoginSuccessfulEvent;
-import org.nocraft.renay.bungeeauth.event.RegisterSuccessfulEvent;
+import org.nocraft.renay.bungeeauth.event.FailedCreationSessionEvent;
+import org.nocraft.renay.bungeeauth.event.PlayerLoginFailed;
+import org.nocraft.renay.bungeeauth.event.PlayerSuccessfulLoginEvent;
+import org.nocraft.renay.bungeeauth.event.PlayerRegisteredEvent;
 import org.nocraft.renay.bungeeauth.storage.session.Session;
+import org.nocraft.renay.bungeeauth.util.TitleBarApi;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -24,7 +25,7 @@ public class PlayerRegisterListener extends BungeeAuthListener {
     }
 
     @EventHandler(priority = EventPriority.LOW)
-    public void onSuccessfulRegister(RegisterSuccessfulEvent e) {
+    public void onSuccessfulRegister(PlayerRegisteredEvent e) {
         UUID uniqueId = e.getPlayerId();
         Optional<ProxiedPlayer> p = plugin.getPlayer(e.getPlayerId());
 
@@ -33,12 +34,12 @@ public class PlayerRegisterListener extends BungeeAuthListener {
             return;
         }
 
-        Optional<Session> optionalSession = this.plugin.createSession(uniqueId);
+        Optional<Session> optionalSession = this.plugin.getAuthFactory().createSession(uniqueId);
 
         if (!optionalSession.isPresent()) {
             plugin.getLogger().info("Player session " + p.get().getName() + " is not present..");
             this.plugin.getPluginManager().callEvent(
-                    new FailedCreateSessionEvent(uniqueId));
+                    new FailedCreationSessionEvent(uniqueId));
             return;
         }
 
@@ -49,6 +50,9 @@ public class PlayerRegisterListener extends BungeeAuthListener {
 
         plugin.getLogger().info("Successful handled register for player " + p.get().getName());
 
+        // remove old title
+        TitleBarApi.send(p.get(), "", "", 0, 10, 0);
+
         this.plugin.getSessionStorage().save(session)
                 .thenAccept(s -> authPlayer.changeActiveSession(session))
                 .thenAccept(s -> this.applySuccessfulLogin(uniqueId))
@@ -57,11 +61,11 @@ public class PlayerRegisterListener extends BungeeAuthListener {
 
     private Void applyFailedLogin(Throwable ex, UUID uniqueId) {
         ex.printStackTrace();
-        this.plugin.getPluginManager().callEvent(new LoginFailedEvent(uniqueId));
+        this.plugin.getPluginManager().callEvent(new PlayerLoginFailed(uniqueId));
         return null;
     }
 
     private void applySuccessfulLogin(UUID uniqueId) {
-        this.plugin.getPluginManager().callEvent(new LoginSuccessfulEvent(uniqueId));
+        this.plugin.getPluginManager().callEvent(new PlayerSuccessfulLoginEvent(uniqueId));
     }
 }

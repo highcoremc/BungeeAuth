@@ -4,10 +4,11 @@ import net.md_5.bungee.api.plugin.Event;
 
 import java.util.UUID;
 
-public class FailedCreateSessionEvent extends Event {
+public class PlayerRegisteredEvent extends Event  {
+
     private final UUID playerId;
 
-    public FailedCreateSessionEvent(UUID playerId) {
+    public PlayerRegisteredEvent(UUID playerId) {
         this.playerId = playerId;
     }
 

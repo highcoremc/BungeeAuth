@@ -32,7 +32,7 @@ public class User {
     }
 
     public boolean isRegistered() {
-        return null != this.registeredAt;
+        return null != this.password;
     }
 
     public void changePassword(UserPassword password) {

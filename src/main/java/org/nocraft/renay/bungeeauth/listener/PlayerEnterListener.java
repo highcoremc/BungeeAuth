@@ -68,7 +68,7 @@ public class PlayerEnterListener extends BungeeAuthListener {
             e.setCancelled(true);
         }
 
-        if (!e.getTarget().getName().equals("login")) {
+        if (!"login".equals(e.getTarget().getName())) {
             e.setTarget(this.plugin.getProxy().getServerInfo("login"));
         }
     }
@@ -94,7 +94,7 @@ public class PlayerEnterListener extends BungeeAuthListener {
             return userQuery.get();
         }
 
-        InetSocketAddress address = c.getAddress();
+        InetSocketAddress address = (InetSocketAddress) c.getSocketAddress();
 
         String host = address.getHostString();
         String userName = c.getName();
@@ -125,9 +125,14 @@ public class PlayerEnterListener extends BungeeAuthListener {
 
                 String host = c.getAddress().getHostString();
                 BungeeAuthPlayer player = new BungeeAuthPlayer(user);
+
                 Optional<Session> session = this.sessionStorage
                         .loadSession(uniqueId, host).join();
-                session.ifPresent(player::changeActiveSession);
+                if (!player.user.isRegistered()) {
+                    session.ifPresent(s -> this.sessionStorage.remove(uniqueId, s.ipAddress));
+                } else {
+                    session.ifPresent(player::changeActiveSession);
+                }
 
                 this.players.put(uniqueId, player);
             } catch (Exception ex) {
@@ -166,22 +171,9 @@ public class PlayerEnterListener extends BungeeAuthListener {
         BungeeAuthPlayer player = this.players.remove(uniqueId);
 
         if (null == player) {
-            this.plugin.getLogger().info(String.format("Player %s was not found in auth player HashMap", p.getName()));
-            return;
+            String message = "Player %s was not found in auth player HashMap";
+            this.plugin.getLogger().info(String.format(message, p.getName()));
         }
-
-        // todo: save record to activity log
-        // todo: on every disconnect
-
-        if (!player.user.isRegistered()) {
-            this.dataStorage.saveUser(player.user);
-        }
-
-        if (null == player.session) {
-            return;
-        }
-
-        this.sessionStorage.save(player.session);
     }
 }
 

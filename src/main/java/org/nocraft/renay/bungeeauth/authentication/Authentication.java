@@ -1,4 +1,4 @@
-package org.nocraft.renay.bungeeauth;
+package org.nocraft.renay.bungeeauth.authentication;
 
 public interface Authentication {
     enum Result {

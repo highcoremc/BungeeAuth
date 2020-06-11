@@ -2,11 +2,14 @@ package org.nocraft.renay.bungeeauth.storage.implementation.sql.connection.hikar
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import org.nocraft.renay.bungeeauth.authentication.hash.HashMethodType;
 import org.nocraft.renay.bungeeauth.storage.implementation.sql.connection.SqlConnectionFactory;
+import org.nocraft.renay.bungeeauth.storage.implementation.sql.converters.HashMethodConverter;
 import org.nocraft.renay.bungeeauth.storage.misc.DatabaseStorageCredentials;
 import org.sql2o.Connection;
 import org.sql2o.Sql2o;
 import org.sql2o.Sql2oException;
+import org.sql2o.converters.Converter;
 import org.sql2o.quirks.PostgresQuirks;
 
 import java.sql.SQLException;
@@ -63,8 +66,17 @@ public abstract class HikariConnectionFactory implements SqlConnectionFactory {
         config.setInitializationFailTimeout(-1);
 
         this.hikari = new HikariDataSource(config);
-        this.sql2o = new Sql2o(this.hikari, new PostgresQuirks());
+        this.sql2o = new Sql2o(this.hikari, new PostgresQuirks(createMappers()));
         this.sql2o.setDefaultColumnMappings(getColumnMappings());
+    }
+
+    @SuppressWarnings("rawtypes")
+    public Map<Class, Converter> createMappers() {
+        Map<Class, Converter> mappers = new HashMap<>();
+
+        mappers.put(HashMethodType.class, new HashMethodConverter());
+
+        return mappers;
     }
 
     private Map<String, String> getColumnMappings() {
@@ -75,6 +87,7 @@ public abstract class HikariConnectionFactory implements SqlConnectionFactory {
         colMaps.put("updated_at", "updatedAt");
         colMaps.put("registered_ip", "registeredIp");
         colMaps.put("registered_at", "registeredAt");
+        colMaps.put("hash_method_type", "hashMethodType");
 
         return colMaps;
     }

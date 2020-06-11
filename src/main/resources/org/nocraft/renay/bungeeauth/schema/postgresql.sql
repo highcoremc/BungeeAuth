@@ -12,11 +12,12 @@ CREATE TABLE IF NOT EXISTS "{prefix}users"
 
 CREATE TABLE IF NOT EXISTS "{prefix}user_password"
 (
-    "id"         SERIAL PRIMARY KEY                  NOT NULL,
-    "unique_id"  VARCHAR(36) UNIQUE                  NOT NULL,
-    "password"   VARCHAR(255)                        NOT NULL,
-    "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+    "id"               SERIAL PRIMARY KEY                  NOT NULL,
+    "unique_id"        VARCHAR(36) UNIQUE                  NOT NULL,
+    "password"         VARCHAR(255)                        NOT NULL,
+    "hash_method_type" VARCHAR(12)                         NOT NULL,
+    "updated_at"       TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "created_at"       TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 DROP TRIGGER IF EXISTS user_password_update_date ON "{prefix}user_password";

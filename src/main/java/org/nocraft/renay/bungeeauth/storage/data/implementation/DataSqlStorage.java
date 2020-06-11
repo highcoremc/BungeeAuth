@@ -29,9 +29,9 @@ public class DataSqlStorage implements DataStorage {
     private static final String USER_SELECT_ALL_IDS = "SELECT id FROM '{prefix}users'";
 
     private static final String USER_PASSWORD_SELECT_ID = "SELECT id FROM '{prefix}user_password' WHERE unique_id = :p1";
-    private static final String USER_PASSWORD_SELECT = "SELECT unique_id,password,updated_at,created_at FROM '{prefix}user_password' WHERE unique_id = :p1";
-    private static final String USER_PASSWORD_INSERT = "INSERT INTO '{prefix}user_password' (unique_id, password) VALUES (:p1, :p2)";
-    private static final String USER_PASSWORD_UPDATE = "UPDATE '{prefix}user_password' SET password = :p2 WHERE unique_id = :p1";
+    private static final String USER_PASSWORD_SELECT = "SELECT unique_id,password,hash_method_type,updated_at,created_at FROM '{prefix}user_password' WHERE unique_id = :p1";
+    private static final String USER_PASSWORD_INSERT = "INSERT INTO '{prefix}user_password' (unique_id, password, hash_method_type) VALUES (:p1, :p2, :p3)";
+    private static final String USER_PASSWORD_UPDATE = "UPDATE '{prefix}user_password' SET password = :p2, hash_method_type = :p3 WHERE unique_id = :p1";
 
     private final BungeeAuthPlugin plugin;
 
@@ -194,6 +194,7 @@ public class DataSqlStorage implements DataStorage {
         try (Query q = c.createQuery(this.statementProcessor.apply(queryString))) {
             q.addParameter("p1", password.uniqueId.toString());
             q.addParameter("p2", password.password);
+            q.addParameter("p3", password.hashMethodType);
             q.executeUpdate();
         }
     }

@@ -1,4 +1,4 @@
-package org.nocraft.renay.bungeeauth.hash;
+package org.nocraft.renay.bungeeauth.authentication.hash;
 
 public class HashMethodFactory {
 

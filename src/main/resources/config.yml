@@ -125,6 +125,9 @@ session:
   # The main channel prefix.
   channel: 'bungeeauth' # DO NOT TOUCH IT IF YOU DON'T KNOW ABOUT THIS OPTION
 
+settings:
+  max-auth-attempts: 6
+
 # servers for login players
 login:
 - 'Login-1'

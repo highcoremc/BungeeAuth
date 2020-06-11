@@ -6,25 +6,23 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import org.nocraft.renay.bungeeauth.BungeeAuthPlayer;
 import org.nocraft.renay.bungeeauth.BungeeAuthPlugin;
-import org.nocraft.renay.bungeeauth.event.FailedCreateSessionEvent;
-import org.nocraft.renay.bungeeauth.event.LoginFailedEvent;
-import org.nocraft.renay.bungeeauth.event.LoginSuccessfulEvent;
-import org.nocraft.renay.bungeeauth.event.RegisterSuccessfulEvent;
+import org.nocraft.renay.bungeeauth.config.ConfigKeys;
+import org.nocraft.renay.bungeeauth.event.PlayerRegisteredEvent;
 import org.nocraft.renay.bungeeauth.storage.entity.User;
 import org.nocraft.renay.bungeeauth.storage.entity.UserPassword;
-import org.nocraft.renay.bungeeauth.storage.session.Session;
 
-import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 public class RegisterCommand extends BungeeAuthCommand {
 
     private final BungeeAuthPlugin plugin;
+    private final Integer minLengthPassword;
 
     public RegisterCommand(BungeeAuthPlugin plugin) {
         super(plugin, "register", null, "reg");
         this.plugin = plugin;
+        this.minLengthPassword = plugin.getConfiguration()
+                .get(ConfigKeys.MIN_PASSWORD_LENGTH);
     }
 
     @Override
@@ -50,6 +48,15 @@ public class RegisterCommand extends BungeeAuthCommand {
 
         ProxiedPlayer player = (ProxiedPlayer) sender;
         String rawPassword = args[0];
+
+        if (minLengthPassword > rawPassword.length()) {
+            String usage = "&c&lFAILURE&f: &fPassword length can not be less then &e%s&f.";
+            String message = String.format(usage, minLengthPassword);
+            String transformed = ChatColor.translateAlternateColorCodes('&', message);
+            sender.sendMessage(TextComponent.fromLegacyText(transformed));
+            return;
+        }
+
         BungeeAuthPlayer authPlayer = this.plugin.getAuthPlayers()
                 .get(player.getUniqueId());
 
@@ -60,8 +67,8 @@ public class RegisterCommand extends BungeeAuthCommand {
             return;
         }
 
-        UserPassword password = this.plugin.createUserPassword(
-                player, rawPassword);
+        UserPassword password = this.plugin.getAuthFactory()
+                .createUserPassword(player, rawPassword);
         authPlayer.user.changePassword(password);
 
         UUID uniqueId = authPlayer.user.uniqueId;
@@ -73,6 +80,6 @@ public class RegisterCommand extends BungeeAuthCommand {
 
     private void applySuccessfulRegister(UUID uniqueId) {
         this.plugin.getPluginManager().callEvent(
-                new RegisterSuccessfulEvent(uniqueId));
+                new PlayerRegisteredEvent(uniqueId));
     }
 }

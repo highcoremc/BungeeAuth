@@ -4,15 +4,15 @@ import net.md_5.bungee.api.plugin.Event;
 
 import java.util.UUID;
 
-public class LoginSuccessfulEvent extends Event {
+public class PlayerLoginFailed extends Event {
 
     private final UUID playerId;
 
-    public LoginSuccessfulEvent(UUID playerId) {
+    public PlayerLoginFailed(UUID playerId) {
         this.playerId = playerId;
     }
 
     public UUID getPlayerId() {
-        return this.playerId;
+        return playerId;
     }
 }

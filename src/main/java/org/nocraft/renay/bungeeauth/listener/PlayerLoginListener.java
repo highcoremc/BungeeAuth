@@ -6,14 +6,14 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
 
+import org.nocraft.renay.bungeeauth.BungeeAuthPlayer;
 import org.nocraft.renay.bungeeauth.BungeeAuthPlugin;
-import org.nocraft.renay.bungeeauth.event.FailedCreateSessionEvent;
-import org.nocraft.renay.bungeeauth.event.LoginFailedEvent;
-import org.nocraft.renay.bungeeauth.event.LoginSuccessfulEvent;
-import org.nocraft.renay.bungeeauth.event.RegisterSuccessfulEvent;
+import org.nocraft.renay.bungeeauth.event.*;
+import org.nocraft.renay.bungeeauth.storage.session.Session;
+import org.nocraft.renay.bungeeauth.util.TitleBarApi;
 
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class PlayerLoginListener extends BungeeAuthListener {
 
@@ -22,59 +22,80 @@ public class PlayerLoginListener extends BungeeAuthListener {
     public PlayerLoginListener(BungeeAuthPlugin plugin) {
         super(plugin);
         this.plugin = plugin;
+        this.plugin.getScheduler().asyncRepeating(
+                this::cleanupSessions, 10, TimeUnit.MINUTES);
     }
 
-    @EventHandler(priority = EventPriority.NORMAL)
-    public void onSuccessfulPlayerLogin(LoginSuccessfulEvent e) {
-        Optional<ProxiedPlayer> p = plugin.getPlayer(e.getPlayerId());
-
-        if (!p.isPresent()) {
-            return;
+    private void cleanupSessions() {
+        Queue<Map<String, Session>> playerSessions = this.plugin
+                .getSessionStorage()
+                .loadAll().join();
+        for (Map<String, Session> sessions : playerSessions) {
+            sessions.forEach((key, session) -> {
+                Date endTime = session.time.endTime;
+                if (System.currentTimeMillis() > endTime.getTime()) {
+                    this.plugin.getSessionStorage().remove(
+                            session.userId, key);
+                }
+            });
         }
-
-        ProxiedPlayer player = p.get();
-
-         // TODO: connect player to lobby, or previous played server
-        player.connect(plugin.getProxy().getServerInfo("earth"));
-
-        plugin.getLogger().info(String.format("Player %s was a successfully authenticated", player.getName()));
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
-    public void onSuccessfulPlayerRegister(RegisterSuccessfulEvent e) {
-        UUID uniqueId = e.getPlayerId();
+    public void onSuccessfulPlayerLogin(PlayerSuccessfulLoginEvent e) {
+        plugin.getPlayer(e.getPlayerId()).ifPresent(player -> {
+            // TODO: connect player to lobby, or previous played server
+            player.connect(plugin.getProxy().getServerInfo("earth"));
 
-        Optional<ProxiedPlayer> p = this.plugin.getPlayer(uniqueId);
+            // remove old title
+            TitleBarApi.send(player, "", "", 0, 10, 0);
 
-        if (!p.isPresent()) {
-            return;
-        }
+            // clean chat after login
+            for (int i = 0; i < 23; i++) {
+                player.sendMessage(new TextComponent());
+            }
 
-        plugin.getLogger().info(String.format("Player %s was a successfully registered", p.get().getName()));
+            String msg = ChatColor.GREEN + "Successfully authenticated!";
+            player.sendMessage(TextComponent.fromLegacyText(msg));
+        });
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
-    public void onFailCreteSession(FailedCreateSessionEvent e) {
-        UUID uniqueId = e.getPlayerId();
-
-        plugin.getLogger().info("Failed create session for player " + uniqueId);
-    }
-
-    @EventHandler(priority = EventPriority.NORMAL)
-    public void onFailedLogin(LoginFailedEvent e) {
+    public void onSuccessfulPlayerRegister(PlayerRegisteredEvent e) {
         UUID uniqueId = e.getPlayerId();
         Optional<ProxiedPlayer> p = this.plugin
                 .getPlayer(uniqueId);
 
-        if (!p.isPresent()) {
-            plugin.getLogger().info("Failed authenticate player " + uniqueId + " and he was leave before kick.");
-            return;
+        if (p.isPresent()) {
+            String message = "Player %s was a successfully registered!";
+            plugin.getLogger().info(String.format(message, p.get().getName()));
+            this.plugin.getAttemptManager().clearAttempts(uniqueId);
         }
 
-        String message = ChatColor.translateAlternateColorCodes('&',
-                "&c&lFAIL AUTHENTICATION\n"+
-                "&fWe are can not process you login,\n"+
-                "&fplease contact with administration.");
-        p.get().disconnect(TextComponent.fromLegacyText(message));
+        BungeeAuthPlayer player = this.plugin.getAuthPlayers()
+                .get(uniqueId);
+        this.plugin.getDataStorage().saveUser(player.user);
+    }
+
+    @EventHandler(priority = EventPriority.NORMAL)
+    public void onFailCreteSession(FailedCreationSessionEvent e) {
+        this.plugin.getPlayer(e.getPlayerId()).ifPresent(player -> {
+            String message = ChatColor.translateAlternateColorCodes('&',
+                            "&c&lFAIL AUTHENTICATION\n" +
+                            "&fServer can not handle your request,\n" +
+                            "&fPlease contact with administrator...");
+            player.disconnect(TextComponent.fromLegacyText(message));
+        });
+    }
+
+    @EventHandler(priority = EventPriority.NORMAL)
+    public void onFailedLogin(PlayerLoginFailed e) {
+        this.plugin.getPlayer(e.getPlayerId()).ifPresent(player -> {
+            String message = ChatColor.translateAlternateColorCodes('&',
+                            "&c&lFAIL AUTHENTICATION\n" +
+                            "&fWe are can not process you login,\n" +
+                            "&fplease contact with administration.");
+            player.disconnect(TextComponent.fromLegacyText(message));
+        });
     }
 }

@@ -1,8 +1,8 @@
 package org.nocraft.renay.bungeeauth.storage.entity;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.nocraft.renay.bungeeauth.hash.HashMethod;
-import org.nocraft.renay.bungeeauth.hash.HashMethodType;
+import org.nocraft.renay.bungeeauth.authentication.hash.HashMethod;
+import org.nocraft.renay.bungeeauth.authentication.hash.HashMethodType;
 
 import java.util.Date;
 import java.util.UUID;
@@ -14,37 +14,32 @@ public class UserPassword {
     public final UUID uniqueId;
     public final String password;
 
-    public final HashMethodType methodType;
+    public final HashMethodType hashMethodType;
 
-    private Date updatedAt;
-    private Date createdAt;
+    public final Date updatedAt;
+    public final Date createdAt;
 
     /**
      * Lock used by Storage implementations to prevent concurrent read/writes
+     *
      * @see #getIOLock()
      */
     private Lock ioLock = new ReentrantLock();
 
-    public UserPassword(UUID uniqueId, String password, HashMethodType methodType) {
-        this.methodType = methodType;
+    public UserPassword(UUID uniqueId, String password, HashMethodType type) {
+        this.hashMethodType = type;
         this.uniqueId = uniqueId;
         this.password = password;
+        this.updatedAt = new Date();
+        this.createdAt = new Date();
     }
 
     public boolean verify(@NonNull HashMethod method, @NonNull String entry) {
-        return method.verify(this.password, entry);
-    }
-
-    public @NonNull Date getCreatedAt() {
-        return this.createdAt;
-    }
-
-    public @NonNull Date getUpdatedAt() {
-        return this.updatedAt;
+        return method.verify(entry, this.password);
     }
 
     public String toString() {
-        return String.format("%s,%s,%s", this.methodType.toString(), this.uniqueId.toString(), this.password);
+        return String.format("%s,%s,%s", this.hashMethodType.toString(), this.uniqueId.toString(), this.password);
     }
 
     public Lock getIOLock() {
