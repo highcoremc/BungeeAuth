@@ -76,10 +76,10 @@ data:
     # You can also use this section to disable SSL connections, by uncommenting the 'useSSL' and
     # 'verifyServerCertificate' options below.
     properties:
-      #useUnicode: true
-      #characterEncoding: utf8
-      #useSSL: false
-      #verifyServerCertificate: false
+    #useUnicode: true
+    #characterEncoding: utf8
+    #useSSL: false
+    #verifyServerCertificate: false
 
   # The prefix for all NoDataSync SQL tables.
   # - Change this if you want to use different tables for different servers.
@@ -127,14 +127,16 @@ session:
 
 settings:
   max-auth-attempts: 6
+  ban-time-minutes: 10
+  min-password-length: 4
 
-# servers for login players
-login:
-- 'Login-1'
-
-# servers which accept player after login
-lobby:
-- 'Lobby-1'
+servers:
+  # servers which accept player after login
+  game:
+    - 'earth'
+  # servers for login players
+  login:
+    - 'login'
 
 # can be SHA256, SHA1, BCRYPT
 hash-method: BCRYPT

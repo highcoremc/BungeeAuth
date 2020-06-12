@@ -9,6 +9,7 @@ import org.nocraft.renay.bungeeauth.storage.session.SessionStorageType;
 import org.nocraft.renay.bungeeauth.util.ImmutableCollectors;
 
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -62,7 +63,7 @@ public final class ConfigKeys {
     }));
 
     public static final ConfigKey<HashMethodType> HASH_METHOD_TYPE = enduringKey(customKey(
-            c -> HashMethodType.parse(c.getString("hash-method", "bcrypt"))));;
+            c -> HashMethodType.parse(c.getString("hash-method", "bcrypt"))));
 
     public static final ConfigKey<Integer> SESSION_TIMEOUT = enduringKey(customKey(
             c -> c.getInteger("session.channel", 3600)));
@@ -92,6 +93,12 @@ public final class ConfigKeys {
      * The name of the storage method being used for session
      */
     public static final ConfigKey<SessionStorageType> CACHE_STORAGE_METHOD = enduringKey(customKey(c -> SessionStorageType.parse(c.getString("session-storage-method", "redis"), SessionStorageType.REDIS)));
+
+    public static final ConfigKey<List<String>> GAME_SERVERS = enduringKey(customKey(
+            c -> c.getStringList("servers.game", new ArrayList<>())));
+
+    public static final ConfigKey<List<String>> LOGIN_SERVERS = enduringKey(customKey(
+            c -> c.getStringList("servers.login", new ArrayList<>())));
 
 
     private static final List<ConfigKeyTypes.BaseConfigKey<?>> KEYS;

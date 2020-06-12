@@ -57,6 +57,8 @@ public class BungeeAuthPlugin extends Plugin {
 
     private Scheduler scheduler;
 
+    private ServerManager serverManager;
+
     public void onEnable() {
         SessionStorageFactory sessionStorageFactory = new SessionStorageFactory(this);
         DataStorageFactory storageFactory = new DataStorageFactory(this);
@@ -77,6 +79,17 @@ public class BungeeAuthPlugin extends Plugin {
 
         Integer banTime = this.getConfiguration().get(ConfigKeys.BAN_TIME_MINUTES);
 
+        this.serverManager = new ServerManager(this.getScheduler());
+
+        List<String> loginServers = this.getConfiguration().get(ConfigKeys.LOGIN_SERVERS);
+        List<String> gameServers = this.getConfiguration().get(ConfigKeys.GAME_SERVERS);
+
+        setupConnectorServers(ServerType.LOGIN, loginServers, this.serverManager);
+        setupConnectorServers(ServerType.GAME, gameServers, this.serverManager);
+
+        AsyncLoginChecker task = new AsyncLoginChecker(this, loginServers);
+        this.scheduler.asyncRepeating(task, 1, TimeUnit.SECONDS);
+
         this.listeners.add(new PlayerChatListener(this));
         this.listeners.add(new PlayerEnterListener(this));
         this.listeners.add(new PlayerLoginListener(this));
@@ -88,13 +101,11 @@ public class BungeeAuthPlugin extends Plugin {
         this.commands.add(new LoginCommand(this));
         this.commands.register();
 
-        List<String> loginServers = new ArrayList<>();
-        loginServers.add("login");
-
-        AsyncLoginChecker task = new AsyncLoginChecker(this, loginServers);
-        this.scheduler.asyncRepeating(task, 1, TimeUnit.SECONDS);
-
         setupHooks();
+    }
+
+    private void setupConnectorServers(ServerType type, List<String> servers, ServerManager connector) {
+        servers.forEach(server -> connector.addServer(type, this.getProxy().getServerInfo(server)));
     }
 
     private void setupHooks() {
@@ -106,6 +117,10 @@ public class BungeeAuthPlugin extends Plugin {
         }
 
         this.fastLogin = (FastLoginBungee) fastLogin;
+    }
+
+    public ServerManager getServerManager() {
+        return serverManager;
     }
 
     public PluginManager getPluginManager() {
@@ -229,6 +244,12 @@ public class BungeeAuthPlugin extends Plugin {
     }
 
     public boolean isAuthenticated(UUID uniqueId) {
-        return this.authPlayers.containsKey(uniqueId);
+        BungeeAuthPlayer player = this.authPlayers.get(uniqueId);
+
+        if (null == player) {
+            return false;
+        }
+
+        return player.isAuthenticated();
     }
 }

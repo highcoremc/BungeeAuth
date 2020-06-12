@@ -14,6 +14,8 @@ import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
 import org.nocraft.renay.bungeeauth.BungeeAuthPlayer;
 import org.nocraft.renay.bungeeauth.BungeeAuthPlugin;
+import org.nocraft.renay.bungeeauth.ServerManager;
+import org.nocraft.renay.bungeeauth.ServerType;
 import org.nocraft.renay.bungeeauth.storage.data.SimpleDataStorage;
 import org.nocraft.renay.bungeeauth.storage.entity.SimpleSessionStorage;
 import org.nocraft.renay.bungeeauth.storage.entity.User;
@@ -33,11 +35,13 @@ public class PlayerEnterListener extends BungeeAuthListener {
     private final SimpleSessionStorage sessionStorage;
     private final SimpleDataStorage dataStorage;
 
+    private final ServerManager connector;
     private final BungeeAuthPlugin plugin;
 
     public PlayerEnterListener(BungeeAuthPlugin plugin) {
         super(plugin);
         this.sessionStorage = plugin.getSessionStorage();
+        this.connector = plugin.getServerManager();
         this.dataStorage = plugin.getDataStorage();
         this.players = plugin.getAuthPlayers();
         this.plugin = plugin;
@@ -60,16 +64,33 @@ public class PlayerEnterListener extends BungeeAuthListener {
     }
 
     private void handleUnauthorizedAction(ServerConnectEvent e) {
-        Server currentServer = e.getPlayer().getServer();
+        // current server player
+        Server server = e.getPlayer().getServer();
 
         plugin.getLogger().info("Handle unauthorized player " + e.getPlayer().getName());
 
-        if (null != currentServer && currentServer.getInfo().getName().equals("login")) {
+        if (null == server) {
+            try {
+                e.setTarget(this.connector.getServer(ServerType.LOGIN));
+            } catch (IllegalStateException ex) {
+                ex.printStackTrace();
+                this.connector.disconnect(e.getPlayer());
+            }
+            return;
+        }
+
+        ServerType serverType = this.connector.getServerType(server.getInfo());
+        if (serverType.equals(ServerType.LOGIN)) {
             e.setCancelled(true);
         }
 
-        if (!"login".equals(e.getTarget().getName())) {
-            e.setTarget(this.plugin.getProxy().getServerInfo("login"));
+        if (!this.connector.getServerType(e.getTarget()).equals(ServerType.LOGIN)) {
+            try {
+                e.setTarget(this.connector.getServer(ServerType.LOGIN));
+            } catch (IllegalStateException ex) {
+                this.connector.disconnect(e.getPlayer());
+                ex.printStackTrace();
+            }
         }
     }
 
@@ -81,8 +102,14 @@ public class PlayerEnterListener extends BungeeAuthListener {
             return;
         }
 
-        if (e.getTarget() == null || "login".equals(e.getTarget().getName())) {
-            e.setTarget(plugin.getProxy().getServerInfo("earth"));
+        ServerType target = connector.getServerType(e.getTarget());
+        if (target.equals(ServerType.UNKNOWN) || target.equals(ServerType.LOGIN)) {
+            try {
+                e.setTarget(this.connector.getServer(ServerType.GAME));
+            } catch (IllegalStateException ex) {
+                connector.disconnect(e.getPlayer());
+                ex.printStackTrace();
+            }
         }
     }
 
@@ -141,7 +168,7 @@ public class PlayerEnterListener extends BungeeAuthListener {
 
                 String message = ChatColor.translateAlternateColorCodes('&',
                         "&c&lFAILURE JOIN" +
-                        "&fSorry, but the server cannot process your request.");
+                                "&fSorry, but the server cannot process your request.");
                 e.setCancelReason(TextComponent.fromLegacyText(message));
                 e.setCancelled(true);
             } finally {

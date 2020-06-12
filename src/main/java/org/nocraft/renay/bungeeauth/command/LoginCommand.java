@@ -8,8 +8,8 @@ import org.nocraft.renay.bungeeauth.authentication.AttemptManager;
 import org.nocraft.renay.bungeeauth.authentication.Authentication;
 import org.nocraft.renay.bungeeauth.BungeeAuthPlayer;
 import org.nocraft.renay.bungeeauth.BungeeAuthPlugin;
-import org.nocraft.renay.bungeeauth.event.PlayerLoginFailed;
-import org.nocraft.renay.bungeeauth.event.PlayerSuccessfulLoginEvent;
+import org.nocraft.renay.bungeeauth.event.PlayerLoginFailedEvent;
+import org.nocraft.renay.bungeeauth.event.PlayerAuthenticatedEvent;
 
 public class LoginCommand extends BungeeAuthCommand {
 
@@ -44,13 +44,13 @@ public class LoginCommand extends BungeeAuthCommand {
 			case SUCCESS_LOGIN:
 				try {
 					BungeeAuthPlayer bap = this.plugin.getAuthPlayers().get(player.getUniqueId());
-					PlayerSuccessfulLoginEvent event = new PlayerSuccessfulLoginEvent(player.getUniqueId());
+					PlayerAuthenticatedEvent event = new PlayerAuthenticatedEvent(player.getUniqueId());
 
 					this.plugin.updateAuthSession(bap).thenAccept(s ->
 							this.plugin.getPluginManager().callEvent(event));
 				} catch (IllegalStateException ex) {
 					ex.printStackTrace();
-					PlayerLoginFailed event = new PlayerLoginFailed(player.getUniqueId());
+					PlayerLoginFailedEvent event = new PlayerLoginFailedEvent(player.getUniqueId());
 					this.plugin.getPluginManager().callEvent(event);
 				}
 				return;

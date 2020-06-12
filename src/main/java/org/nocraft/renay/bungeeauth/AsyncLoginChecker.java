@@ -62,6 +62,15 @@ public class AsyncLoginChecker implements Runnable {
                     continue;
                 }
 
+                if (bungeeAuthPlayer.isAuthenticated()) {
+                    ServerManager serverManager = this.plugin.getServerManager();
+                    ServerType serverType = serverManager
+                            .getServerType(player.getServer().getInfo());
+                    if (serverType.equals(ServerType.LOGIN)) {
+                        serverManager.connect(ServerType.GAME, player);
+                    }
+                }
+
                 if (bungeeAuthPlayer.user.isRegistered()) {
                     String chatMessage = ChatColor.translateAlternateColorCodes('&',
                             "&a&lINFO&f: &fPlease login with &2/l &7<password>");

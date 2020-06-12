@@ -11,11 +11,21 @@ public class BungeeAuthPlayer {
     public final User user;
     public Session session;
 
+    private boolean authenticated = false;
+
     public BungeeAuthPlayer(User user) {
         this.user = user;
     }
 
     public void changeActiveSession(Session session) {
         this.session = session;
+    }
+
+    public void authenticated() {
+        this.authenticated = true;
+    }
+
+    public boolean isAuthenticated() {
+        return this.authenticated;
     }
 }

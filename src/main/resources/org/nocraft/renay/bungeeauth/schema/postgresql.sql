@@ -22,13 +22,7 @@ CREATE TABLE IF NOT EXISTS "{prefix}user_password"
 
 DROP TRIGGER IF EXISTS user_password_update_date ON "{prefix}user_password";
 
-CREATE TRIGGER user_password_update_date
-    BEFORE UPDATE
-    ON "{prefix}user_password"
-    FOR ROW
-EXECUTE PROCEDURE UPDATE_MODIFIED_COLUMN();
-
-CREATE OR REPLACE FUNCTION UPDATE_MODIFIED_COLUMN() RETURNS TRIGGER AS
+CREATE OR REPLACE FUNCTION update_modified_column() RETURNS TRIGGER AS
 $$
 BEGIN
     IF row (NEW.*) IS DISTINCT FROM row (OLD.*) THEN
@@ -39,3 +33,9 @@ BEGIN
     END IF;
 END;
 $$ language 'plpgsql';
+
+CREATE TRIGGER user_password_update_date
+    BEFORE UPDATE
+    ON "{prefix}user_password"
+    FOR ROW
+EXECUTE PROCEDURE update_modified_column();

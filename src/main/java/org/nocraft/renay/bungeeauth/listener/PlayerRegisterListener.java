@@ -1,14 +1,14 @@
 package org.nocraft.renay.bungeeauth.listener;
 
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
 import org.nocraft.renay.bungeeauth.BungeeAuthPlayer;
 import org.nocraft.renay.bungeeauth.BungeeAuthPlugin;
-import org.nocraft.renay.bungeeauth.event.FailedCreationSessionEvent;
-import org.nocraft.renay.bungeeauth.event.PlayerLoginFailed;
-import org.nocraft.renay.bungeeauth.event.PlayerSuccessfulLoginEvent;
-import org.nocraft.renay.bungeeauth.event.PlayerRegisteredEvent;
+import org.nocraft.renay.bungeeauth.PlayerWrapper;
+import org.nocraft.renay.bungeeauth.event.*;
 import org.nocraft.renay.bungeeauth.storage.session.Session;
 import org.nocraft.renay.bungeeauth.util.TitleBarApi;
 
@@ -48,8 +48,6 @@ public class PlayerRegisterListener extends BungeeAuthListener {
                 .getAuthPlayers()
                 .get(uniqueId);
 
-        plugin.getLogger().info("Successful handled register for player " + p.get().getName());
-
         // remove old title
         TitleBarApi.send(p.get(), "", "", 0, 10, 0);
 
@@ -59,13 +57,26 @@ public class PlayerRegisterListener extends BungeeAuthListener {
                 .exceptionally(ex -> this.applyFailedLogin(ex, uniqueId));
     }
 
+    @EventHandler(priority = EventPriority.NORMAL)
+    public void onPlayerFailedRegister(PlayerRegisterFailedEvent e) {
+        this.plugin.getPlayer(e.getPlayerId()).ifPresent(player -> {
+            String message = ChatColor.translateAlternateColorCodes('&',
+                    "&c&lFAIL REGISTRATION\n" +
+                            "&fWe are can not process your request\n" +
+                            "&fPlease contact with administration..");
+            player.disconnect(TextComponent.fromLegacyText(message));
+            String msg = "Player %s failed register with ip %s.";
+            plugin.getLogger().warning(String.format(msg, player.getName(), PlayerWrapper.wrap(player).getIpAddress()));
+        });
+    }
+
     private Void applyFailedLogin(Throwable ex, UUID uniqueId) {
+        this.plugin.getPluginManager().callEvent(new PlayerLoginFailedEvent(uniqueId));
         ex.printStackTrace();
-        this.plugin.getPluginManager().callEvent(new PlayerLoginFailed(uniqueId));
         return null;
     }
 
     private void applySuccessfulLogin(UUID uniqueId) {
-        this.plugin.getPluginManager().callEvent(new PlayerSuccessfulLoginEvent(uniqueId));
+        this.plugin.getPluginManager().callEvent(new PlayerAuthenticatedEvent(uniqueId));
     }
 }

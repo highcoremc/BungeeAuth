@@ -6,8 +6,7 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
 
-import org.nocraft.renay.bungeeauth.BungeeAuthPlayer;
-import org.nocraft.renay.bungeeauth.BungeeAuthPlugin;
+import org.nocraft.renay.bungeeauth.*;
 import org.nocraft.renay.bungeeauth.event.*;
 import org.nocraft.renay.bungeeauth.storage.session.Session;
 import org.nocraft.renay.bungeeauth.util.TitleBarApi;
@@ -18,10 +17,12 @@ import java.util.concurrent.TimeUnit;
 public class PlayerLoginListener extends BungeeAuthListener {
 
     private final BungeeAuthPlugin plugin;
+    private final ServerManager connector;
 
     public PlayerLoginListener(BungeeAuthPlugin plugin) {
         super(plugin);
         this.plugin = plugin;
+        this.connector = plugin.getServerManager();
         this.plugin.getScheduler().asyncRepeating(
                 this::cleanupSessions, 10, TimeUnit.MINUTES);
     }
@@ -42,20 +43,26 @@ public class PlayerLoginListener extends BungeeAuthListener {
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
-    public void onSuccessfulPlayerLogin(PlayerSuccessfulLoginEvent e) {
+    public void onSuccessfulEventChangeStatus(PlayerAuthenticatedEvent e) {
+        BungeeAuthPlayer player = this.plugin.getAuthPlayers()
+                .get(e.getPlayerId());
+        if (player != null) {
+            player.authenticated();
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOW)
+    public void onSuccessfulPlayerLogin(PlayerAuthenticatedEvent e) {
         plugin.getPlayer(e.getPlayerId()).ifPresent(player -> {
-            // TODO: connect player to lobby, or previous played server
-            player.connect(plugin.getProxy().getServerInfo("earth"));
-
-            // remove old title
-            TitleBarApi.send(player, "", "", 0, 10, 0);
-
+            connector.connect(ServerType.GAME, player);
             // clean chat after login
             for (int i = 0; i < 23; i++) {
                 player.sendMessage(new TextComponent());
             }
-
-            String msg = ChatColor.GREEN + "Successfully authenticated!";
+            // remove old title
+            TitleBarApi.send(player, "", "", 0, 15, 0);
+            String msg = ChatColor.translateAlternateColorCodes('&',
+                    "&a&lINFO&f: &fSuccessfully authenticated!");
             player.sendMessage(TextComponent.fromLegacyText(msg));
         });
     }
@@ -85,17 +92,21 @@ public class PlayerLoginListener extends BungeeAuthListener {
                             "&fServer can not handle your request,\n" +
                             "&fPlease contact with administrator...");
             player.disconnect(TextComponent.fromLegacyText(message));
+            String msg = "Player %s failed create session with ip %s.";
+            plugin.getLogger().warning(String.format(msg, player.getName(), PlayerWrapper.wrap(player).getIpAddress()));
         });
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
-    public void onFailedLogin(PlayerLoginFailed e) {
+    public void onFailedLogin(PlayerLoginFailedEvent e) {
         this.plugin.getPlayer(e.getPlayerId()).ifPresent(player -> {
             String message = ChatColor.translateAlternateColorCodes('&',
                             "&c&lFAIL AUTHENTICATION\n" +
-                            "&fWe are can not process you login,\n" +
-                            "&fplease contact with administration.");
+                            "&fWe are can not process your login,\n" +
+                            "&fPlease contact with administration.");
             player.disconnect(TextComponent.fromLegacyText(message));
+            String msg = "Player %s failed register with ip %s.";
+            plugin.getLogger().warning(String.format(msg, player.getName(), PlayerWrapper.wrap(player).getIpAddress()));
         });
     }
 }

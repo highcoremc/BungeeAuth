@@ -7,6 +7,7 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 import org.nocraft.renay.bungeeauth.BungeeAuthPlayer;
 import org.nocraft.renay.bungeeauth.BungeeAuthPlugin;
 import org.nocraft.renay.bungeeauth.config.ConfigKeys;
+import org.nocraft.renay.bungeeauth.event.PlayerRegisterFailedEvent;
 import org.nocraft.renay.bungeeauth.event.PlayerRegisteredEvent;
 import org.nocraft.renay.bungeeauth.storage.entity.User;
 import org.nocraft.renay.bungeeauth.storage.entity.UserPassword;
@@ -75,7 +76,14 @@ public class RegisterCommand extends BungeeAuthCommand {
         User user = authPlayer.user;
 
         this.plugin.getDataStorage().saveUser(user)
-                .thenAccept(s -> this.applySuccessfulRegister(uniqueId));
+                .thenAccept(s -> this.applySuccessfulRegister(uniqueId))
+                .exceptionally(s -> this.applyFailedRegister(uniqueId));
+    }
+
+    private Void applyFailedRegister(UUID uniqueId) {
+        this.plugin.getPluginManager().callEvent(
+                new PlayerRegisterFailedEvent(uniqueId));
+        return null;
     }
 
     private void applySuccessfulRegister(UUID uniqueId) {
