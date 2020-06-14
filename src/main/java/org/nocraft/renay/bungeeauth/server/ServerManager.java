@@ -1,9 +1,12 @@
-package org.nocraft.renay.bungeeauth;
+package org.nocraft.renay.bungeeauth.server;
 
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
+import org.nocraft.renay.bungeeauth.BungeeAuthPlugin;
+import org.nocraft.renay.bungeeauth.config.Message;
+import org.nocraft.renay.bungeeauth.config.MessageKeys;
 import org.nocraft.renay.bungeeauth.scheduler.Scheduler;
 
 import java.io.IOException;
@@ -18,8 +21,10 @@ public class ServerManager {
     private final Map<ServerInfo, ServerType> servers = new HashMap<>();
     private final Map<ServerInfo, ServerType> actualServers = new ConcurrentHashMap<>();
 
+    private final BungeeAuthPlugin plugin;
 
-    public ServerManager(Scheduler scheduler) {
+    public ServerManager(BungeeAuthPlugin plugin, Scheduler scheduler) {
+        this.plugin = plugin;
         scheduler.asyncRepeating(this::actual, 500, TimeUnit.MILLISECONDS);
     }
 
@@ -70,11 +75,9 @@ public class ServerManager {
     }
 
     public void disconnect(ProxiedPlayer p) {
-        String msg = ChatColor.translateAlternateColorCodes('&',
-                "&c&lFAILURE CONNECT\n\n" +
-                "&fThere are no actual servers to connect to,\n" +
-                "&fPlease connect with administration.");
-        p.disconnect(TextComponent.fromLegacyText(msg));
+        Message message = plugin.getMessageConfig()
+                .get(MessageKeys.NO_ACTUAL_SERVER);
+        p.disconnect(message.asComponent());
     }
 
     private ServerInfo calculateRandomServer(Map<ServerInfo, ServerType> servers) throws IllegalStateException {

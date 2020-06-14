@@ -9,6 +9,8 @@ import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
 import org.nocraft.renay.bungeeauth.authentication.AttemptManager;
 import org.nocraft.renay.bungeeauth.BungeeAuthPlugin;
+import org.nocraft.renay.bungeeauth.config.Message;
+import org.nocraft.renay.bungeeauth.config.MessageKeys;
 import org.nocraft.renay.bungeeauth.event.PlayerAttemptsLoginExceeded;
 
 import java.util.*;
@@ -53,11 +55,8 @@ public class PlayerBanListener extends BungeeAuthListener {
             long banTime = this.bannedPlayers.get(uniqueId);
             long timeLeftMinutes = getTimeLeftMinutes(banTime);
 
-            String message = ChatColor.translateAlternateColorCodes('&',
-                    "&c&lFORBIDDEN ACCESS\n\n"+
-                    "&fYou are banned for " + timeLeftMinutes + " minute(s).\n" +
-                    "&fBecause you entered the wrong password " + maxAttempts + " times.");
-            player.disconnect(TextComponent.fromLegacyText(message));
+            Message message = plugin.getMessageConfig().get(MessageKeys.BAD_NICKNAME);
+            player.disconnect(message.asComponent(timeLeftMinutes, maxAttempts));
         }
     }
 
@@ -69,13 +68,10 @@ public class PlayerBanListener extends BungeeAuthListener {
     @EventHandler(priority = EventPriority.NORMAL)
     public void onPlayerExceededAttempts(PlayerAttemptsLoginExceeded e) {
         Optional<ProxiedPlayer> player = this.plugin.getPlayer(e.getPlayerId());
-        String message = ChatColor.translateAlternateColorCodes('&',
-                "&c&lFAILURE AUTHENTICATION\n\n" +
-                "&fNumber of login attempts exceeded. Please try again!");
-        BaseComponent[] reason = TextComponent.fromLegacyText(message);
-
+        Message message = plugin.getMessageConfig().get(
+                MessageKeys.EXCEEDED_LOGIN_ATTEMPTS);
         player.ifPresent(this::addBannedPlayer);
-        player.ifPresent(p -> p.disconnect(reason));
+        player.ifPresent(p -> p.disconnect(message.asComponent()));
     }
 
     private void addBannedPlayer(ProxiedPlayer p) {

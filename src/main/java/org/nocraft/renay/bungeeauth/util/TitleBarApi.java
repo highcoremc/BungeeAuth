@@ -6,6 +6,7 @@ import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.Title;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
+import org.nocraft.renay.bungeeauth.config.Message;
 
 public class TitleBarApi {
 
@@ -19,17 +20,14 @@ public class TitleBarApi {
         this.stay = stay;
     }
 
-    public void send(ProxiedPlayer player, String title, String subtitle) {
+    public void send(ProxiedPlayer player, Message title, Message subtitle) {
         send(player, title, subtitle, this.fadeIn, this.stay, this.fadeOut);
     }
 
-    public static void send(ProxiedPlayer proxiedPlayer, String title, String subtitle, int fadeIn, int stay, int fadeOut) {
-        String formatSubtitle = ChatColor.translateAlternateColorCodes('&', subtitle);
-        String formattedTitle = ChatColor.translateAlternateColorCodes('&', title);
-
+    public static void send(ProxiedPlayer proxiedPlayer, Message title, Message subtitle, int fadeIn, int stay, int fadeOut) {
         Title t = ProxyServer.getInstance().createTitle()
-            .title(TextComponent.fromLegacyText(formattedTitle))
-            .subTitle(TextComponent.fromLegacyText(formatSubtitle));
+            .title(title.asComponent())
+            .subTitle(subtitle.asComponent());
         t.fadeIn(fadeIn).stay(stay).fadeOut(fadeOut);
         t.send(proxiedPlayer);
     }

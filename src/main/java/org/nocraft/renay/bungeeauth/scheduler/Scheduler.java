@@ -25,10 +25,6 @@ public class Scheduler  {
         return this.executor;
     }
 
-    public Executor sync() {
-        return this.executor;
-    }
-
     public SchedulerTask asyncLater(Runnable task, long delay, TimeUnit unit) {
         ScheduledTask t = this.plugin.getProxy().getScheduler().schedule(this.plugin, task, delay, unit);
         this.tasks.add(t);

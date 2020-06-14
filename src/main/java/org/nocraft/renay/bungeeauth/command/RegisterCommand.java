@@ -7,6 +7,8 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 import org.nocraft.renay.bungeeauth.BungeeAuthPlayer;
 import org.nocraft.renay.bungeeauth.BungeeAuthPlugin;
 import org.nocraft.renay.bungeeauth.config.ConfigKeys;
+import org.nocraft.renay.bungeeauth.config.Message;
+import org.nocraft.renay.bungeeauth.config.MessageKeys;
 import org.nocraft.renay.bungeeauth.event.PlayerRegisterFailedEvent;
 import org.nocraft.renay.bungeeauth.event.PlayerRegisteredEvent;
 import org.nocraft.renay.bungeeauth.storage.entity.User;
@@ -34,16 +36,16 @@ public class RegisterCommand extends BungeeAuthCommand {
         }
 
         if (args.length == 0) {
-            String usage = "&6&lUSAGE&f: &fUse the &7/reg &c<password>&f for register.";
-            String transformed = ChatColor.translateAlternateColorCodes('&', usage);
-            sender.sendMessage(TextComponent.fromLegacyText(transformed));
+            Message message = plugin.getMessageConfig()
+                    .get(MessageKeys.LOGIN_USAGE);
+            sender.sendMessage(message.asComponent());
             return;
         }
 
         if (args.length == 2 && !args[0].equals(args[1])) {
-            String usage = "&c&lFAILURE&f: &fPassword confirmation does not matches.";
-            String transformed = ChatColor.translateAlternateColorCodes('&', usage);
-            sender.sendMessage(TextComponent.fromLegacyText(transformed));
+            Message message = plugin.getMessageConfig()
+                    .get(MessageKeys.PASSWORD_MISMATCH);
+            sender.sendMessage(message.asComponent());
             return;
         }
 
@@ -51,10 +53,9 @@ public class RegisterCommand extends BungeeAuthCommand {
         String rawPassword = args[0];
 
         if (minLengthPassword > rawPassword.length()) {
-            String usage = "&c&lFAILURE&f: &fPassword length can not be less then &e%s&f.";
-            String message = String.format(usage, minLengthPassword);
-            String transformed = ChatColor.translateAlternateColorCodes('&', message);
-            sender.sendMessage(TextComponent.fromLegacyText(transformed));
+            Message message = plugin.getMessageConfig()
+                    .get(MessageKeys.PASSWORD_MIN_LENGTH);
+            sender.sendMessage(message.asComponent(minLengthPassword));
             return;
         }
 
@@ -62,9 +63,9 @@ public class RegisterCommand extends BungeeAuthCommand {
                 .get(player.getUniqueId());
 
         if (authPlayer.user.hasPassword()) {
-            String usage = "&c&lFAILURE&f: &fYou have already registered.";
-            String transformed = ChatColor.translateAlternateColorCodes('&', usage);
-            sender.sendMessage(TextComponent.fromLegacyText(transformed));
+            Message message = plugin.getMessageConfig()
+                    .get(MessageKeys.ALREADY_REGISTERED);
+            sender.sendMessage(message.asComponent());
             return;
         }
 

@@ -1,7 +1,5 @@
 package org.nocraft.renay.bungeeauth.listener;
 
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.PendingConnection;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.connection.Server;
@@ -9,23 +7,24 @@ import net.md_5.bungee.api.event.LoginEvent;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.PreLoginEvent;
 import net.md_5.bungee.api.event.ServerConnectEvent;
+import net.md_5.bungee.api.plugin.Event;
 import net.md_5.bungee.connection.InitialHandler;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
 import org.nocraft.renay.bungeeauth.BungeeAuthPlayer;
 import org.nocraft.renay.bungeeauth.BungeeAuthPlugin;
-import org.nocraft.renay.bungeeauth.ServerManager;
-import org.nocraft.renay.bungeeauth.ServerType;
+import org.nocraft.renay.bungeeauth.config.Message;
+import org.nocraft.renay.bungeeauth.config.MessageKeys;
+import org.nocraft.renay.bungeeauth.server.ServerManager;
+import org.nocraft.renay.bungeeauth.server.ServerType;
+import org.nocraft.renay.bungeeauth.event.PlayerAuthenticatedEvent;
 import org.nocraft.renay.bungeeauth.storage.data.SimpleDataStorage;
 import org.nocraft.renay.bungeeauth.storage.entity.SimpleSessionStorage;
 import org.nocraft.renay.bungeeauth.storage.entity.User;
 import org.nocraft.renay.bungeeauth.storage.session.Session;
 
 import java.net.InetSocketAddress;
-import java.util.Date;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.regex.Pattern;
 
 public class PlayerEnterListener extends BungeeAuthListener {
@@ -37,6 +36,7 @@ public class PlayerEnterListener extends BungeeAuthListener {
 
     private final ServerManager connector;
     private final BungeeAuthPlugin plugin;
+    private final Set<UUID> whiteList = new HashSet<>();
 
     public PlayerEnterListener(BungeeAuthPlugin plugin) {
         super(plugin);
@@ -47,19 +47,17 @@ public class PlayerEnterListener extends BungeeAuthListener {
         this.plugin = plugin;
     }
 
-    //    @EventHandler(priority = EventPriority.LOWEST)
-    private void onPreLogin(PreLoginEvent e) {
-        if (e.isCancelled()) {
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPreLogin(PreLoginEvent e) {
+        if (e.isCancelled() || null == e.getConnection().getName()) {
             return;
         }
 
         if (!Pattern.matches("^[A-Za-z0-9_]+$", e.getConnection().getName())) {
-            String msg = ChatColor.translateAlternateColorCodes('&', "&c&lFAILURE NICKNAME\n" +
-                    "&fYour nickname contains forbidden symbols.\n" +
-                    "&fPlease change the alias and use only the Latin alphabet\n" +
-                    "with the only one acceptable character &l_");
-            e.setCancelReason(TextComponent.fromLegacyText(msg));
             e.setCancelled(true);
+            Message message = plugin.getMessageConfig()
+                    .get(MessageKeys.BAD_NICKNAME);
+            e.setCancelReason(message.asComponent());
         }
     }
 
@@ -95,7 +93,8 @@ public class PlayerEnterListener extends BungeeAuthListener {
     }
 
     private void handlePlayerSession(ServerConnectEvent e) {
-        BungeeAuthPlayer player = this.players.get(e.getPlayer().getUniqueId());
+        UUID uniqueId = e.getPlayer().getUniqueId();
+        BungeeAuthPlayer player = this.players.get(uniqueId);
 
         if (null == player.session || new Date().getTime() > player.session.time.endTime.getTime()) {
             handleUnauthorizedAction(e);
@@ -106,6 +105,8 @@ public class PlayerEnterListener extends BungeeAuthListener {
         if (target.equals(ServerType.UNKNOWN) || target.equals(ServerType.LOGIN)) {
             try {
                 e.setTarget(this.connector.getServer(ServerType.GAME));
+                Event event = new PlayerAuthenticatedEvent(uniqueId, true);
+                this.plugin.getPluginManager().callEvent(event);
             } catch (IllegalStateException ex) {
                 connector.disconnect(e.getPlayer());
                 ex.printStackTrace();
@@ -135,13 +136,6 @@ public class PlayerEnterListener extends BungeeAuthListener {
 
         plugin.getLogger().info(String.format("Player with uuid %s has joined to the network", c.getUniqueId()));
 
-        // TODO: enable
-        // if the player is premium, we do not process him
-//        if (plugin.isPremiumProfile(e.getConnection())) {
-//            plugin.getLogger().info(String.format("Player %s successfully login as Premium player", c.getName()));
-//            return;
-//        }
-
         e.registerIntent(this.plugin);
 
         // load session for player from database
@@ -165,12 +159,10 @@ public class PlayerEnterListener extends BungeeAuthListener {
             } catch (Exception ex) {
                 this.plugin.getLogger().severe("Exception occurred whilst loading data for " + c.getUniqueId() + " - " + c.getName());
                 ex.printStackTrace();
-
-                String message = ChatColor.translateAlternateColorCodes('&',
-                        "&c&lFAILURE JOIN" +
-                                "&fSorry, but the server cannot process your request.");
-                e.setCancelReason(TextComponent.fromLegacyText(message));
                 e.setCancelled(true);
+                Message message = plugin.getMessageConfig()
+                        .get(MessageKeys.BAD_REQUEST);
+                e.setCancelReason(message.asComponent());
             } finally {
                 // finally, complete our intent to modify state, so the proxy can continue handling the connection.
                 e.completeIntent(this.plugin);
@@ -194,13 +186,8 @@ public class PlayerEnterListener extends BungeeAuthListener {
     public void onPlayerDisconnect(PlayerDisconnectEvent e) {
         ProxiedPlayer p = e.getPlayer();
         UUID uniqueId = p.getUniqueId();
-
-        BungeeAuthPlayer player = this.players.remove(uniqueId);
-
-        if (null == player) {
-            String message = "Player %s was not found in auth player HashMap";
-            this.plugin.getLogger().info(String.format(message, p.getName()));
-        }
+        this.whiteList.remove(uniqueId);
+        this.players.remove(uniqueId);
     }
 }
 

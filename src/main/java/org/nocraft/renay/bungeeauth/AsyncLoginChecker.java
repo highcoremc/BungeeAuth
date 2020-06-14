@@ -4,6 +4,10 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
+import org.nocraft.renay.bungeeauth.config.Message;
+import org.nocraft.renay.bungeeauth.config.MessageKeys;
+import org.nocraft.renay.bungeeauth.server.ServerManager;
+import org.nocraft.renay.bungeeauth.server.ServerType;
 import org.nocraft.renay.bungeeauth.util.TitleBarApi;
 
 import java.util.List;
@@ -15,11 +19,6 @@ public class AsyncLoginChecker implements Runnable {
     private final Queue<ServerInfo> servers;
     private final BungeeAuthPlugin plugin;
     private long maxAuthTime = 300;
-
-    private final String loginTitle = "&a&l» &2&lWelcome back &a&l«";
-    private final String loginSubtitle = "&fPlease login with &2&l/l &7<password>";
-    private final String registerTitle = "&a&l» &2&lWelcome to &f&lNocraft &a&l«";
-    private final String registerSubtitle = "&fPlease register with &2&l/reg &7<password>";
 
     /**
      * Checks async players on auth servers.
@@ -55,10 +54,9 @@ public class AsyncLoginChecker implements Runnable {
 
                 long timeLeft = (now - bungeeAuthPlayer.joinedAt.getTime()) / 1000;
                 if (timeLeft >= this.maxAuthTime) {
-                    String message = ChatColor.translateAlternateColorCodes('&',
-                            "&c&lFAILURE AUTHENTICATION\n\n" +
-                            "&fSorry, but you were not able to authenticate in 5 minutes.");
-                    player.disconnect(TextComponent.fromLegacyText(message));
+                    Message message = plugin.getMessageConfig().get(
+                            MessageKeys.LOGIN_TIMEOUT);
+                    player.disconnect(message.asComponent());
                     continue;
                 }
 
@@ -72,17 +70,33 @@ public class AsyncLoginChecker implements Runnable {
                 }
 
                 if (bungeeAuthPlayer.user.isRegistered()) {
-                    String chatMessage = ChatColor.translateAlternateColorCodes('&',
-                            "&a&lINFO&f: &fPlease login with &2/l &7<password>");
-                    player.sendMessage(TextComponent.fromLegacyText(chatMessage));
-                    titleBarApi.send(player, this.loginTitle, this.loginSubtitle);
+                    Message message = plugin.getMessageConfig()
+                        .get(MessageKeys.LOGIN_CHAT_MESSAGE);
+                    player.sendMessage(message.asComponent());
+                    sendLoginTitle(titleBarApi, player);
                 } else {
-                    String chatMessage = ChatColor.translateAlternateColorCodes('&',
-                            "&a&lINFO&f: &fPlease register with &2/reg &7<password>");
-                    player.sendMessage(TextComponent.fromLegacyText(chatMessage));
-                    titleBarApi.send(player, this.registerTitle, this.registerSubtitle);
+                    Message message = plugin.getMessageConfig()
+                            .get(MessageKeys.REGISTER_CHAT_MESSAGE);
+                    player.sendMessage(message.asComponent());
+                    sendRegisterTitle(titleBarApi, player);
                 }
             }
         }
+    }
+
+    private void sendRegisterTitle(TitleBarApi titleBarApi, ProxiedPlayer player) {
+        Message title = plugin.getMessageConfig()
+                .get(MessageKeys.REGISTER_TITLE);
+        Message subtitle = plugin.getMessageConfig()
+                .get(MessageKeys.REGISTER_SUBTITLE);
+        titleBarApi.send(player, title, subtitle);
+    }
+
+    private void sendLoginTitle(TitleBarApi titleBarApi, ProxiedPlayer player) {
+        Message title = plugin.getMessageConfig()
+                .get(MessageKeys.LOGIN_TITLE);
+        Message subtitle = plugin.getMessageConfig()
+                .get(MessageKeys.LOGIN_SUBTITLE);
+        titleBarApi.send(player, title, subtitle);
     }
 }

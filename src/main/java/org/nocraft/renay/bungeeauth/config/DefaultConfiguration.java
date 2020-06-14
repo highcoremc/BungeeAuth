@@ -4,11 +4,11 @@ import org.nocraft.renay.bungeeauth.BungeeAuthPlugin;
 import org.nocraft.renay.bungeeauth.config.adapter.ConfigurationAdapter;
 
 /**
- * An abstract implementation of {@link Configuration}.
+ * An default implementation of {@link Configuration}.
  *
  * <p>Values are loaded into memory on init.</p>
  */
-public class AbstractConfiguration implements Configuration {
+public class DefaultConfiguration implements Configuration {
 
     /**
      * The configurations loaded values.
@@ -21,7 +21,7 @@ public class AbstractConfiguration implements Configuration {
     private final BungeeAuthPlugin plugin;
     private final ConfigurationAdapter adapter;
 
-    public AbstractConfiguration(BungeeAuthPlugin plugin, ConfigurationAdapter adapter) {
+    public DefaultConfiguration(BungeeAuthPlugin plugin, ConfigurationAdapter adapter) {
         this.plugin = plugin;
         this.adapter = adapter;
 

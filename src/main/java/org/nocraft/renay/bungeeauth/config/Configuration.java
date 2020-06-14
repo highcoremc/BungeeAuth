@@ -32,5 +32,4 @@ public interface Configuration {
      * @return the value mapped to the given key. May be null.
      */
     <T> T get(ConfigKey<T> key);
-
 }

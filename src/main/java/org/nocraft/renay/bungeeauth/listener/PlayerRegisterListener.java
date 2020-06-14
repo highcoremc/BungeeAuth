@@ -8,6 +8,8 @@ import net.md_5.bungee.event.EventPriority;
 import org.nocraft.renay.bungeeauth.BungeeAuthPlayer;
 import org.nocraft.renay.bungeeauth.BungeeAuthPlugin;
 import org.nocraft.renay.bungeeauth.PlayerWrapper;
+import org.nocraft.renay.bungeeauth.config.Message;
+import org.nocraft.renay.bungeeauth.config.MessageKeys;
 import org.nocraft.renay.bungeeauth.event.*;
 import org.nocraft.renay.bungeeauth.storage.session.Session;
 import org.nocraft.renay.bungeeauth.util.TitleBarApi;
@@ -28,14 +30,12 @@ public class PlayerRegisterListener extends BungeeAuthListener {
     public void onSuccessfulRegister(PlayerRegisteredEvent e) {
         UUID uniqueId = e.getPlayerId();
         Optional<ProxiedPlayer> p = plugin.getPlayer(e.getPlayerId());
-
         if (!p.isPresent()) {
             plugin.getLogger().info("Player " + uniqueId + " is not present on the server..");
             return;
         }
 
         Optional<Session> optionalSession = this.plugin.getAuthFactory().createSession(uniqueId);
-
         if (!optionalSession.isPresent()) {
             plugin.getLogger().info("Player session " + p.get().getName() + " is not present..");
             this.plugin.getPluginManager().callEvent(
@@ -49,8 +49,7 @@ public class PlayerRegisterListener extends BungeeAuthListener {
                 .get(uniqueId);
 
         // remove old title
-        TitleBarApi.send(p.get(), "", "", 0, 10, 0);
-
+        TitleBarApi.send(p.get(), new Message(""), new Message(""), 0, 10, 0);
         this.plugin.getSessionStorage().save(session)
                 .thenAccept(s -> authPlayer.changeActiveSession(session))
                 .thenAccept(s -> this.applySuccessfulLogin(uniqueId))
@@ -60,11 +59,9 @@ public class PlayerRegisterListener extends BungeeAuthListener {
     @EventHandler(priority = EventPriority.NORMAL)
     public void onPlayerFailedRegister(PlayerRegisterFailedEvent e) {
         this.plugin.getPlayer(e.getPlayerId()).ifPresent(player -> {
-            String message = ChatColor.translateAlternateColorCodes('&',
-                    "&c&lFAIL REGISTRATION\n" +
-                            "&fWe are can not process your request\n" +
-                            "&fPlease contact with administration..");
-            player.disconnect(TextComponent.fromLegacyText(message));
+            Message message = plugin.getMessageConfig()
+                    .get(MessageKeys.FAILED_REGISTER);
+            player.disconnect(message.asComponent());
             String msg = "Player %s failed register with ip %s.";
             plugin.getLogger().warning(String.format(msg, player.getName(), PlayerWrapper.wrap(player).getIpAddress()));
         });

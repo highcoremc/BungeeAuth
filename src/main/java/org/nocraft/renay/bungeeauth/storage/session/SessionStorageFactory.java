@@ -35,7 +35,7 @@ public class SessionStorageFactory {
                 return new SessionRedisStorage(
                         this.plugin,
                         new RedisConnectionFactory<>(this.plugin.getConfiguration().get(ConfigKeys.CACHE_VALUES)),
-                        this.plugin.getConfiguration().get(ConfigKeys.CACHE_CHANNEL_PREFIX)
+                        this.plugin.getConfiguration().get(ConfigKeys.SESSION_CHANNEL_PREFIX)
                 );
             default:
                 throw new RuntimeException("Unknown method: " + method);

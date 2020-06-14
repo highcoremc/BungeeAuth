@@ -66,7 +66,7 @@ public final class ConfigKeys {
             c -> HashMethodType.parse(c.getString("hash-method", "bcrypt"))));
 
     public static final ConfigKey<Integer> SESSION_TIMEOUT = enduringKey(customKey(
-            c -> c.getInteger("session.channel", 3600)));
+            c -> c.getInteger("session.timeout", 3600)));
 
     public static final ConfigKey<Integer> MAX_AUTH_ATTEMPTS = enduringKey(customKey(
             c -> c.getInteger("settings.max-auth-attempts", 5)));
@@ -82,7 +82,7 @@ public final class ConfigKeys {
      */
     public static final ConfigKey<String> DATA_SQL_TABLE_PREFIX = enduringKey(customKey(c -> c.getString("data.table-prefix", c.getString("data.table_prefix", "bungeeauth_"))));
 
-    public static final ConfigKey<String> CACHE_CHANNEL_PREFIX = enduringKey(customKey(c -> c.getString("session.channel", c.getString("session.channel", "bungeeauth"))));
+    public static final ConfigKey<String> SESSION_CHANNEL_PREFIX = enduringKey(customKey(c -> c.getString("session.channel", c.getString("session.channel", "bungeeauth"))));
 
     /**
      * The name of the storage method being used for data

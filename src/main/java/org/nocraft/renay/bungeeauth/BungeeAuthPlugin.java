@@ -1,7 +1,5 @@
 package org.nocraft.renay.bungeeauth;
 
-import com.github.games647.fastlogin.bungee.BungeeLoginSession;
-import com.github.games647.fastlogin.bungee.FastLoginBungee;
 import net.md_5.bungee.api.connection.PendingConnection;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
@@ -10,18 +8,21 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.nocraft.renay.bungeeauth.authentication.AttemptManager;
 import org.nocraft.renay.bungeeauth.authentication.AuthFactory;
 import org.nocraft.renay.bungeeauth.authentication.Authentication;
-import org.nocraft.renay.bungeeauth.command.BungeeAuthCommand;
-import org.nocraft.renay.bungeeauth.command.LoginCommand;
-import org.nocraft.renay.bungeeauth.command.RegisterCommand;
-import org.nocraft.renay.bungeeauth.config.AbstractConfiguration;
-import org.nocraft.renay.bungeeauth.config.ConfigKeys;
-import org.nocraft.renay.bungeeauth.config.Configuration;
-import org.nocraft.renay.bungeeauth.config.adapter.ConfigurationAdapter;
 import org.nocraft.renay.bungeeauth.authentication.hash.HashMethod;
 import org.nocraft.renay.bungeeauth.authentication.hash.HashMethodFactory;
 import org.nocraft.renay.bungeeauth.authentication.hash.HashMethodType;
+import org.nocraft.renay.bungeeauth.command.BungeeAuthCommand;
+import org.nocraft.renay.bungeeauth.command.LoginCommand;
+import org.nocraft.renay.bungeeauth.command.RegisterCommand;
+import org.nocraft.renay.bungeeauth.config.DefaultConfiguration;
+import org.nocraft.renay.bungeeauth.config.ConfigKeys;
+import org.nocraft.renay.bungeeauth.config.Configuration;
+import org.nocraft.renay.bungeeauth.config.MessageConfiguration;
+import org.nocraft.renay.bungeeauth.config.adapter.ConfigurationAdapter;
 import org.nocraft.renay.bungeeauth.listener.*;
 import org.nocraft.renay.bungeeauth.scheduler.Scheduler;
+import org.nocraft.renay.bungeeauth.server.ServerManager;
+import org.nocraft.renay.bungeeauth.server.ServerType;
 import org.nocraft.renay.bungeeauth.storage.data.DataStorageFactory;
 import org.nocraft.renay.bungeeauth.storage.data.SimpleDataStorage;
 import org.nocraft.renay.bungeeauth.storage.entity.SimpleSessionStorage;
@@ -34,7 +35,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -46,17 +50,17 @@ public class BungeeAuthPlugin extends Plugin {
     private final Composer<BungeeAuthListener> listeners = new Composer<>();
     private final Composer<BungeeAuthCommand> commands = new Composer<>();
 
-    private final Configuration configuration = new AbstractConfiguration(this, provideConfigurationAdapter());
     private AuthFactory authFactory;
+
+    private final Configuration configuration = new DefaultConfiguration(this, provideConfigurationAdapter());
+    private final Configuration messages = new MessageConfiguration(this, provideMessageConfigurationAdapter());
 
     private SimpleSessionStorage sessionStorage;
     private SimpleDataStorage dataStorage;
 
     private AttemptManager attemptManager;
-    private FastLoginBungee fastLogin;
 
     private Scheduler scheduler;
-
     private ServerManager serverManager;
 
     public void onEnable() {
@@ -79,7 +83,7 @@ public class BungeeAuthPlugin extends Plugin {
 
         Integer banTime = this.getConfiguration().get(ConfigKeys.BAN_TIME_MINUTES);
 
-        this.serverManager = new ServerManager(this.getScheduler());
+        this.serverManager = new ServerManager(this, this.getScheduler());
 
         List<String> loginServers = this.getConfiguration().get(ConfigKeys.LOGIN_SERVERS);
         List<String> gameServers = this.getConfiguration().get(ConfigKeys.GAME_SERVERS);
@@ -100,24 +104,12 @@ public class BungeeAuthPlugin extends Plugin {
         this.commands.add(new RegisterCommand(this));
         this.commands.add(new LoginCommand(this));
         this.commands.register();
-
-        setupHooks();
     }
 
     private void setupConnectorServers(ServerType type, List<String> servers, ServerManager connector) {
         servers.forEach(server -> connector.addServer(type, this.getProxy().getServerInfo(server)));
     }
 
-    private void setupHooks() {
-        Plugin fastLogin = getPluginManager().getPlugin("FastLogin");
-
-        if (null == fastLogin) {
-            getLogger().warning("Disable Premium GameProfile Authenticate because FastLogin is not found.");
-            return;
-        }
-
-        this.fastLogin = (FastLoginBungee) fastLogin;
-    }
 
     public ServerManager getServerManager() {
         return serverManager;
@@ -128,16 +120,20 @@ public class BungeeAuthPlugin extends Plugin {
     }
 
     protected ConfigurationAdapter provideConfigurationAdapter() {
-        return new BungeeConfigAdapter(this, resolveConfig());
+        return new BungeeConfigAdapter(this, resolveConfig("config.yml"));
+    }
+
+    private ConfigurationAdapter provideMessageConfigurationAdapter() {
+        return new BungeeMessageAdapter(this, resolveConfig("messages.yml"));
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    private File resolveConfig() {
-        File configFile = new File(this.getDataFolder(), "config.yml");
+    private File resolveConfig(String fileName) {
+        File configFile = new File(this.getDataFolder(), fileName);
 
         if (!configFile.exists()) {
             this.getDataFolder().mkdirs();
-            try (InputStream is = this.getResourceAsStream("config.yml")) {
+            try (InputStream is = this.getResourceAsStream(fileName)) {
                 Files.copy(is, configFile.toPath());
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -168,17 +164,8 @@ public class BungeeAuthPlugin extends Plugin {
         return this.configuration;
     }
 
-    public boolean isPremiumProfile(PendingConnection connection) {
-        BungeeLoginSession session = this.fastLogin.getSession(connection);
-
-        if (session == null) {
-            getLogger().warning(String.format(
-                    "Failed to get information about player %s:%s because FastLogin does not have this connection",
-                    connection.getName(), connection.getUniqueId()));
-            return false;
-        }
-
-        return session.getProfile().isPremium();
+    public Configuration getMessageConfig() {
+        return this.messages;
     }
 
     public Authentication.Result authenticate(UUID uniqueId, String rawPassword) {
@@ -241,6 +228,10 @@ public class BungeeAuthPlugin extends Plugin {
 
     public AuthFactory getAuthFactory() {
         return this.authFactory;
+    }
+
+    public boolean isAuthenticated(ProxiedPlayer p) {
+        return isAuthenticated(p.getUniqueId());
     }
 
     public boolean isAuthenticated(UUID uniqueId) {

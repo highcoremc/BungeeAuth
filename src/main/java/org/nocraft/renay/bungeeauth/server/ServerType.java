@@ -1,8 +1,4 @@
-package org.nocraft.renay.bungeeauth;
-
-import com.google.common.collect.ImmutableList;
-
-import java.util.List;
+package org.nocraft.renay.bungeeauth.server;
 
 public enum ServerType {
     LOGIN("login"),

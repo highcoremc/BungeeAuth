@@ -24,8 +24,7 @@ public class AttemptManager {
         Integer attempts = this.attempts.getOrDefault(player.getUniqueId(), 1);
 
         if (attempts >= this.maxCountAttempts) {
-            Event event = new PlayerAttemptsLoginExceeded(
-                    player.getUniqueId());
+            Event event = new PlayerAttemptsLoginExceeded(player.getUniqueId());
             this.plugin.getPluginManager().callEvent(event);
             this.clearAttempts(player.getUniqueId());
             return 0;

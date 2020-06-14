@@ -8,6 +8,8 @@ import org.nocraft.renay.bungeeauth.authentication.AttemptManager;
 import org.nocraft.renay.bungeeauth.authentication.Authentication;
 import org.nocraft.renay.bungeeauth.BungeeAuthPlayer;
 import org.nocraft.renay.bungeeauth.BungeeAuthPlugin;
+import org.nocraft.renay.bungeeauth.config.Message;
+import org.nocraft.renay.bungeeauth.config.MessageKeys;
 import org.nocraft.renay.bungeeauth.event.PlayerLoginFailedEvent;
 import org.nocraft.renay.bungeeauth.event.PlayerAuthenticatedEvent;
 
@@ -30,9 +32,9 @@ public class LoginCommand extends BungeeAuthCommand {
 		}
 
 		if (args.length != 1) {
-			String usage = "&6&lUSAGE&f: &fUse the &7/l &c<password>&f for authenticate.";
-			String transformed = ChatColor.translateAlternateColorCodes('&', usage);
-			sender.sendMessage(TextComponent.fromLegacyText(transformed));
+			Message message = plugin.getMessageConfig()
+					.get(MessageKeys.LOGIN_USAGE);
+			sender.sendMessage(message.asComponent());
 			return;
 		}
 
@@ -55,23 +57,15 @@ public class LoginCommand extends BungeeAuthCommand {
 				}
 				return;
 			case WRONG_PASSWORD:
-				this.handleWrongPassword(player, this.attemptManager.handle(player));
+				Message message = plugin.getMessageConfig()
+						.get(MessageKeys.WRONG_PASSWORD);
+				int leftAttempts = this.attemptManager.handle(player);
+				player.sendMessage(message.asComponent(leftAttempts));
 				return;
-			case ACCOUNT_NOT_FOUND: handleAccountNotFound(player);
+			case ACCOUNT_NOT_FOUND:
+				Message msg = plugin.getMessageConfig()
+						.get(MessageKeys.ACCOUNT_NOT_FOUND);
+				player.disconnect(msg.asComponent());
 		}
-	}
-
-	private void handleWrongPassword(ProxiedPlayer player, int attemptsLeft) {
-		String message = ChatColor.translateAlternateColorCodes('&',
-				"\n&c&lFAILURE&f: Wrong password. You have &e" + attemptsLeft + "&r attempts.\n");
-		player.sendMessage(TextComponent.fromLegacyText(message));
-	}
-
-	private void handleAccountNotFound(ProxiedPlayer player) {
-		String message = ChatColor.translateAlternateColorCodes('&',
-				"&6&lFAILURE AUTHENTICATION\n" +
-				"&fSorry for the inconvenience,\n"+
-				"&fPlease re-enter to the server");
-		player.disconnect(TextComponent.fromLegacyText(message));
 	}
 }

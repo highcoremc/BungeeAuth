@@ -131,13 +131,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.github.games647</groupId>
-            <artifactId>fastlogin.bungee</artifactId>
-            <version>1.11-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
             <version>1.7.21</version>

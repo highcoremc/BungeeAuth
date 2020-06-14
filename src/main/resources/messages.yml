@@ -1,0 +1,71 @@
+fail-session-creation: |+
+  &c&lFAIL AUTHENTICATION
+  &f
+  &fServer can not handle your request,
+  &fPlease contact with administrator...
+failed-authentication: |+
+  &c&lFAIL AUTHENTICATION
+  &f
+  &fWe are can not process your login,
+  &fPlease contact with administration.
+timeout-login: |+
+  &c&lFAILURE AUTHENTICATION
+  &f
+  &fSorry, but you were not able to authenticate in 5 minutes.
+failed-register: |+
+  &c&lFAIL REGISTRATION
+  &f
+  &fWe are can not process your request
+  &fPlease contact with administration..
+forbidden-access: |+
+  &c&lFORBIDDEN ACCESS
+  &f
+  &fYou are banned for {0} minute(s).
+  &fBecause you entered the wrong password {1} times.
+exceeded-login-attempts: |+
+  &c&lFAILURE AUTHENTICATION
+  &f
+  &fNumber of login attempts exceeded. Please try again!
+bad-nickname: |+
+  &c&lBAD NICKNAME
+  &f
+  &fYour nickname contains forbidden symbols.
+  &fPlease change the alias and use only the Latin alphabet
+  &fwith the only one acceptable character &l_
+bad-request: |+
+  &c&lBAD REQUEST
+  &fSorry, but the server cannot process your request.
+wrong-password: |+
+  &f
+  &c&lFAILURE&f: Wrong password. You have &e{0}&r attempts.
+  &f
+password-mismatch: |+
+  &f
+  &c&lFAILURE&f: &fPassword confirmation does not matches.
+  &f
+password-min-length: |+
+  &f
+  &c&lFAILURE&f: &fPassword length can not be less then &e{0}&f.
+  &f
+account-not-found: |+
+  &6&lFAILURE AUTHENTICATION
+  &f
+  &fSorry for the inconvenience,
+  &fPlease re-enter to the server.
+no-actual-server: |+
+  &c&lFAILURE CONNECT
+  &f
+  &fThere are no actual servers to connect to,
+  &fPlease connect with administration.
+
+user-authenticated: "&a&lINFO&f: &fSuccessfully authenticated!"
+already-registered: "&c&lFAILURE&f: &fYou have already registered."
+login-usage: "&6&lUSAGE&f: &fUse the &7/l &c<password>&f for authenticate."
+
+login-title: "&a&l» &2&lWelcome back &a&l«"
+login-subtitle: "&fPlease login with &2&l/l &7<password>"
+login-text: "&a&lINFO&f: &fPlease login with &2/l &7<password>"
+
+register-title: "&a&l» &2&lWelcome to &f&lNocraft &a&l«"
+register-subtitle: "&fPlease register with &2&l/reg &7<password>"
+register-text: "&a&lINFO&f: &fPlease register with &2/reg &7<password>"

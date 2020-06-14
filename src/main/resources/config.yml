@@ -124,6 +124,7 @@ session:
 
   # The main channel prefix.
   channel: 'bungeeauth' # DO NOT TOUCH IT IF YOU DON'T KNOW ABOUT THIS OPTION
+  timeout: 86000
 
 settings:
   max-auth-attempts: 6
