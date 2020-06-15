@@ -29,8 +29,6 @@ import java.util.regex.Pattern;
 
 public class PlayerEnterListener extends BungeeAuthListener {
 
-    private final Map<UUID, BungeeAuthPlayer> players;
-
     private final SimpleSessionStorage sessionStorage;
     private final SimpleDataStorage dataStorage;
 
@@ -43,7 +41,6 @@ public class PlayerEnterListener extends BungeeAuthListener {
         this.sessionStorage = plugin.getSessionStorage();
         this.connector = plugin.getServerManager();
         this.dataStorage = plugin.getDataStorage();
-        this.players = plugin.getAuthPlayers();
         this.plugin = plugin;
     }
 
@@ -53,7 +50,15 @@ public class PlayerEnterListener extends BungeeAuthListener {
             return;
         }
 
-        if (!Pattern.matches("^[A-Za-z0-9_]+$", e.getConnection().getName())) {
+        PendingConnection conn = e.getConnection();
+        if (393 > conn.getVersion()) {
+            e.setCancelled(true);
+            Message message = plugin.getMessageConfig()
+                    .get(MessageKeys.VERSION_OUTDATED);
+            e.setCancelReason(message.asComponent());
+            return;
+        }
+        if (!Pattern.matches("^[A-Za-z0-9_]+$", conn.getName())) {
             e.setCancelled(true);
             Message message = plugin.getMessageConfig()
                     .get(MessageKeys.BAD_NICKNAME);
@@ -94,7 +99,7 @@ public class PlayerEnterListener extends BungeeAuthListener {
 
     private void handlePlayerSession(ServerConnectEvent e) {
         UUID uniqueId = e.getPlayer().getUniqueId();
-        BungeeAuthPlayer player = this.players.get(uniqueId);
+        BungeeAuthPlayer player = this.plugin.getAuthPlayers().get(uniqueId);
 
         if (null == player.session || new Date().getTime() > player.session.time.endTime.getTime()) {
             handleUnauthorizedAction(e);
@@ -102,16 +107,19 @@ public class PlayerEnterListener extends BungeeAuthListener {
         }
 
         ServerType target = connector.getServerType(e.getTarget());
+
         if (target.equals(ServerType.UNKNOWN) || target.equals(ServerType.LOGIN)) {
             try {
                 e.setTarget(this.connector.getServer(ServerType.GAME));
-                Event event = new PlayerAuthenticatedEvent(uniqueId, true);
-                this.plugin.getPluginManager().callEvent(event);
             } catch (IllegalStateException ex) {
                 connector.disconnect(e.getPlayer());
                 ex.printStackTrace();
+                return;
             }
         }
+
+        Event event = new PlayerAuthenticatedEvent(uniqueId, true);
+        this.plugin.getPluginManager().callEvent(event);
     }
 
     private User loadUser(PendingConnection c, UUID uniqueId) {
@@ -155,7 +163,7 @@ public class PlayerEnterListener extends BungeeAuthListener {
                     session.ifPresent(player::changeActiveSession);
                 }
 
-                this.players.put(uniqueId, player);
+                this.plugin.getAuthPlayers().put(uniqueId, player);
             } catch (Exception ex) {
                 this.plugin.getLogger().severe("Exception occurred whilst loading data for " + c.getUniqueId() + " - " + c.getName());
                 ex.printStackTrace();
@@ -175,9 +183,15 @@ public class PlayerEnterListener extends BungeeAuthListener {
     public void onConnect(ServerConnectEvent e) {
         UUID uniqueId = e.getPlayer().getUniqueId();
 
-        if (!this.players.containsKey(uniqueId)) {
+        if (!this.plugin.getAuthPlayers().containsKey(uniqueId)) {
             handleUnauthorizedAction(e);
-        } else {
+            return;
+        }
+
+        BungeeAuthPlayer player = this.plugin
+                .getAuthPlayers()
+                .get(uniqueId);
+        if (!player.isAuthenticated()) {
             handlePlayerSession(e);
         }
     }
@@ -187,7 +201,7 @@ public class PlayerEnterListener extends BungeeAuthListener {
         ProxiedPlayer p = e.getPlayer();
         UUID uniqueId = p.getUniqueId();
         this.whiteList.remove(uniqueId);
-        this.players.remove(uniqueId);
+        this.plugin.getAuthPlayers().remove(uniqueId);
     }
 }
 

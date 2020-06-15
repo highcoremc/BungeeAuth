@@ -24,12 +24,11 @@ public class Message {
         }
         return ChatColor.translateAlternateColorCodes('&', s);
     }
-
-    public void send(CommandSender sender) {
-        sender.sendMessage(asComponent());
-    }
-
     public void send(CommandSender sender, Object... objects) {
         sender.sendMessage(asComponent(objects));
+    }
+
+    public String asString(Object... objects) {
+        return format(this.message, objects);
     }
 }

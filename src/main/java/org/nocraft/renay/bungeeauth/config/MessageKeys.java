@@ -76,6 +76,9 @@ public class MessageKeys {
     public static final ConfigKey<Message> NO_ACTUAL_SERVER = enduringKey(customKey(
             c -> new Message(c.getString("no-actual-server", ""))));
 
+    public static final ConfigKey<Message> VERSION_OUTDATED = enduringKey(customKey(
+            c -> new Message(c.getString("version-outdated", ""))));
+
 
     private static final List<ConfigKeyTypes.BaseConfigKey<?>> KEYS;
 

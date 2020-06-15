@@ -58,6 +58,14 @@ no-actual-server: |+
   &fThere are no actual servers to connect to,
   &fPlease connect with administration.
 
+version-outdated: |+
+  &c&lVERSION OUTDATED
+  &f
+  &fThe server does not support this version,
+  &fplease join from 1.13-1.15.2.
+  &f
+  &aThank you for choosing us, we love you :3
+
 user-authenticated: "&a&lINFO&f: &fSuccessfully authenticated!"
 already-registered: "&c&lFAILURE&f: &fYou have already registered."
 login-usage: "&6&lUSAGE&f: &fUse the &7/l &c<password>&f for authenticate."
