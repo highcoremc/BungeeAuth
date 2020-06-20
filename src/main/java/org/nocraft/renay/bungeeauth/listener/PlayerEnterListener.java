@@ -15,16 +15,18 @@ import org.nocraft.renay.bungeeauth.BungeeAuthPlayer;
 import org.nocraft.renay.bungeeauth.BungeeAuthPlugin;
 import org.nocraft.renay.bungeeauth.config.Message;
 import org.nocraft.renay.bungeeauth.config.MessageKeys;
+import org.nocraft.renay.bungeeauth.event.PlayerAuthenticatedEvent;
 import org.nocraft.renay.bungeeauth.server.ServerManager;
 import org.nocraft.renay.bungeeauth.server.ServerType;
-import org.nocraft.renay.bungeeauth.event.PlayerAuthenticatedEvent;
 import org.nocraft.renay.bungeeauth.storage.data.SimpleDataStorage;
 import org.nocraft.renay.bungeeauth.storage.entity.SimpleSessionStorage;
 import org.nocraft.renay.bungeeauth.storage.entity.User;
 import org.nocraft.renay.bungeeauth.storage.session.Session;
 
 import java.net.InetSocketAddress;
-import java.util.*;
+import java.util.Date;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 public class PlayerEnterListener extends BungeeAuthListener {
@@ -34,7 +36,6 @@ public class PlayerEnterListener extends BungeeAuthListener {
 
     private final ServerManager connector;
     private final BungeeAuthPlugin plugin;
-    private final Set<UUID> whiteList = new HashSet<>();
 
     public PlayerEnterListener(BungeeAuthPlugin plugin) {
         super(plugin);
@@ -108,7 +109,7 @@ public class PlayerEnterListener extends BungeeAuthListener {
 
         ServerType target = connector.getServerType(e.getTarget());
 
-        if (target.equals(ServerType.UNKNOWN) || target.equals(ServerType.LOGIN)) {
+        if (target.equals(ServerType.LOGIN)) {
             try {
                 e.setTarget(this.connector.getServer(ServerType.GAME));
             } catch (IllegalStateException ex) {
@@ -200,7 +201,6 @@ public class PlayerEnterListener extends BungeeAuthListener {
     public void onPlayerDisconnect(PlayerDisconnectEvent e) {
         ProxiedPlayer p = e.getPlayer();
         UUID uniqueId = p.getUniqueId();
-        this.whiteList.remove(uniqueId);
         this.plugin.getAuthPlayers().remove(uniqueId);
     }
 }

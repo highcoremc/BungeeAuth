@@ -2,6 +2,7 @@ package org.nocraft.renay.bungeeauth.listener;
 
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.ChatEvent;
+import net.md_5.bungee.api.event.TabCompleteResponseEvent;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
 import org.nocraft.renay.bungeeauth.BungeeAuthPlugin;
@@ -15,7 +16,7 @@ public class PlayerChatListener extends BungeeAuthListener {
         this.plugin = plugin;
     }
 
-    @EventHandler(priority = EventPriority.NORMAL)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onChat(ChatEvent e) {
         if (!(e.getSender() instanceof ProxiedPlayer)) {
             return;
@@ -31,21 +32,34 @@ public class PlayerChatListener extends BungeeAuthListener {
         plugin.getLogger().info("Player " + player.getName() + " tried to say: " + message);
 
         if (!isLoginCommand(message)) {
+            plugin.getLogger().info(String.format(
+                    "Player %s say %s and we was cancelled.",
+                    player.getName(), message
+            ));
             e.setCancelled(true);
         }
+    }
 
-//        ServerInfo info = player.getServer().getInfo();
-//        ServerType type = plugin.getServerManager()
-//                .getServerType(info);
-//        if (type.equals(ServerType.LOGIN)) {
-//            e.setCancelled(true);
-//        }
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onTabComplete(TabCompleteResponseEvent event) {
+        if (!(event.getSender() instanceof ProxiedPlayer)) {
+            return;
+        }
+
+        ProxiedPlayer player = (ProxiedPlayer)
+                event.getSender();
+        if (!plugin.isAuthenticated(player)) {
+            event.getSuggestions().clear();
+        }
     }
 
     private boolean isLoginCommand(String message) {
-        return message.startsWith("/l") ||
-                message.startsWith("/reg") ||
-                message.startsWith("/login") ||
-                message.startsWith("/register");
+        String[] splitted = message.split(" ");
+        String cmd = splitted[0];
+
+        return cmd.equals("/l") ||
+                cmd.equals("/reg") ||
+                cmd.equals("/login") ||
+                cmd.equals("/register");
     }
 }

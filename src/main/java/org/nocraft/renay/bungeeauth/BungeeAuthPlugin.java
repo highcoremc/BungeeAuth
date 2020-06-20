@@ -1,6 +1,5 @@
 package org.nocraft.renay.bungeeauth;
 
-import net.md_5.bungee.api.connection.PendingConnection;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.api.plugin.PluginManager;
@@ -14,9 +13,9 @@ import org.nocraft.renay.bungeeauth.authentication.hash.HashMethodType;
 import org.nocraft.renay.bungeeauth.command.BungeeAuthCommand;
 import org.nocraft.renay.bungeeauth.command.LoginCommand;
 import org.nocraft.renay.bungeeauth.command.RegisterCommand;
-import org.nocraft.renay.bungeeauth.config.DefaultConfiguration;
 import org.nocraft.renay.bungeeauth.config.ConfigKeys;
 import org.nocraft.renay.bungeeauth.config.Configuration;
+import org.nocraft.renay.bungeeauth.config.DefaultConfiguration;
 import org.nocraft.renay.bungeeauth.config.MessageConfiguration;
 import org.nocraft.renay.bungeeauth.config.adapter.ConfigurationAdapter;
 import org.nocraft.renay.bungeeauth.listener.*;
