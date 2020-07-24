@@ -8,11 +8,11 @@ import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.PreLoginEvent;
 import net.md_5.bungee.api.event.ServerConnectEvent;
 import net.md_5.bungee.api.plugin.Event;
-import net.md_5.bungee.connection.InitialHandler;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
 import org.nocraft.renay.bungeeauth.BungeeAuthPlayer;
 import org.nocraft.renay.bungeeauth.BungeeAuthPlugin;
+import org.nocraft.renay.bungeeauth.config.ConfigKeys;
 import org.nocraft.renay.bungeeauth.config.Message;
 import org.nocraft.renay.bungeeauth.config.MessageKeys;
 import org.nocraft.renay.bungeeauth.event.PlayerAuthenticatedEvent;
@@ -51,14 +51,19 @@ public class PlayerEnterListener extends BungeeAuthListener {
             return;
         }
 
+        String protocolRegex = this.plugin.getConfiguration()
+                .get(ConfigKeys.PROTOCOL_REGEX);
         PendingConnection conn = e.getConnection();
-        if (393 > conn.getVersion()) {
+        String version = String.valueOf(conn.getVersion());
+
+        if (!Pattern.matches(protocolRegex, version)) {
             e.setCancelled(true);
             Message message = plugin.getMessageConfig()
                     .get(MessageKeys.VERSION_OUTDATED);
             e.setCancelReason(message.asComponent());
             return;
         }
+
         if (!Pattern.matches("^[A-Za-z0-9_]+$", conn.getName())) {
             e.setCancelled(true);
             Message message = plugin.getMessageConfig()
@@ -141,7 +146,7 @@ public class PlayerEnterListener extends BungeeAuthListener {
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void onPlayerConnect(LoginEvent e) {
-        InitialHandler c = (InitialHandler) e.getConnection();
+        PendingConnection c = e.getConnection();
 
         plugin.getLogger().info(String.format("Player with uuid %s has joined to the network", c.getUniqueId()));
 

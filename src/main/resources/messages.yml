@@ -61,19 +61,19 @@ no-actual-server: |+
 version-outdated: |+
   &c&lVERSION OUTDATED
   &f
-  &fThe server does not support this version,
-  &fplease join from 1.13-1.15.2.
+  &fСервер не поддерживает данную версию,
+  &fпожалуйста, зайдите с версии &b1.16-1.16.x
   &f
-  &aThank you for choosing us, we love you :3
+  &aСпасибо за то что выбираете нас, мы вас любим :3
 
-user-authenticated: "&a&lINFO&f: &fSuccessfully authenticated!"
-already-registered: "&c&lFAILURE&f: &fYou have already registered."
-login-usage: "&6&lUSAGE&f: &fUse the &7/l &c<password>&f for authenticate."
+user-authenticated: "&a&lINFO&f: &fУспешная аутентификация!"
+already-registered: "&c&lFAILURE&f: &fВы уже зарегистрированы!"
+login-usage: "&6&lUSAGE&f: &fИспользуйте &7/l &c<password>&f для аутентификации."
 
 login-title: "&a&l» &2&lWelcome back &a&l«"
-login-subtitle: "&fPlease login with &2&l/l &7<password>"
-login-text: "&a&lINFO&f: &fPlease login with &2/l &7<password>"
+login-subtitle: "&fАутентификация &2&l/l &7<password>"
+login-text: "&a&lINFO&f: &fПожалуйста, аутентифицируйтесь с помощью команды &2/l &7<пароль>"
 
 register-title: "&a&l» &2&lWelcome to &f&lNocraft &a&l«"
-register-subtitle: "&fPlease register with &2&l/reg &7<password>"
-register-text: "&a&lINFO&f: &fPlease register with &2/reg &7<password>"
+register-subtitle: "&fРегистрация &2&l/reg &7<password>"
+register-text: "&a&lINFO&f: &fПожалуйста, зарегистрируйтесь с помощью &2/reg &7<password>"

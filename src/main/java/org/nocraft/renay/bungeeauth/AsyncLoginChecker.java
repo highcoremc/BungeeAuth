@@ -62,8 +62,8 @@ public class AsyncLoginChecker implements Runnable {
 
                 if (bungeeAuthPlayer.isAuthenticated()) {
                     ServerManager serverManager = this.plugin.getServerManager();
-                    ServerType serverType = serverManager
-                            .getServerType(player.getServer().getInfo());
+                    ServerType serverType = serverManager.getServerType(
+                            player.getServer().getInfo());
                     if (serverType.equals(ServerType.LOGIN)) {
                         serverManager.connect(ServerType.GAME, player);
                     }
@@ -76,7 +76,7 @@ public class AsyncLoginChecker implements Runnable {
                     sendLoginTitle(titleBarApi, player);
                 } else {
                     Message message = plugin.getMessageConfig()
-                            .get(MessageKeys.REGISTER_CHAT_MESSAGE);
+                        .get(MessageKeys.REGISTER_CHAT_MESSAGE);
                     player.sendMessage(message.asComponent());
                     sendRegisterTitle(titleBarApi, player);
                 }

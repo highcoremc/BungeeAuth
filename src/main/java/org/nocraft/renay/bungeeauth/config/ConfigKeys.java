@@ -77,6 +77,9 @@ public final class ConfigKeys {
     public static final ConfigKey<Integer> MIN_PASSWORD_LENGTH = enduringKey(customKey(
             c -> c.getInteger("settings.min-password-length", 4)));
 
+    public static final ConfigKey<String> PROTOCOL_REGEX = enduringKey(customKey(
+            c -> c.getString("allowed-protocols", "*")));
+
     /**
      * The prefix for any SQL tables
      */

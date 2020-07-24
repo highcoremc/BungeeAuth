@@ -141,3 +141,6 @@ servers:
 
 # can be SHA256, SHA1, BCRYPT
 hash-method: BCRYPT
+
+# allowed protocols to join
+allowed-protocols: '^73(5|6)$'
