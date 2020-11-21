@@ -55,7 +55,7 @@ public class PlayerBanListener extends BungeeAuthListener {
             long banTime = this.bannedPlayers.get(uniqueId);
             long timeLeftMinutes = getTimeLeftMinutes(banTime);
 
-            Message message = plugin.getMessageConfig().get(MessageKeys.BAD_NICKNAME);
+            Message message = plugin.getMessageConfig().get(MessageKeys.FORBIDDEN_ACCESS);
             player.disconnect(message.asComponent(timeLeftMinutes, maxAttempts));
         }
     }
