@@ -25,6 +25,9 @@ public class MessageKeys {
     public static final ConfigKey<Message> FAILED_REGISTER = enduringKey(customKey(
             c -> new Message(c.getString("failed-register", ""))));
 
+    public static final ConfigKey<Message> TEMPORARY_FORBIDDEN_ACCESS = enduringKey(customKey(
+            c -> new Message(c.getString("temporary-forbidden-access", ""))));
+
     public static final ConfigKey<Message> FORBIDDEN_ACCESS = enduringKey(customKey(
             c -> new Message(c.getString("forbidden-access", ""))));
 
@@ -81,9 +84,6 @@ public class MessageKeys {
 
     public static final ConfigKey<Message> VERSION_OUTDATED = enduringKey(customKey(
             c -> new Message(c.getString("version-outdated", ""))));
-
-    public static final ConfigKey<Message> BANNED_NICKNAME =  enduringKey(customKey(
-        c -> new Message(c.getString("banned-nickname", ""))));
 
 
     private static final List<ConfigKeyTypes.BaseConfigKey<?>> KEYS;

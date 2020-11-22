@@ -24,9 +24,7 @@ import org.nocraft.renay.bungeeauth.storage.entity.User;
 import org.nocraft.renay.bungeeauth.storage.session.Session;
 
 import java.net.InetSocketAddress;
-import java.util.Date;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.regex.Pattern;
 
 public class PlayerEnterListener extends BungeeAuthListener {
@@ -64,12 +62,46 @@ public class PlayerEnterListener extends BungeeAuthListener {
             return;
         }
 
-        if (!Pattern.matches("^[A-Za-z0-9_]+$", conn.getName())) {
+        String userName = conn.getName();
+
+        if (!Pattern.matches("^[A-Za-z0-9_]+$", userName)) {
             e.setCancelled(true);
             Message message = plugin.getMessageConfig()
                     .get(MessageKeys.BAD_NICKNAME);
             e.setCancelReason(message.asComponent());
         }
+
+        InetSocketAddress address = (InetSocketAddress) conn.getSocketAddress();
+
+        try {
+            this.checkUserInWhitelist(userName, address.getHostString());
+        } catch (RuntimeException ex) {
+            this.plugin.getLogger().warning(String.format(
+                "User with ip `%s` tried to login by username %s", address.getHostString(), userName));
+
+            e.setCancelled(true);
+
+            Message message = plugin.getMessageConfig()
+                .get(MessageKeys.FORBIDDEN_ACCESS);
+            e.setCancelReason(message.asComponent());
+        }
+    }
+
+    private void checkUserInWhitelist(String userName, String userIp) {
+        Map<String, List<String>> whiteList = this.plugin.getConfiguration()
+            .get(ConfigKeys.WHITELIST_USERS);
+
+        List<String> allowedIps = whiteList.get(userName);
+
+        if (null == allowedIps) {
+            return;
+        }
+
+        if (allowedIps.contains(userIp)) {
+            return;
+        }
+
+        throw new RuntimeException("This ip address is not allowed for this user.");
     }
 
     private void handleUnauthorizedAction(ServerConnectEvent e) {

@@ -20,6 +20,13 @@ failed-register: |+
 forbidden-access: |+
   &c&lFORBIDDEN ACCESS
   &f
+  &fВаша попытка входа зарегистрирована.
+  &fВы попытались войти с неразрешенного
+  &f
+  &f        IP-адреса
+temporary-forbidden-access: |+
+  &c&lFORBIDDEN ACCESS
+  &f
   &fYou are banned for {0} minute(s).
   &fBecause you entered the wrong password {1} times.
 exceeded-login-attempts: |+

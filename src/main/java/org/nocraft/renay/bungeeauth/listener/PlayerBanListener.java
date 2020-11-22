@@ -1,8 +1,5 @@
 package org.nocraft.renay.bungeeauth.listener;
 
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.event.EventHandler;
@@ -55,7 +52,7 @@ public class PlayerBanListener extends BungeeAuthListener {
             long banTime = this.bannedPlayers.get(uniqueId);
             long timeLeftMinutes = getTimeLeftMinutes(banTime);
 
-            Message message = plugin.getMessageConfig().get(MessageKeys.FORBIDDEN_ACCESS);
+            Message message = plugin.getMessageConfig().get(MessageKeys.TEMPORARY_FORBIDDEN_ACCESS);
             player.disconnect(message.asComponent(timeLeftMinutes, maxAttempts));
         }
     }

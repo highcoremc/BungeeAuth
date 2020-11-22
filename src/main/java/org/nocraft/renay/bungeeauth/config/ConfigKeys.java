@@ -9,10 +9,7 @@ import org.nocraft.renay.bungeeauth.storage.session.SessionStorageType;
 import org.nocraft.renay.bungeeauth.util.ImmutableCollectors;
 
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.nocraft.renay.bungeeauth.config.ConfigKeyTypes.customKey;
 import static org.nocraft.renay.bungeeauth.config.ConfigKeyTypes.enduringKey;
@@ -103,6 +100,8 @@ public final class ConfigKeys {
     public static final ConfigKey<List<String>> LOGIN_SERVERS = enduringKey(customKey(
             c -> c.getStringList("servers.login", new ArrayList<>())));
 
+    public static final ConfigKey<Map<String, List<String>>> WHITELIST_USERS = enduringKey(customKey(
+        c -> c.getListString("white-list", new HashMap<>())));
 
     private static final List<ConfigKeyTypes.BaseConfigKey<?>> KEYS;
 

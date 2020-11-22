@@ -131,6 +131,10 @@ settings:
   ban-time-minutes: 10
   min-password-length: 4
 
+white-list:
+  NA01:
+    - '134.249.237.221'
+
 servers:
   # servers which accept player after login
   game:
