@@ -132,7 +132,7 @@ settings:
   min-password-length: 4
 
 white-list:
-  NA01:
+  na01:
     - '134.249.237.221'
 
 servers:

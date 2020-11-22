@@ -91,7 +91,8 @@ public class PlayerEnterListener extends BungeeAuthListener {
         Map<String, List<String>> whiteList = this.plugin.getConfiguration()
             .get(ConfigKeys.WHITELIST_USERS);
 
-        List<String> allowedIps = whiteList.get(userName);
+        List<String> allowedIps = whiteList
+            .get(userName.toLowerCase());
 
         if (null == allowedIps) {
             return;
