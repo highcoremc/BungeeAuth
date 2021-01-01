@@ -14,10 +14,14 @@ import org.nocraft.renay.bungeeauth.storage.entity.SimpleSessionStorage;
 import org.nocraft.renay.bungeeauth.storage.entity.User;
 import org.nocraft.renay.bungeeauth.storage.entity.UserPassword;
 import org.nocraft.renay.bungeeauth.storage.session.Session;
+import org.nocraft.renay.bungeeauth.util.ImmutableCollectors;
 
 import java.net.InetSocketAddress;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Stream;
 
 public class AuthManager {
 
@@ -47,7 +51,7 @@ public class AuthManager {
                 session.ifPresent(player::changeActiveSession);
             }
 
-            this.plugin.getAuthPlayers().put(uniqueId, player);
+            this.plugin.addAuthPlayer(player);
         } catch (Exception ex) {
             throw new AuthenticationException(conn.getName(), conn.getUniqueId(), ex);
         }
@@ -81,7 +85,21 @@ public class AuthManager {
         }
     }
 
-    public void verify(UserPassword password, String oldPassword) {
-        HashMethodType method = password.hashMethodType;
+    public void clearSessions(UUID uniqueId) {
+        CompletableFuture<Map<String, Session>> sessionsFuture = this.plugin
+            .getSessionStorage().loadSessions(uniqueId);
+
+        BungeeAuthPlayer authPlayer = this.plugin.getAuthPlayer(uniqueId);
+        Session activeSession = null == authPlayer ? null : authPlayer.session;
+
+        sessionsFuture.thenAccept(sessions -> {
+            Stream<Session> result = sessions.values().stream();
+
+            if (null != activeSession) {
+                result = result.filter(s -> !activeSession.equals(s));
+            }
+
+            this.plugin.dropSessions(result.collect(ImmutableCollectors.toList()));
+        });
     }
 }

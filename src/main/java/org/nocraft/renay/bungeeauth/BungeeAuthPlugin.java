@@ -4,6 +4,7 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.api.plugin.PluginManager;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.nocraft.renay.bungeeauth.authentication.AttemptManager;
 import org.nocraft.renay.bungeeauth.authentication.AuthFactory;
 import org.nocraft.renay.bungeeauth.authentication.Authentication;
@@ -175,7 +176,7 @@ public class BungeeAuthPlugin extends Plugin {
     }
 
     public Authentication.Result authenticate(UUID uniqueId, String rawPassword) {
-        BungeeAuthPlayer player = this.getAuthPlayers().get(uniqueId);
+        BungeeAuthPlayer player = this.getAuthPlayer(uniqueId);
 
         if (null == player) {
             throw new IllegalStateException("Player not found in the list of connected players.");
@@ -212,11 +213,7 @@ public class BungeeAuthPlugin extends Plugin {
         return this.sessionStorage.save(session.get());
     }
 
-    public Map<UUID, BungeeAuthPlayer> getAuthPlayers() {
-        return this.authPlayers;
-    }
-
-    public BungeeAuthPlayer getAuthPlayer(UUID uniqueId) {
+    public @Nullable BungeeAuthPlayer getAuthPlayer(UUID uniqueId) {
         return this.authPlayers.get(uniqueId);
     }
 
@@ -256,5 +253,21 @@ public class BungeeAuthPlugin extends Plugin {
 
     public AuthManager getAuthManager() {
         return this.authManager;
+    }
+
+    public void addAuthPlayer(BungeeAuthPlayer player) {
+        this.authPlayers.put(player.user.uniqueId, player);
+    }
+
+    public boolean hasAuthPlayer(UUID uniqueId) {
+        return this.authPlayers.containsKey(uniqueId);
+    }
+
+    public void removeAuthPlayer(UUID uniqueId) {
+        this.authPlayers.remove(uniqueId);
+    }
+
+    public void dropSessions(List<Session> sessions) {
+        this.sessionStorage.remove(sessions);
     }
 }

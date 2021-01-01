@@ -59,8 +59,8 @@ public class RegisterCommand extends BungeeAuthCommand {
             return;
         }
 
-        BungeeAuthPlayer authPlayer = this.plugin.getAuthPlayers()
-                .get(player.getUniqueId());
+        BungeeAuthPlayer authPlayer = this.plugin
+            .getAuthPlayer(player.getUniqueId());
 
         if (authPlayer.user.hasPassword()) {
             Message message = plugin.getMessageConfig()

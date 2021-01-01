@@ -51,6 +51,11 @@ public class DataRedisStorage implements DataStorage {
     }
 
     @Override
+    public Optional<User> loadUser(String playerName) throws Exception {
+        return Optional.empty();
+    }
+
+    @Override
     public void saveUser(User user) {
         try (StatefulRedisConnection<String, User> conn = this.connectionFactory.getConnection()) {
             conn.sync().hset(STORAGE_KEY, user.uniqueId.toString(), user);

@@ -136,7 +136,7 @@ public class PlayerEnterListener extends BungeeAuthListener {
 
     private void handlePlayerSession(ServerConnectEvent e) {
         UUID uniqueId = e.getPlayer().getUniqueId();
-        BungeeAuthPlayer player = this.plugin.getAuthPlayers().get(uniqueId);
+        BungeeAuthPlayer player = this.plugin.getAuthPlayer(uniqueId);
 
         if (null == player.session || new Date().getTime() > player.session.time.endTime.getTime()) {
             handleUnauthorizedAction(e);
@@ -168,7 +168,7 @@ public class PlayerEnterListener extends BungeeAuthListener {
         e.registerIntent(this.plugin);
 
         // load session for player from database
-        this.plugin.getProxy().getScheduler().runAsync(plugin, () -> {
+        this.plugin.getScheduler().async().execute(() -> {
             try {
                 this.authManager.authenticate(c);
             } catch (AuthenticationException ex) {
@@ -190,14 +190,13 @@ public class PlayerEnterListener extends BungeeAuthListener {
     public void onConnect(ServerConnectEvent e) {
         UUID uniqueId = e.getPlayer().getUniqueId();
 
-        if (!this.plugin.getAuthPlayers().containsKey(uniqueId)) {
+        if (!this.plugin.hasAuthPlayer(uniqueId)) {
             handleUnauthorizedAction(e);
             return;
         }
 
         BungeeAuthPlayer player = this.plugin
-                .getAuthPlayers()
-                .get(uniqueId);
+                .getAuthPlayer(uniqueId);
         if (!player.isAuthenticated()) {
             handlePlayerSession(e);
         }
@@ -207,7 +206,7 @@ public class PlayerEnterListener extends BungeeAuthListener {
     public void onPlayerDisconnect(PlayerDisconnectEvent e) {
         ProxiedPlayer p = e.getPlayer();
         UUID uniqueId = p.getUniqueId();
-        this.plugin.getAuthPlayers().remove(uniqueId);
+        this.plugin.removeAuthPlayer(uniqueId);
     }
 }
 

@@ -1,7 +1,6 @@
 package org.nocraft.renay.bungeeauth.listener;
 
 import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
@@ -14,7 +13,6 @@ import org.nocraft.renay.bungeeauth.config.MessageKeys;
 import org.nocraft.renay.bungeeauth.event.FailedCreationSessionEvent;
 import org.nocraft.renay.bungeeauth.event.PlayerAuthenticatedEvent;
 import org.nocraft.renay.bungeeauth.event.PlayerLoginFailedEvent;
-import org.nocraft.renay.bungeeauth.event.PlayerRegisteredEvent;
 import org.nocraft.renay.bungeeauth.server.ServerManager;
 import org.nocraft.renay.bungeeauth.server.ServerType;
 import org.nocraft.renay.bungeeauth.storage.session.Session;
@@ -37,22 +35,24 @@ public class PlayerLoginListener extends BungeeAuthListener {
 
     private void cleanupSessions() {
         Queue<Map<String, Session>> playerSessions = this.plugin
-                .getSessionStorage()
-                .loadAll().join();
+                .getSessionStorage().loadAll().join();
+
         for (Map<String, Session> sessions : playerSessions) {
-            sessions.forEach((key, session) -> {
-                Date endTime = session.time.endTime;
-                if (System.currentTimeMillis() > endTime.getTime()) {
-                    this.plugin.getSessionStorage().remove(session.userId, key);
-                }
-            });
+            sessions.forEach(this::dropSession);
+        }
+    }
+
+    private void dropSession(String key, Session session) {
+        Date endTime = session.time.endTime;
+        if (System.currentTimeMillis() > endTime.getTime()) {
+            this.plugin.getSessionStorage().remove(session.userId, key);
         }
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void onSuccessfulEventChangeStatus(PlayerAuthenticatedEvent e) {
-        BungeeAuthPlayer player = this.plugin.getAuthPlayers()
-                .get(e.getPlayerId());
+        BungeeAuthPlayer player = this.plugin.getAuthPlayer(e.getPlayerId());
+
         if (player != null) {
             player.authenticated();
         }
@@ -60,7 +60,7 @@ public class PlayerLoginListener extends BungeeAuthListener {
 
     @EventHandler(priority = EventPriority.LOW)
     public void onSuccessfulPlayerLogin(PlayerAuthenticatedEvent e) {
-        plugin.getPlayer(e.getPlayerId()).ifPresent(player -> {
+        this.plugin.getPlayer(e.getPlayerId()).ifPresent(player -> {
             // clean chat after login
             for (int i = 0; i < 23; i++) {
                 player.sendMessage(new TextComponent());
@@ -76,13 +76,13 @@ public class PlayerLoginListener extends BungeeAuthListener {
 
             // needs to connect player to game servers?
             if (!e.isConnectHandled()) {
-                connector.connect(ServerType.GAME, player);
+                this.connector.connect(ServerType.GAME, player);
             }
         });
     }
 
     private void logAuthenticatedPlayer(ProxiedPlayer p) {
-        plugin.getLogger().info(String.format("Player %s successfully login as Offline player", p.getName()));
+        this.plugin.getLogger().info(String.format("Player %s successfully login as Offline player", p.getName()));
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
@@ -93,7 +93,7 @@ public class PlayerLoginListener extends BungeeAuthListener {
             player.disconnect(message.asComponent());
 
             String msg = "Player %s failed create session with ip %s.";
-            plugin.getLogger().warning(String.format(msg, player.getName(), PlayerWrapper.wrap(player).getIpAddress()));
+            this.plugin.getLogger().warning(String.format(msg, player.getName(), PlayerWrapper.wrap(player).getIpAddress()));
         });
     }
 
@@ -105,7 +105,7 @@ public class PlayerLoginListener extends BungeeAuthListener {
             player.disconnect(message.asComponent());
 
             String msg = "Player %s failed register with ip %s.";
-            plugin.getLogger().warning(String.format(msg, player.getName(), PlayerWrapper.wrap(player).getIpAddress()));
+            this.plugin.getLogger().warning(String.format(msg, player.getName(), PlayerWrapper.wrap(player).getIpAddress()));
         });
     }
 }

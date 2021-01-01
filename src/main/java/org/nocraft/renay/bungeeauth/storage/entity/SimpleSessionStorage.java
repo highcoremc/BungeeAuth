@@ -5,10 +5,7 @@ import org.nocraft.renay.bungeeauth.storage.AbstractStorage;
 import org.nocraft.renay.bungeeauth.storage.session.Session;
 import org.nocraft.renay.bungeeauth.storage.session.SessionStorage;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.Queue;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 public class SimpleSessionStorage extends AbstractStorage {
@@ -35,6 +32,10 @@ public class SimpleSessionStorage extends AbstractStorage {
         return makeFuture(() -> this.implementation.loadSession(uniqueId, key));
     }
 
+    public CompletableFuture<Map<String, Session>> loadSessions(UUID uniqueId) {
+        return makeFuture(() -> this.implementation.loadSessions(uniqueId));
+    }
+
     public CompletableFuture<Void> save(Session session) {
         return makeFuture(() -> this.implementation.saveSession(session));
     }
@@ -50,5 +51,9 @@ public class SimpleSessionStorage extends AbstractStorage {
 
     public CompletableFuture<Void> remove(UUID uniqueId, String key) {
         return makeFuture(() -> this.implementation.removeSession(uniqueId, key));
-    };
+    }
+
+    public CompletableFuture<Void> remove(List<Session> sessions) {
+        return makeFuture(() -> this.implementation.removeSession(sessions));
+    }
 }

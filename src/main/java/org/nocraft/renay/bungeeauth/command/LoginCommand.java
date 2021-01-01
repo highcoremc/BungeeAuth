@@ -45,11 +45,10 @@ public class LoginCommand extends BungeeAuthCommand {
 		switch (result) {
 			case SUCCESS_LOGIN:
 				try {
-					BungeeAuthPlayer bap = this.plugin.getAuthPlayers().get(player.getUniqueId());
+					BungeeAuthPlayer bap = this.plugin.getAuthPlayer(player.getUniqueId());
 					PlayerAuthenticatedEvent event = new PlayerAuthenticatedEvent(player.getUniqueId());
 
-					this.plugin.updateAuthSession(bap).thenAccept(s ->
-							this.plugin.getPluginManager().callEvent(event));
+					this.plugin.updateAuthSession(bap).thenAccept(s -> this.plugin.getPluginManager().callEvent(event));
 				} catch (IllegalStateException ex) {
 					ex.printStackTrace();
 					PlayerLoginFailedEvent event = new PlayerLoginFailedEvent(player.getUniqueId());

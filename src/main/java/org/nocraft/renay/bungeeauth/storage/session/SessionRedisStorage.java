@@ -1,7 +1,6 @@
 package org.nocraft.renay.bungeeauth.storage.session;
 
 import com.lambdaworks.redis.api.StatefulRedisConnection;
-import com.sun.jmx.remote.internal.ArrayQueue;
 import org.nocraft.renay.bungeeauth.BungeeAuthPlugin;
 import org.nocraft.renay.bungeeauth.storage.implementation.nosql.RedisConnectionFactory;
 
@@ -71,6 +70,22 @@ public class SessionRedisStorage implements SessionStorage {
     public void removeSession(UUID uniqueId, String key) {
         try (StatefulRedisConnection<String, Session> conn = this.connectionFactory.getConnection()) {
             conn.sync().hdel(craftKey(uniqueId), key);
+        }
+    }
+
+    @Override
+    public Map<String, Session> loadSessions(UUID uniqueId) {
+        try (StatefulRedisConnection<String, Session> conn = this.connectionFactory.getConnection()) {
+            return conn.sync().hgetall(craftKey(uniqueId));
+        }
+    }
+
+    @Override
+    public void removeSession(List<Session> sessions) {
+        try (StatefulRedisConnection<String, Session> conn = this.connectionFactory.getConnection()) {
+            for (Session session : sessions) {
+                conn.sync().hdel(craftKey(session.userId), session.ipAddress);
+            }
         }
     }
 

@@ -6,6 +6,7 @@ import org.nocraft.renay.bungeeauth.storage.entity.SessionTime;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -54,5 +55,48 @@ public class Session implements Serializable {
             this.ioLock = new ReentrantLock();
         }
         return this.ioLock;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (!(o instanceof Session)) {
+            return false;
+        }
+
+        Session session = (Session) o;
+
+        if (!Objects.equals(username, session.username)) {
+            return false;
+        }
+
+        if (!userId.equals(session.userId)) {
+            return false;
+        }
+
+        if (!Objects.equals(ipAddress, session.ipAddress)) {
+            return false;
+        }
+
+        if (!Objects.equals(time, session.time)) {
+            return false;
+        }
+
+        return Objects.equals(ioLock, session.ioLock);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = username != null ? username.hashCode() : 0;
+
+        result = 31 * result + userId.hashCode();
+        result = 31 * result + (ipAddress != null ? ipAddress.hashCode() : 0);
+        result = 31 * result + (time != null ? time.hashCode() : 0);
+        result = 31 * result + (ioLock != null ? ioLock.hashCode() : 0);
+
+        return result;
     }
 }

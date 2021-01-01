@@ -96,8 +96,11 @@ public class MessageKeys {
     public static final ConfigKey<Message> CHANGEPASSWORD_WRONG_CONFIRM = messageKey(
         c -> c.getString("changepassword-wrong-confirm-password", ""));
 
-    public static final ConfigKey<Message> CHANGEPASSWORD_SUCCESS = messageKey(
-        c -> c.getString("changepassword-success", ""));
+    public static final ConfigKey<Message> CHANGEPASSWORD_OTHER_SUCCESS = messageKey(
+        c -> c.getString("changepassword-other-success", ""));
+
+    public static final ConfigKey<Message> CHANGEPASSWORD_SELF_SUCCESS = messageKey(
+        c -> c.getString("changepassword-self-success", ""));
 
     public static final ConfigKey<Message> CHANGEPASSWORD_REAUTHENTICATE = messageKey(
         c -> c.getString("changepassword-reauthenticate", ""));

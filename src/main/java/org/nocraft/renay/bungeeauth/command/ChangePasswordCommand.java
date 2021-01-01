@@ -6,6 +6,7 @@ import org.nocraft.renay.bungeeauth.BungeeAuthPlayer;
 import org.nocraft.renay.bungeeauth.BungeeAuthPlugin;
 import org.nocraft.renay.bungeeauth.config.Message;
 import org.nocraft.renay.bungeeauth.config.MessageKeys;
+import org.nocraft.renay.bungeeauth.event.ChangedPasswordEvent;
 import org.nocraft.renay.bungeeauth.storage.entity.User;
 import org.nocraft.renay.bungeeauth.storage.entity.UserPassword;
 
@@ -55,12 +56,11 @@ public class ChangePasswordCommand extends BungeeAuthCommand {
             .createUserPassword(player, newPassword);
         authPlayer.user.changePassword(password);
 
+        ChangedPasswordEvent event = new ChangedPasswordEvent(
+            player, player.getUniqueId(), player.getName());
+
         this.plugin.getDataStorage().changeUserPassword(authPlayer.user.getPassword())
-            .thenRun(() -> {
-                Message message = plugin.getMessageConfig().get(
-                    MessageKeys.CHANGEPASSWORD_SUCCESS);
-                player.sendMessage(message.asComponent(player.getName()));
-            });
+            .thenRun(() -> this.plugin.getPluginManager().callEvent(event));
     }
 
     private void asConsole(CommandSender sender, String[] args) {
@@ -74,38 +74,39 @@ public class ChangePasswordCommand extends BungeeAuthCommand {
         String playerName = args[0];
         String newPassword = args[1];
 
-        this.plugin.getScheduler().async().execute(() -> {
-            Optional<User> optionalUser;
+        this.plugin.getScheduler().async().execute(() -> handle(sender, playerName, newPassword));
+    }
 
-            try {
-                optionalUser = this.plugin.getDataStorage().loadUser(playerName).get();
-            } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
-                return;
-            }
+    private void handle(CommandSender sender, String playerName, String newPassword) {
+        Optional<User> optionalUser;
 
-            if (!optionalUser.isPresent()) {
-                Message message = this.plugin.getMessageConfig()
-                    .get(MessageKeys.PLAYER_ACCOUNT_NOT_FOUND);
-                sender.sendMessage(message.asComponent(playerName));
-                return;
-            }
+        try {
+            optionalUser = this.plugin.getDataStorage().loadUser(playerName).get();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            return;
+        }
 
-            User user = optionalUser.get();
-            UserPassword password = this.plugin.getAuthFactory()
-                .createUserPassword(user, newPassword);
-            user.changePassword(password);
-
-            try {
-                this.plugin.getDataStorage().changeUserPassword(user.getPassword()).get();
-            } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
-                return;
-            }
-
-            Message message = this.plugin.getMessageConfig().get(
-                MessageKeys.CHANGEPASSWORD_SUCCESS);
+        if (!optionalUser.isPresent()) {
+            Message message = this.plugin.getMessageConfig()
+                .get(MessageKeys.PLAYER_ACCOUNT_NOT_FOUND);
             sender.sendMessage(message.asComponent(playerName));
-        });
+            return;
+        }
+
+        User user = optionalUser.get();
+
+        UserPassword password = this.plugin.getAuthFactory()
+            .createUserPassword(user, newPassword);
+        user.changePassword(password);
+
+        try {
+            this.plugin.getDataStorage().changeUserPassword(user.getPassword()).get();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        this.plugin.getPluginManager().callEvent(new ChangedPasswordEvent(sender, user.uniqueId, playerName));
     }
 }

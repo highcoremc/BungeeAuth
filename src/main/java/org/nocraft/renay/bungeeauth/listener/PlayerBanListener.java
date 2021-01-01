@@ -11,11 +11,12 @@ import org.nocraft.renay.bungeeauth.config.MessageKeys;
 import org.nocraft.renay.bungeeauth.event.PlayerAttemptsLoginExceeded;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 public class PlayerBanListener extends BungeeAuthListener {
 
-    private volatile Map<UUID, Long> bannedPlayers = new HashMap<>();
+    private final Map<UUID, Long> bannedPlayers = new ConcurrentHashMap<>();
 
     private final BungeeAuthPlugin plugin;
     private final int bannedTime;
@@ -64,16 +65,17 @@ public class PlayerBanListener extends BungeeAuthListener {
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void onPlayerExceededAttempts(PlayerAttemptsLoginExceeded e) {
-        Optional<ProxiedPlayer> player = this.plugin.getPlayer(e.getPlayerId());
-        Message message = plugin.getMessageConfig().get(
-                MessageKeys.EXCEEDED_LOGIN_ATTEMPTS);
-        player.ifPresent(this::addBannedPlayer);
-        player.ifPresent(p -> p.disconnect(message.asComponent()));
+        this.plugin.getPlayer(e.getPlayerId()).ifPresent(this::banPlayer);
     }
 
-    private void addBannedPlayer(ProxiedPlayer p) {
+    private void banPlayer(ProxiedPlayer p) {
         // end time of ban in minutes represent in milliseconds
-        long endTime = System.currentTimeMillis() + (1000 * 60 * bannedTime);
+        long endTime = System.currentTimeMillis() + (1000L * 60 * bannedTime);
         this.bannedPlayers.put(p.getUniqueId(), endTime);
+
+        Message message = plugin.getMessageConfig().get(
+            MessageKeys.EXCEEDED_LOGIN_ATTEMPTS);
+
+        p.disconnect(message.asComponent());
     }
 }

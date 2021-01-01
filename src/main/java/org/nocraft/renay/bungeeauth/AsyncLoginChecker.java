@@ -44,8 +44,8 @@ public class AsyncLoginChecker implements Runnable {
 
         for (ServerInfo server : this.servers) {
             for (ProxiedPlayer player : server.getPlayers()) {
-                BungeeAuthPlayer bungeeAuthPlayer = this.plugin.getAuthPlayers()
-                        .get(player.getUniqueId());
+                BungeeAuthPlayer bungeeAuthPlayer = this.plugin
+                    .getAuthPlayer(player.getUniqueId());
 
                 if (bungeeAuthPlayer == null) {
                     tryAuthenticate(player);

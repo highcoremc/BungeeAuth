@@ -3,6 +3,7 @@ package org.nocraft.renay.bungeeauth.storage;
 import org.nocraft.renay.bungeeauth.BungeeAuthPlugin;
 import org.nocraft.renay.bungeeauth.util.Throwing;
 
+import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
