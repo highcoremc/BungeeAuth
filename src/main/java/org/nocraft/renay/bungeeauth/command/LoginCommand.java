@@ -64,7 +64,7 @@ public class LoginCommand extends BungeeAuthCommand {
 				return;
 			case ACCOUNT_NOT_FOUND:
 				Message msg = plugin.getMessageConfig()
-						.get(MessageKeys.ACCOUNT_NOT_FOUND);
+						.get(MessageKeys.AUTHENTICATION_ACCOUNT_NOT_FOUND);
 				player.disconnect(msg.asComponent());
 		}
 	}

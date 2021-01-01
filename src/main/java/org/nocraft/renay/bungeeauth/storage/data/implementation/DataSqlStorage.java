@@ -153,6 +153,11 @@ public class DataSqlStorage implements DataStorage {
         return Optional.empty();
     }
 
+    @Override
+    public Optional<User> loadUser(String playerName) throws Exception {
+        return Optional.empty();
+    }
+
     private Optional<UserPassword> loadUserPassword(UUID uniqueId) {
         try (Connection c = this.connectionFactory.getConnection()) {
             try (Query query = c.createQuery(this.statementProcessor.apply(USER_PASSWORD_SELECT))) {
@@ -172,7 +177,10 @@ public class DataSqlStorage implements DataStorage {
     public void changeUserPassword(@NonNull UserPassword password) {
         password.getIOLock().lock();
         try (Connection c = this.connectionFactory.getConnection()) {
-            try (Query query = c.createQuery(this.statementProcessor.apply(USER_PASSWORD_SELECT_ID))) {
+            String apply = this.statementProcessor
+                .apply(USER_PASSWORD_SELECT_ID);
+
+            try (Query query = c.createQuery(apply)) {
                 UserPassword result = query
                         .withParams(password.uniqueId.toString())
                         .executeAndFetchFirst(UserPassword.class);
@@ -202,21 +210,17 @@ public class DataSqlStorage implements DataStorage {
     @Override
     public void saveUser(@NonNull User user) {
         user.getOILock().lock();
-        try {
-            // Change user password if it exists
-            if (user.hasPassword()) changeUserPassword(user.getPassword());
-            try (Connection c = this.connectionFactory.getConnection()) {
-                try (Query query = c.createQuery(this.statementProcessor.apply(USER_SELECT_ID_BY_UID))) {
-                    User result = query
-                            .withParams(user.uniqueId.toString())
-                            .executeAndFetchFirst(User.class);
-                    if (result == null) {
-                        saveUser(c, user, USER_INSERT);
-                    }
+        try (Connection c = this.connectionFactory.getConnection()) {
+            try (Query query = c.createQuery(this.statementProcessor.apply(USER_SELECT_ID_BY_UID))) {
+                User result = query
+                        .withParams(user.uniqueId.toString())
+                        .executeAndFetchFirst(User.class);
+                if (result == null) {
+                    saveUser(c, user, USER_INSERT);
                 }
-            } catch (Exception ex) {
-                ex.printStackTrace();
             }
+        } catch (Exception ex) {
+            ex.printStackTrace();
         } finally {
             user.getOILock().unlock();
         }
@@ -257,8 +261,7 @@ public class DataSqlStorage implements DataStorage {
 
         try (Connection c = this.connectionFactory.getConnection()) {
             try (Query query = c.createQuery(this.statementProcessor.apply(USER_SELECT_ID_BY_USERNAME))) {
-                return query.withParams(username)
-                        .executeAndFetchFirst(User.class).uniqueId;
+                return query.withParams(username).executeAndFetchFirst(User.class).uniqueId;
             }
         } catch (SQLException | Sql2oException ex) {
             ex.printStackTrace();

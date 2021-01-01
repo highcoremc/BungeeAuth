@@ -1,11 +1,10 @@
 package org.nocraft.renay.bungeeauth;
 
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import org.nocraft.renay.bungeeauth.config.Message;
 import org.nocraft.renay.bungeeauth.config.MessageKeys;
+import org.nocraft.renay.bungeeauth.exception.AuthenticationException;
 import org.nocraft.renay.bungeeauth.server.ServerManager;
 import org.nocraft.renay.bungeeauth.server.ServerType;
 import org.nocraft.renay.bungeeauth.util.TitleBarApi;
@@ -18,7 +17,7 @@ public class AsyncLoginChecker implements Runnable {
 
     private final Queue<ServerInfo> servers;
     private final BungeeAuthPlugin plugin;
-    private long maxAuthTime = 300;
+    private long maxAuthTime = 500;
 
     /**
      * Checks async players on auth servers.
@@ -49,6 +48,7 @@ public class AsyncLoginChecker implements Runnable {
                         .get(player.getUniqueId());
 
                 if (bungeeAuthPlayer == null) {
+                    tryAuthenticate(player);
                     return;
                 }
 
@@ -82,6 +82,19 @@ public class AsyncLoginChecker implements Runnable {
                 }
             }
         }
+    }
+
+    private void tryAuthenticate(ProxiedPlayer player) {
+        this.plugin.getScheduler().async().execute(() -> {
+            try {
+                this.plugin.getAuthManager().authenticate(
+                    player.getPendingConnection());
+            } catch (AuthenticationException ex) {
+                Message message = this.plugin.getMessageConfig()
+                    .get(MessageKeys.FAILED_AUTHENTICATION);
+                player.disconnect(message.asComponent());
+            }
+        });
     }
 
     private void sendRegisterTitle(TitleBarApi titleBarApi, ProxiedPlayer player) {

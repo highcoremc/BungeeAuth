@@ -14,6 +14,10 @@ public class ConfigKeyTypes {
         return new EnduringKey<>(delegate);
     }
 
+    public static MessageKey messageKey(Function<ConfigurationAdapter, String> function) {
+        return new MessageKey(function);
+    }
+
     public abstract static class BaseConfigKey<T> implements ConfigKey<T> {
         int ordinal = -1;
 
@@ -50,6 +54,20 @@ public class ConfigKeyTypes {
         @Override
         public T get(ConfigurationAdapter adapter) {
             return this.delegate.get(adapter);
+        }
+    }
+
+    public static class MessageKey extends BaseConfigKey<Message> {
+
+        private final Function<ConfigurationAdapter, String> function;
+
+        private MessageKey(Function<ConfigurationAdapter, String> function) {
+            this.function = function;
+        }
+
+        @Override
+        public Message get(ConfigurationAdapter adapter) {
+            return new Message(this.function.apply(adapter));
         }
     }
 

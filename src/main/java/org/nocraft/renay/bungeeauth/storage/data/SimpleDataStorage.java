@@ -56,6 +56,10 @@ public class SimpleDataStorage extends AbstractStorage {
         return makeFuture(() -> this.implementation.loadUser(uniqueId));
     }
 
+    public CompletableFuture<Optional<User>> loadUser(String playerName) {
+        return makeFuture(() -> this.implementation.loadUser(playerName));
+    }
+
     public CompletableFuture<Void> saveUser(@NonNull User user) {
         return makeFuture(() -> this.implementation.saveUser(user));
     }

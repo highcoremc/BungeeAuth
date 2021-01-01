@@ -77,7 +77,8 @@ public class RegisterCommand extends BungeeAuthCommand {
         User user = authPlayer.user;
 
         this.plugin.getDataStorage().saveUser(user)
-                .thenAccept(s -> this.applySuccessfulRegister(uniqueId))
+                .thenRun(() -> this.plugin.getDataStorage().changeUserPassword(user.getPassword()))
+                .thenRun(() -> this.applySuccessfulRegister(uniqueId))
                 .exceptionally(s -> this.applyFailedRegister(uniqueId));
     }
 

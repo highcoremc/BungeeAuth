@@ -16,31 +16,29 @@ import org.nocraft.renay.bungeeauth.config.ConfigKeys;
 import org.nocraft.renay.bungeeauth.config.Message;
 import org.nocraft.renay.bungeeauth.config.MessageKeys;
 import org.nocraft.renay.bungeeauth.event.PlayerAuthenticatedEvent;
+import org.nocraft.renay.bungeeauth.exception.AuthenticationException;
 import org.nocraft.renay.bungeeauth.server.ServerManager;
 import org.nocraft.renay.bungeeauth.server.ServerType;
-import org.nocraft.renay.bungeeauth.storage.data.SimpleDataStorage;
-import org.nocraft.renay.bungeeauth.storage.entity.SimpleSessionStorage;
-import org.nocraft.renay.bungeeauth.storage.entity.User;
-import org.nocraft.renay.bungeeauth.storage.session.Session;
+import org.nocraft.renay.bungeeauth.service.AuthManager;
 
 import java.net.InetSocketAddress;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 public class PlayerEnterListener extends BungeeAuthListener {
 
-    private final SimpleSessionStorage sessionStorage;
-    private final SimpleDataStorage dataStorage;
-
     private final ServerManager connector;
     private final BungeeAuthPlugin plugin;
+    private final AuthManager authManager;
 
     public PlayerEnterListener(BungeeAuthPlugin plugin) {
         super(plugin);
-        this.sessionStorage = plugin.getSessionStorage();
-        this.connector = plugin.getServerManager();
-        this.dataStorage = plugin.getDataStorage();
         this.plugin = plugin;
+        this.connector = plugin.getServerManager();
+        this.authManager = this.plugin.getAuthManager();
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -161,22 +159,6 @@ public class PlayerEnterListener extends BungeeAuthListener {
         this.plugin.getPluginManager().callEvent(event);
     }
 
-    private User loadUser(PendingConnection c, UUID uniqueId) {
-        Optional<User> userQuery = this.dataStorage
-                .loadUser(uniqueId).join();
-
-        if (userQuery.isPresent()) {
-            return userQuery.get();
-        }
-
-        InetSocketAddress address = (InetSocketAddress) c.getSocketAddress();
-
-        String host = address.getHostString();
-        String userName = c.getName();
-
-        return new User(uniqueId, userName, host);
-    }
-
     @EventHandler(priority = EventPriority.NORMAL)
     public void onPlayerConnect(LoginEvent e) {
         PendingConnection c = e.getConnection();
@@ -188,27 +170,13 @@ public class PlayerEnterListener extends BungeeAuthListener {
         // load session for player from database
         this.plugin.getProxy().getScheduler().runAsync(plugin, () -> {
             try {
-                UUID uniqueId = c.getUniqueId();
-                User user = loadUser(c, uniqueId);
-
-                String host = c.getAddress().getHostString();
-                BungeeAuthPlayer player = new BungeeAuthPlayer(user);
-
-                Optional<Session> session = this.sessionStorage
-                        .loadSession(uniqueId, host).join();
-                if (!player.user.isRegistered()) {
-                    session.ifPresent(s -> this.sessionStorage.remove(uniqueId, s.ipAddress));
-                } else {
-                    session.ifPresent(player::changeActiveSession);
-                }
-
-                this.plugin.getAuthPlayers().put(uniqueId, player);
-            } catch (Exception ex) {
+                this.authManager.authenticate(c);
+            } catch (AuthenticationException ex) {
                 this.plugin.getLogger().severe("Exception occurred whilst loading data for " + c.getUniqueId() + " - " + c.getName());
                 ex.printStackTrace();
                 e.setCancelled(true);
                 Message message = plugin.getMessageConfig()
-                        .get(MessageKeys.BAD_REQUEST);
+                    .get(MessageKeys.BAD_REQUEST);
                 e.setCancelReason(message.asComponent());
             } finally {
                 // finally, complete our intent to modify state, so the proxy can continue handling the connection.

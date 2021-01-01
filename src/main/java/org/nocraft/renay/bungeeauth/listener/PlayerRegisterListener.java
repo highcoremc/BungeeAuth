@@ -33,32 +33,38 @@ public class PlayerRegisterListener extends BungeeAuthListener {
             return;
         }
 
+        ProxiedPlayer player = p.get();
         Optional<Session> optionalSession = this.plugin.getAuthFactory().createSession(uniqueId);
         if (!optionalSession.isPresent()) {
-            plugin.getLogger().info("Player session " + p.get().getName() + " is not present..");
-            this.plugin.getPluginManager().callEvent(
-                    new FailedCreationSessionEvent(uniqueId));
+            plugin.getLogger().info("Player session " + player.getName() + " is not present..");
+            this.plugin.getPluginManager().callEvent(new FailedCreationSessionEvent(uniqueId));
             return;
         }
 
         Session session = optionalSession.get();
-        BungeeAuthPlayer authPlayer = this.plugin
-                .getAuthPlayers()
-                .get(uniqueId);
+        BungeeAuthPlayer authPlayer = this.plugin.getAuthPlayer(uniqueId);
 
         // remove old title
-        TitleBarApi.send(p.get(), new Message(""), new Message(""), 0, 10, 0);
+        TitleBarApi.send(player, new Message(""), new Message(""), 0, 10, 0);
         this.plugin.getSessionStorage().save(session)
                 .thenAccept(s -> authPlayer.changeActiveSession(session))
+                .thenAccept(s -> this.applySuccessfulRegister(player))
                 .thenAccept(s -> this.applySuccessfulLogin(uniqueId))
                 .exceptionally(ex -> this.applyFailedLogin(ex, uniqueId));
+    }
+
+    public void applySuccessfulRegister(ProxiedPlayer p) {
+        String message = "Player %s was a successfully registered!";
+        plugin.getLogger().info(String.format(message, p.getName()));
+        this.plugin.getAttemptManager().clearAttempts(p.getUniqueId());
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void onPlayerFailedRegister(PlayerRegisterFailedEvent e) {
         this.plugin.getPlayer(e.getPlayerId()).ifPresent(player -> {
             Message message = plugin.getMessageConfig()
-                    .get(MessageKeys.FAILED_REGISTER);
+                .get(MessageKeys.FAILED_REGISTER);
+
             player.disconnect(message.asComponent());
             String msg = "Player %s failed register with ip %s.";
             plugin.getLogger().warning(String.format(msg, player.getName(), PlayerWrapper.wrap(player).getIpAddress()));

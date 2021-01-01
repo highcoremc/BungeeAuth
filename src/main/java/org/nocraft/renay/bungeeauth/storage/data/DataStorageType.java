@@ -8,9 +8,7 @@ public enum DataStorageType {
 
     // Remote databases
     POSTGRESQL("PostgreSQL", "postgresql"),
-
-    // Custom
-    CUSTOM("Custom", "custom");
+    REDIS("Redis", "redis");
 
     private final String name;
 

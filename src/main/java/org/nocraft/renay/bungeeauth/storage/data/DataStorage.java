@@ -10,6 +10,8 @@ import java.util.*;
 public interface DataStorage extends Storage {
     Optional<User> loadUser(UUID uniqueId) throws Exception;
 
+    Optional<User> loadUser(String playerName) throws Exception;
+
     void saveUser(User user) throws Exception;
 
     void changeUserPassword(UserPassword password);

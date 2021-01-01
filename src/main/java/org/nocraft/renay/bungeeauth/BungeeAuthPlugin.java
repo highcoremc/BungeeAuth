@@ -11,6 +11,7 @@ import org.nocraft.renay.bungeeauth.authentication.hash.HashMethod;
 import org.nocraft.renay.bungeeauth.authentication.hash.HashMethodFactory;
 import org.nocraft.renay.bungeeauth.authentication.hash.HashMethodType;
 import org.nocraft.renay.bungeeauth.command.BungeeAuthCommand;
+import org.nocraft.renay.bungeeauth.command.ChangePasswordCommand;
 import org.nocraft.renay.bungeeauth.command.LoginCommand;
 import org.nocraft.renay.bungeeauth.command.RegisterCommand;
 import org.nocraft.renay.bungeeauth.config.ConfigKeys;
@@ -22,6 +23,7 @@ import org.nocraft.renay.bungeeauth.listener.*;
 import org.nocraft.renay.bungeeauth.scheduler.Scheduler;
 import org.nocraft.renay.bungeeauth.server.ServerManager;
 import org.nocraft.renay.bungeeauth.server.ServerType;
+import org.nocraft.renay.bungeeauth.service.AuthManager;
 import org.nocraft.renay.bungeeauth.storage.data.DataStorageFactory;
 import org.nocraft.renay.bungeeauth.storage.data.SimpleDataStorage;
 import org.nocraft.renay.bungeeauth.storage.entity.SimpleSessionStorage;
@@ -59,8 +61,9 @@ public class BungeeAuthPlugin extends Plugin {
 
     private AttemptManager attemptManager;
 
-    private Scheduler scheduler;
     private ServerManager serverManager;
+    private AuthManager authManager;
+    private Scheduler scheduler;
 
     public void onEnable() {
         SessionStorageFactory sessionStorageFactory = new SessionStorageFactory(this);
@@ -83,6 +86,9 @@ public class BungeeAuthPlugin extends Plugin {
         Integer banTime = this.getConfiguration().get(ConfigKeys.BAN_TIME_MINUTES);
 
         this.serverManager = new ServerManager(this, this.getScheduler());
+        this.authManager = new AuthManager(this);
+
+        this.scheduler.async().execute(() -> this.authManager.authenticateOnlinePlayers());
 
         List<String> loginServers = this.getConfiguration().get(ConfigKeys.LOGIN_SERVERS);
         List<String> gameServers = this.getConfiguration().get(ConfigKeys.GAME_SERVERS);
@@ -100,6 +106,7 @@ public class BungeeAuthPlugin extends Plugin {
         this.listeners.add(new PlayerBanListener(this, banTime));
         this.listeners.register();
 
+        this.commands.add(new ChangePasswordCommand(this));
         this.commands.add(new RegisterCommand(this));
         this.commands.add(new LoginCommand(this));
         this.commands.register();
@@ -209,6 +216,10 @@ public class BungeeAuthPlugin extends Plugin {
         return this.authPlayers;
     }
 
+    public BungeeAuthPlayer getAuthPlayer(UUID uniqueId) {
+        return this.authPlayers.get(uniqueId);
+    }
+
     public SimpleDataStorage getDataStorage() {
         return this.dataStorage;
     }
@@ -241,5 +252,9 @@ public class BungeeAuthPlugin extends Plugin {
         }
 
         return player.isAuthenticated();
+    }
+
+    public AuthManager getAuthManager() {
+        return this.authManager;
     }
 }

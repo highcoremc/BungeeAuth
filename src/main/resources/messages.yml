@@ -54,7 +54,7 @@ password-min-length: |+
   &f
   &c&lFAILURE&f: &fPassword length can not be less then &e{0}&f.
   &f
-account-not-found: |+
+authentication-account-not-found: |+
   &6&lFAILURE AUTHENTICATION
   &f
   &fSorry for the inconvenience,

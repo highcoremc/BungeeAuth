@@ -1,7 +1,6 @@
 package org.nocraft.renay.bungeeauth.config;
 
 import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 
@@ -24,11 +23,8 @@ public class Message {
         }
         return ChatColor.translateAlternateColorCodes('&', s);
     }
-    public void send(CommandSender sender, Object... objects) {
-        sender.sendMessage(asComponent(objects));
-    }
 
-    public String asString(Object... objects) {
+    public String toString(Object... objects) {
         return format(this.message, objects);
     }
 }

@@ -32,8 +32,7 @@ public class PlayerLoginListener extends BungeeAuthListener {
         super(plugin);
         this.plugin = plugin;
         this.connector = plugin.getServerManager();
-        this.plugin.getScheduler().asyncRepeating(
-                this::cleanupSessions, 10, TimeUnit.MINUTES);
+        this.plugin.getScheduler().asyncRepeating(this::cleanupSessions, 10, TimeUnit.MINUTES);
     }
 
     private void cleanupSessions() {
@@ -44,8 +43,7 @@ public class PlayerLoginListener extends BungeeAuthListener {
             sessions.forEach((key, session) -> {
                 Date endTime = session.time.endTime;
                 if (System.currentTimeMillis() > endTime.getTime()) {
-                    this.plugin.getSessionStorage().remove(
-                            session.userId, key);
+                    this.plugin.getSessionStorage().remove(session.userId, key);
                 }
             });
         }
@@ -70,8 +68,7 @@ public class PlayerLoginListener extends BungeeAuthListener {
 
             // remove old title
             TitleBarApi.send(player, new Message(""), new Message(""), 0, 15, 0);
-            Message message = plugin.getMessageConfig()
-                    .get(MessageKeys.USER_AUTHENTICATED);
+            Message message = plugin.getMessageConfig().get(MessageKeys.USER_AUTHENTICATED);
             player.sendMessage(message.asComponent());
 
             // log message what player is authenticated
@@ -86,23 +83,6 @@ public class PlayerLoginListener extends BungeeAuthListener {
 
     private void logAuthenticatedPlayer(ProxiedPlayer p) {
         plugin.getLogger().info(String.format("Player %s successfully login as Offline player", p.getName()));
-    }
-
-    @EventHandler(priority = EventPriority.NORMAL)
-    public void onSuccessfulPlayerRegister(PlayerRegisteredEvent e) {
-        UUID uniqueId = e.getPlayerId();
-        Optional<ProxiedPlayer> p = this.plugin
-                .getPlayer(uniqueId);
-
-        if (p.isPresent()) {
-            String message = "Player %s was a successfully registered!";
-            plugin.getLogger().info(String.format(message, p.get().getName()));
-            this.plugin.getAttemptManager().clearAttempts(uniqueId);
-        }
-
-        BungeeAuthPlayer player = this.plugin.getAuthPlayers()
-                .get(uniqueId);
-        this.plugin.getDataStorage().saveUser(player.user);
     }
 
     @EventHandler(priority = EventPriority.NORMAL)

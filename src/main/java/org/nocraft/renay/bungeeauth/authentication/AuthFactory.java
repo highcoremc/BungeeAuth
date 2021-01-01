@@ -7,6 +7,7 @@ import org.nocraft.renay.bungeeauth.authentication.hash.HashMethod;
 import org.nocraft.renay.bungeeauth.authentication.hash.HashMethodFactory;
 import org.nocraft.renay.bungeeauth.authentication.hash.HashMethodType;
 import org.nocraft.renay.bungeeauth.storage.entity.SessionTime;
+import org.nocraft.renay.bungeeauth.storage.entity.User;
 import org.nocraft.renay.bungeeauth.storage.entity.UserPassword;
 import org.nocraft.renay.bungeeauth.storage.session.Session;
 
@@ -62,6 +63,14 @@ public class AuthFactory {
         HashMethod method = HashMethodFactory.create(this.hashMethodType);
         String hash = method.hash(rawPassword);
         UUID uniqueId = player.getUniqueId();
+
+        return new UserPassword(uniqueId, hash, this.hashMethodType);
+    }
+
+    public UserPassword createUserPassword(User user, String rawPassword) {
+        HashMethod method = HashMethodFactory.create(this.hashMethodType);
+        String hash = method.hash(rawPassword);
+        UUID uniqueId = user.uniqueId;
 
         return new UserPassword(uniqueId, hash, this.hashMethodType);
     }

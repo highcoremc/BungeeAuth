@@ -1,5 +1,6 @@
 package org.nocraft.renay.bungeeauth.command;
 
+import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.plugin.Command;
 import org.nocraft.renay.bungeeauth.BungeeAuthPlugin;
 import org.nocraft.renay.bungeeauth.util.Registerable;
