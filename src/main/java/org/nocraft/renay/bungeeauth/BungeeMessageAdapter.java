@@ -83,9 +83,10 @@ public class BungeeMessageAdapter implements ConfigurationAdapter {
 
     @Override
     public Map<String, List<String>> getListString(String path, Map<String, List<String>> def) {
+        Configuration section = this.configuration.getSection(path);
+
         Map<String, List<String>> map = new HashMap<>();
-        Configuration section = this.configuration
-            .getSection(path);
+
         if (section == null) {
             return def;
         }

@@ -61,9 +61,9 @@ public class LoginCommand extends BungeeAuthCommand {
 				int leftAttempts = this.attemptManager.handle(player);
 				player.sendMessage(message.asComponent(leftAttempts));
 				return;
-			case ACCOUNT_NOT_FOUND:
+			case AUTHENTICATION_FAILED:
 				Message msg = plugin.getMessageConfig()
-						.get(MessageKeys.AUTHENTICATION_ACCOUNT_NOT_FOUND);
+						.get(MessageKeys.FAILED_AUTHENTICATION);
 				player.disconnect(msg.asComponent());
 		}
 	}

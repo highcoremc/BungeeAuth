@@ -7,6 +7,8 @@ import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
 import org.nocraft.renay.bungeeauth.BungeeAuthPlugin;
 
+import java.util.Arrays;
+
 public class PlayerChatListener extends BungeeAuthListener {
 
     private final BungeeAuthPlugin plugin;
@@ -33,8 +35,8 @@ public class PlayerChatListener extends BungeeAuthListener {
 
         if (!isLoginCommand(message)) {
             plugin.getLogger().info(String.format(
-                    "Player %s say %s and we was cancelled.",
-                    player.getName(), message
+                "Player %s say %s and we was cancelled.",
+                player.getName(), message
             ));
             e.setCancelled(true);
         }
@@ -47,7 +49,7 @@ public class PlayerChatListener extends BungeeAuthListener {
         }
 
         ProxiedPlayer player = (ProxiedPlayer)
-                event.getSender();
+            event.getSender();
         if (!plugin.isAuthenticated(player)) {
             event.getSuggestions().clear();
         }
@@ -55,11 +57,9 @@ public class PlayerChatListener extends BungeeAuthListener {
 
     private boolean isLoginCommand(String message) {
         String[] splitted = message.split(" ");
-        String cmd = splitted[0];
+        String cmd = splitted[0].substring(1);
 
-        return cmd.equals("/l") ||
-                cmd.equals("/reg") ||
-                cmd.equals("/login") ||
-                cmd.equals("/register");
+        String[] authCommands = {"l", "reg", "login", "register"};
+        return Arrays.asList(authCommands).contains(cmd.toLowerCase());
     }
 }

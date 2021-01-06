@@ -25,6 +25,7 @@ public class DataSqlStorage implements DataStorage {
     private static final String USER_INSERT = "INSERT INTO '{prefix}users' (unique_id, username, realname, registered_ip) VALUES(:p1, :p2, :p3, :p4)";
     private static final String USER_UPDATE = "UPDATE '{prefix}users' SET username = :p2, realname = :p3, registered_ip = :p4 WHERE unique_id = :p1";
     private static final String USER_SELECT_BY_UID = "SELECT unique_id,username,realname,registered_at,registered_ip FROM '{prefix}users' WHERE unique_id=:p1";
+    private static final String USER_SELECT_BY_NAME = "SELECT unique_id,username,realname,registered_at,registered_ip FROM '{prefix}users' WHERE username=:p1";
     private static final String USER_SELECT_ID_BY_UID = "SELECT id FROM '{prefix}users' WHERE unique_id=:p1";
     private static final String USER_SELECT_ALL_IDS = "SELECT id FROM '{prefix}users'";
 
@@ -133,9 +134,7 @@ public class DataSqlStorage implements DataStorage {
     public Optional<User> loadUser(UUID uniqueId) {
         try (Connection c = this.connectionFactory.getConnection()) {
             try (Query query = c.createQuery(this.statementProcessor.apply(USER_SELECT_BY_UID))) {
-                User user = query
-                        .withParams(uniqueId.toString())
-                        .executeAndFetchFirst(User.class);
+                User user = query.withParams(uniqueId.toString()).executeAndFetchFirst(User.class);
 
                 if (null == user) {
                     return Optional.empty();
@@ -154,7 +153,24 @@ public class DataSqlStorage implements DataStorage {
     }
 
     @Override
-    public Optional<User> loadUser(String playerName) throws Exception {
+    public Optional<User> loadUser(String playerName) {
+        try (Connection c = this.connectionFactory.getConnection()) {
+            try (Query query = c.createQuery(this.statementProcessor.apply(USER_SELECT_BY_NAME))) {
+                User user = query.withParams(playerName.toLowerCase()).executeAndFetchFirst(User.class);
+
+                if (null == user) {
+                    return Optional.empty();
+                }
+
+                Optional<UserPassword> password = loadUserPassword(user.uniqueId);
+                password.ifPresent(user::changePassword);
+
+                return Optional.of(user);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
         return Optional.empty();
     }
 

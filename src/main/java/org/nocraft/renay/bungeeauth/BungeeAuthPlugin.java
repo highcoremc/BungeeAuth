@@ -15,10 +15,7 @@ import org.nocraft.renay.bungeeauth.command.BungeeAuthCommand;
 import org.nocraft.renay.bungeeauth.command.ChangePasswordCommand;
 import org.nocraft.renay.bungeeauth.command.LoginCommand;
 import org.nocraft.renay.bungeeauth.command.RegisterCommand;
-import org.nocraft.renay.bungeeauth.config.ConfigKeys;
-import org.nocraft.renay.bungeeauth.config.Configuration;
-import org.nocraft.renay.bungeeauth.config.DefaultConfiguration;
-import org.nocraft.renay.bungeeauth.config.MessageConfiguration;
+import org.nocraft.renay.bungeeauth.config.*;
 import org.nocraft.renay.bungeeauth.config.adapter.ConfigurationAdapter;
 import org.nocraft.renay.bungeeauth.listener.*;
 import org.nocraft.renay.bungeeauth.scheduler.Scheduler;
@@ -28,6 +25,7 @@ import org.nocraft.renay.bungeeauth.service.AuthManager;
 import org.nocraft.renay.bungeeauth.storage.data.DataStorageFactory;
 import org.nocraft.renay.bungeeauth.storage.data.SimpleDataStorage;
 import org.nocraft.renay.bungeeauth.storage.entity.SimpleSessionStorage;
+import org.nocraft.renay.bungeeauth.storage.entity.User;
 import org.nocraft.renay.bungeeauth.storage.entity.UserPassword;
 import org.nocraft.renay.bungeeauth.storage.session.Session;
 import org.nocraft.renay.bungeeauth.storage.session.SessionStorageFactory;
@@ -103,6 +101,7 @@ public class BungeeAuthPlugin extends Plugin {
         this.listeners.add(new PlayerChatListener(this));
         this.listeners.add(new PlayerEnterListener(this));
         this.listeners.add(new PlayerLoginListener(this));
+        this.listeners.add(new ChangePasswordListener(this));
         this.listeners.add(new PlayerRegisterListener(this));
         this.listeners.add(new PlayerBanListener(this, banTime));
         this.listeners.register();
@@ -183,7 +182,7 @@ public class BungeeAuthPlugin extends Plugin {
         }
 
         if (!player.user.isRegistered() || !player.user.hasPassword()) {
-            return Authentication.Result.ACCOUNT_NOT_FOUND;
+            return Authentication.Result.AUTHENTICATION_FAILED;
         }
 
         if (null != player.session && player.session.isActive()) {
@@ -269,5 +268,9 @@ public class BungeeAuthPlugin extends Plugin {
 
     public void dropSessions(List<Session> sessions) {
         this.sessionStorage.remove(sessions);
+    }
+
+    public CompletableFuture<Optional<User>> loadUser(String playerName) {
+        return this.dataStorage.loadUser(playerName);
     }
 }

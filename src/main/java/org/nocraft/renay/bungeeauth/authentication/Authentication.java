@@ -4,7 +4,7 @@ public interface Authentication {
     enum Result {
         SUCCESS_LOGIN,
         WRONG_PASSWORD,
-        ACCOUNT_NOT_FOUND,
+        AUTHENTICATION_FAILED,
         ALREADY_AUTHENTICATED
     }
 }

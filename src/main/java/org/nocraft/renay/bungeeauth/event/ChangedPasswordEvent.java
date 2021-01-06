@@ -9,10 +9,11 @@ import java.util.UUID;
 public class ChangedPasswordEvent extends Event {
 
     private final CommandSender sender;
+    private final String playerName;
     private final UUID playerId;
-    private String playerName;
 
     public ChangedPasswordEvent(CommandSender sender, UUID playerId, String playerName) {
+        this.playerName = playerName;
         this.playerId = playerId;
         this.sender = sender;
     }

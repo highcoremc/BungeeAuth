@@ -62,8 +62,10 @@ public class BungeeConfigAdapter implements ConfigurationAdapter {
 
     @Override
     public Map<String, String> getStringMap(String path, Map<String, String> def) {
-        Map<String, String> map = new HashMap<>();
         Configuration section = this.configuration.getSection(path);
+
+        Map<String, String> map = new HashMap<>();
+
         if (section == null) {
             return def;
         }
@@ -77,10 +79,11 @@ public class BungeeConfigAdapter implements ConfigurationAdapter {
 
     @Override
     public Map<String, List<String>> getListString(String path, Map<String, List<String>> def) {
+        Configuration section = this.configuration.getSection(path);
+
         Map<String, List<String>> map = new HashMap<>();
-        Configuration section = this.configuration
-            .getSection(path);
-        if (section == null) {
+
+        if (section == null || section.getKeys().isEmpty()) {
             return def;
         }
 

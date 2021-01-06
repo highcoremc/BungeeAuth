@@ -1,86 +1,122 @@
 fail-session-creation: |+
-  &c&lFAIL AUTHENTICATION
+  &c&lОШИБКА АУТЕНТИФИКАЦИИ
   &f
-  &fServer can not handle your request,
-  &fPlease contact with administrator...
+  &fПроизошла ошибка при создании сессии.
+  &fПожалуйста попробуйте еще раз
+  &fили свяжитесь с администрацией!
 failed-authentication: |+
-  &c&lFAIL AUTHENTICATION
+  &c&lОШИБКА АУТЕНТИФИКАЦИИ
   &f
-  &fWe are can not process your login,
-  &fPlease contact with administration.
+  &fПроизошла ошибка при аутентификации.
+  &fПожалуйста попробуйте еще раз
+  &fлибо свяжитесь с администрацией!
 timeout-login: |+
-  &c&lFAILURE AUTHENTICATION
+  &c&lОШИБКА АУТЕНТИФИКАЦИИ
   &f
-  &fSorry, but you were not able to authenticate in 5 minutes.
+  &fВы были неактивны более 5 минут,
+  &fЛибо не успели пройти аутентификацию.
+  &fПожалуйста, перезайдите и попробуйте еще раз!
 failed-register: |+
-  &c&lFAIL REGISTRATION
+  &c&lОШИБКА РЕГИСТРАЦИИ
   &f
-  &fWe are can not process your request
-  &fPlease contact with administration..
+  &fСервер не может обработать ваш запрос.
+  &fПожалуйста попробуйте еще раз
+  &fили свяжитесь с администрацией!
 forbidden-access: |+
-  &c&lFORBIDDEN ACCESS
+  &c&lДОСТУП ЗАПРЕЩЕН
   &f
   &fВаша попытка входа зарегистрирована.
   &fВы попытались войти с неразрешенного
   &f
   &f        IP-адреса
 temporary-forbidden-access: |+
-  &c&lFORBIDDEN ACCESS
+  &c&lДОСТУП ЗАПРЕЩЕН
   &f
-  &fYou are banned for {0} minute(s).
-  &fBecause you entered the wrong password {1} times.
+  &fВы забанены на {0} минут(ы).
+  &fПотому что вы ввели неправильный пароль {1} раз(a).
 exceeded-login-attempts: |+
-  &c&lFAILURE AUTHENTICATION
+  &c&lОШИБКА АУТЕНТИФИКАЦИИ
   &f
-  &fNumber of login attempts exceeded. Please try again!
+  &fПревышено количество попыток входа.
+  &fПожалуйста, попробуйте еще раз!
 bad-nickname: |+
-  &c&lBAD NICKNAME
+  &c&lОШИБКА АУТЕНТИФИКАЦИИ
   &f
-  &fYour nickname contains forbidden symbols.
-  &fPlease change the alias and use only the Latin alphabet
-  &fwith the only one acceptable character &l_
+  &fВаш ник содержит запрещенные символы.
+  &fПожалуйста, используйте только символы
+  &fлатниского алфавита
 bad-request: |+
   &c&lBAD REQUEST
-  &fSorry, but the server cannot process your request.
+  &f
+  &fИзвините, но сервер не может обработать ваш запрос.
 wrong-password: |+
   &f
-  &c&lFAILURE&f: Wrong password. You have &e{0}&r attempts.
+  &c&lОШИБКА &8› &fНеправильный пароль. У вас осталось &e{0}&r попыток.
   &f
 password-mismatch: |+
   &f
-  &c&lFAILURE&f: &fPassword confirmation does not matches.
+  &c&lОШИБКА &8› &fПодтверждение пароля не совпадает.
   &f
 password-min-length: |+
   &f
-  &c&lFAILURE&f: &fPassword length can not be less then &e{0}&f.
+  &c&lОШИБКА &8› &fДлина пароля не может быть меньше &e{0}&f символов.
   &f
-authentication-account-not-found: |+
-  &6&lFAILURE AUTHENTICATION
-  &f
-  &fSorry for the inconvenience,
-  &fPlease re-enter to the server.
 no-actual-server: |+
-  &c&lFAILURE CONNECT
+  &c&lОШИБКА АУТЕНТИФИКАЦИИ
   &f
-  &fThere are no actual servers to connect to,
-  &fPlease connect with administration.
-
+  &fНет доступных серверов для присоединения
+  &fПожалуйста, свяжитесь с администрацией
 version-outdated: |+
   &c&lVERSION OUTDATED
   &f
   &fСервер не поддерживает данную версию,
-  &fпожалуйста, зайдите с версии &b1.16-1.16.x
+  &fпожалуйста, зайдите с версии &b1.12.2-1.16.x
   &f
-  &aСпасибо за то что выбираете нас, мы вас любим :3
+  &aСпасибо за то что выбираете нас :3
 
-user-authenticated: "&a&lINFO&f: &fУспешная аутентификация!"
-already-registered: "&c&lFAILURE&f: &fВы уже зарегистрированы!"
-login-usage: "&6&lUSAGE&f: &fИспользуйте &7/l &c<password>&f для аутентификации."
+user-authenticated: |-
+  &f
+  &a&lУСПЕХ &8› &fУспешная аутентификация!
+  &f
+already-registered: |-
+  &f
+  &c&lОШИБКА &8› &fВы уже зарегистрированы!
+  &f
+usage-account-login: |-
+  &f
+  &b&lПОДСКАЗКА &8› &fИспользуйте &b/l &7<password>&f для аутентификации.
+  &f
+tip-account-login: |-
+  &f
+  &b&lПОДСКАЗКА &8› &fПожалуйста, аутентифицируйтесь с помощью команды &b/l &7<пароль>
+  &f
+tip-account-register: |-
+  &f
+  &b&lПОДСКАЗКА &8› &fПожалуйста, зарегистрируйтесь с помощью &b/reg &7<password>
+  &f
+changepassword-usage-self: |-
+  &f
+  &b&lПОДСКАЗКА &8› &fИспользуйте &b/changepassword &7<password> <confirm_password>
+  &f
+changepassword-usage-other: |-
+  &f
+  &b&lПОДСКАЗКА &8› &fИспользуйте &b/changepassword &7<player> <password>
+  &f
+changepassword-success-self: |-
+  &f
+  &a&lУСПЕХ &8› &fВаш пароль был успешно изменён!
+  &f
+changepassword-success-other: |-
+  &f
+  &a&lУСПЕХ &8› &fПароль для игрока &2{0}&f был успешно изменён!
+  &f
+account-not-registered: |-
+  &f
+  &c&lОШИБКА &8› &fПользователь с таким ником не зарегистрирован!
+  &f
 
-login-title: "&a&l» &2&lWelcome back &a&l«"
-login-subtitle: "&fАутентификация &2&l/l &7<password>"
-login-text: "&a&lINFO&f: &fПожалуйста, аутентифицируйтесь с помощью команды &2/l &7<пароль>"
+login-title: "&b&l» &3&lС возвращением! &b&l«"
+login-subtitle: "&fАутентификация &b&l/l &7<password>"
 
-register-title: "&a&l» &2&lWelcome to &f&lNocraft &a&l«"
-register-subtitle: "&fРегистрация &2&l/reg &7<password>"
-register-text: "&a&lINFO&f: &fПожалуйста, зарегистрируйтесь с помощью &2/reg &7<password>"
+register-title: "&b&l» &3&lДобро пожаловать на &f&lZabbixmc &b&l«"
+register-subtitle: "&fРегистрация &b&l/reg &7<password>"

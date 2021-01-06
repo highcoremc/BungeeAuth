@@ -61,10 +61,7 @@ public class PlayerLoginListener extends BungeeAuthListener {
     @EventHandler(priority = EventPriority.LOW)
     public void onSuccessfulPlayerLogin(PlayerAuthenticatedEvent e) {
         this.plugin.getPlayer(e.getPlayerId()).ifPresent(player -> {
-            // clean chat after login
-            for (int i = 0; i < 23; i++) {
-                player.sendMessage(new TextComponent());
-            }
+            cleanChat(player);
 
             // remove old title
             TitleBarApi.send(player, new Message(""), new Message(""), 0, 15, 0);
@@ -79,6 +76,13 @@ public class PlayerLoginListener extends BungeeAuthListener {
                 this.connector.connect(ServerType.GAME, player);
             }
         });
+    }
+
+    private void cleanChat(ProxiedPlayer player) {
+        // clean chat after login
+        for (int i = 0; i < 23; i++) {
+            player.sendMessage(new TextComponent());
+        }
     }
 
     private void logAuthenticatedPlayer(ProxiedPlayer p) {

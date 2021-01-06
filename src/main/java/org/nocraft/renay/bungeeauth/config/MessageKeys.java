@@ -48,17 +48,14 @@ public class MessageKeys {
     public static final ConfigKey<Message> PASSWORD_MIN_LENGTH = messageKey(
             c -> c.getString("password-min-length", ""));
 
-    public static final ConfigKey<Message> AUTHENTICATION_ACCOUNT_NOT_FOUND = messageKey(
-            c -> c.getString("authentication-account-not-found", ""));
-
-    public static final ConfigKey<Message> PLAYER_ACCOUNT_NOT_FOUND = messageKey(
-            c -> c.getString("player-account-not-found", ""));
+    public static final ConfigKey<Message> ACCOUNT_NOT_REGISTERED = messageKey(
+            c -> c.getString("account-not-registered", ""));
 
     public static final ConfigKey<Message> USER_AUTHENTICATED = messageKey(
             c -> c.getString("user-authenticated", ""));
 
     public static final ConfigKey<Message> LOGIN_USAGE = messageKey(
-            c -> c.getString("login-usage", ""));
+            c -> c.getString("usage-account-login", ""));
 
     public static final ConfigKey<Message> LOGIN_TITLE = messageKey(
             c -> c.getString("login-title", ""));
@@ -67,7 +64,7 @@ public class MessageKeys {
             c -> c.getString("login-subtitle", ""));
 
     public static final ConfigKey<Message> LOGIN_CHAT_MESSAGE = messageKey(
-            c -> c.getString("login-text", ""));
+            c -> c.getString("tip-account-login", ""));
 
     public static final ConfigKey<Message> REGISTER_TITLE = messageKey(
             c -> c.getString("register-title", ""));
@@ -76,7 +73,7 @@ public class MessageKeys {
             c -> c.getString("register-subtitle", ""));
 
     public static final ConfigKey<Message> REGISTER_CHAT_MESSAGE = messageKey(
-            c -> c.getString("register-text", ""));
+            c -> c.getString("tip-account-register", ""));
 
     public static final ConfigKey<Message> ALREADY_REGISTERED = messageKey(
             c -> c.getString("already-registered", ""));
@@ -87,23 +84,17 @@ public class MessageKeys {
     public static final ConfigKey<Message> VERSION_OUTDATED = messageKey(
             c -> c.getString("version-outdated", ""));
 
-    public static final ConfigKey<Message> CHANGEPASSWORD_PLAYER_USAGE = messageKey(
-        c -> c.getString("change-player-password-usage", ""));
+    public static final ConfigKey<Message> CHANGEPASSWORD_SELF_USAGE = messageKey(
+        c -> c.getString("changepassword-usage-self", ""));
 
-    public static final ConfigKey<Message> CHANGEPASSWORD_CONSOLE_USAGE = messageKey(
-        c -> c.getString("change-console-password-usage", ""));
-
-    public static final ConfigKey<Message> CHANGEPASSWORD_WRONG_CONFIRM = messageKey(
-        c -> c.getString("changepassword-wrong-confirm-password", ""));
+    public static final ConfigKey<Message> CHANGEPASSWORD_OTHER_USAGE = messageKey(
+        c -> c.getString("changepassword-usage-other", ""));
 
     public static final ConfigKey<Message> CHANGEPASSWORD_OTHER_SUCCESS = messageKey(
-        c -> c.getString("changepassword-other-success", ""));
+        c -> c.getString("changepassword-success-other", ""));
 
     public static final ConfigKey<Message> CHANGEPASSWORD_SELF_SUCCESS = messageKey(
-        c -> c.getString("changepassword-self-success", ""));
-
-    public static final ConfigKey<Message> CHANGEPASSWORD_REAUTHENTICATE = messageKey(
-        c -> c.getString("changepassword-reauthenticate", ""));
+        c -> c.getString("changepassword-success-self", ""));
 
 
     private static final List<ConfigKeyTypes.BaseConfigKey<?>> KEYS;

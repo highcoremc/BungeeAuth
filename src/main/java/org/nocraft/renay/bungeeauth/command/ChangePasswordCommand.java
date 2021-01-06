@@ -4,6 +4,7 @@ import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import org.nocraft.renay.bungeeauth.BungeeAuthPlayer;
 import org.nocraft.renay.bungeeauth.BungeeAuthPlugin;
+import org.nocraft.renay.bungeeauth.config.ConfigKeys;
 import org.nocraft.renay.bungeeauth.config.Message;
 import org.nocraft.renay.bungeeauth.config.MessageKeys;
 import org.nocraft.renay.bungeeauth.event.ChangedPasswordEvent;
@@ -33,20 +34,30 @@ public class ChangePasswordCommand extends BungeeAuthCommand {
     }
 
     private void asPlayer(ProxiedPlayer player, String[] args) {
-        if (args.length < 3) {
+        if (args.length < 2) {
             Message message = plugin.getMessageConfig().get(
-                MessageKeys.CHANGEPASSWORD_PLAYER_USAGE);
+                MessageKeys.CHANGEPASSWORD_SELF_USAGE);
             player.sendMessage(message.asComponent());
             return;
         }
+
+        int minLengthPassword = plugin.getConfiguration()
+            .get(ConfigKeys.MIN_PASSWORD_LENGTH);
 
         String newPassword = args[0];
         String confirmPassword = args[1];
 
         if (!newPassword.equals(confirmPassword)) {
-            Message message = plugin.getMessageConfig().get(
-                MessageKeys.CHANGEPASSWORD_WRONG_CONFIRM);
+            Message message = plugin.getMessageConfig()
+                .get(MessageKeys.PASSWORD_MISMATCH);
             player.sendMessage(message.asComponent());
+            return;
+        }
+
+        if (minLengthPassword > newPassword.length()) {
+            Message message = plugin.getMessageConfig().get(
+                MessageKeys.PASSWORD_MIN_LENGTH);
+            player.sendMessage(message.asComponent(minLengthPassword));
             return;
         }
 
@@ -66,7 +77,7 @@ public class ChangePasswordCommand extends BungeeAuthCommand {
     private void asConsole(CommandSender sender, String[] args) {
         if (args.length < 2) {
             Message message = plugin.getMessageConfig().get(
-                MessageKeys.CHANGEPASSWORD_CONSOLE_USAGE);
+                MessageKeys.CHANGEPASSWORD_OTHER_USAGE);
             sender.sendMessage(message.asComponent());
             return;
         }
@@ -81,7 +92,7 @@ public class ChangePasswordCommand extends BungeeAuthCommand {
         Optional<User> optionalUser;
 
         try {
-            optionalUser = this.plugin.getDataStorage().loadUser(playerName).get();
+            optionalUser = this.plugin.loadUser(playerName).get();
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
             return;
@@ -89,7 +100,7 @@ public class ChangePasswordCommand extends BungeeAuthCommand {
 
         if (!optionalUser.isPresent()) {
             Message message = this.plugin.getMessageConfig()
-                .get(MessageKeys.PLAYER_ACCOUNT_NOT_FOUND);
+                .get(MessageKeys.ACCOUNT_NOT_REGISTERED);
             sender.sendMessage(message.asComponent(playerName));
             return;
         }

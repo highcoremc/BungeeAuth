@@ -19,13 +19,10 @@ import java.util.UUID;
 public class RegisterCommand extends BungeeAuthCommand {
 
     private final BungeeAuthPlugin plugin;
-    private final Integer minLengthPassword;
 
     public RegisterCommand(BungeeAuthPlugin plugin) {
         super(plugin, "register", null, "reg");
         this.plugin = plugin;
-        this.minLengthPassword = plugin.getConfiguration()
-                .get(ConfigKeys.MIN_PASSWORD_LENGTH);
     }
 
     @Override
@@ -36,14 +33,14 @@ public class RegisterCommand extends BungeeAuthCommand {
         }
 
         if (args.length == 0) {
-            Message message = plugin.getMessageConfig()
+            Message message = this.plugin.getMessageConfig()
                     .get(MessageKeys.LOGIN_USAGE);
             sender.sendMessage(message.asComponent());
             return;
         }
 
         if (args.length == 2 && !args[0].equals(args[1])) {
-            Message message = plugin.getMessageConfig()
+            Message message = this.plugin.getMessageConfig()
                     .get(MessageKeys.PASSWORD_MISMATCH);
             sender.sendMessage(message.asComponent());
             return;
@@ -52,15 +49,23 @@ public class RegisterCommand extends BungeeAuthCommand {
         ProxiedPlayer player = (ProxiedPlayer) sender;
         String rawPassword = args[0];
 
+        int minLengthPassword = this.plugin.getConfiguration()
+            .get(ConfigKeys.MIN_PASSWORD_LENGTH);
+
         if (minLengthPassword > rawPassword.length()) {
-            Message message = plugin.getMessageConfig()
+            Message message = this.plugin.getMessageConfig()
                     .get(MessageKeys.PASSWORD_MIN_LENGTH);
             sender.sendMessage(message.asComponent(minLengthPassword));
             return;
         }
 
-        BungeeAuthPlayer authPlayer = this.plugin
-            .getAuthPlayer(player.getUniqueId());
+        BungeeAuthPlayer authPlayer = this.plugin.getAuthPlayer(player.getUniqueId());
+
+        if (null == authPlayer) {
+            Message message = plugin.getMessageConfig()
+                .get(MessageKeys.FAILED_REGISTER);
+            player.disconnect(message.asComponent());
+        }
 
         if (authPlayer.user.hasPassword()) {
             Message message = plugin.getMessageConfig()
