@@ -1,7 +1,9 @@
 package org.nocraft.renay.bungeeauth.command;
 
+import io.netty.util.internal.StringUtil;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
+import net.md_5.bungee.api.plugin.TabExecutor;
 import org.nocraft.renay.bungeeauth.BungeeAuthPlayer;
 import org.nocraft.renay.bungeeauth.BungeeAuthPlugin;
 import org.nocraft.renay.bungeeauth.config.ConfigKeys;
@@ -11,10 +13,11 @@ import org.nocraft.renay.bungeeauth.event.ChangedPasswordEvent;
 import org.nocraft.renay.bungeeauth.storage.entity.User;
 import org.nocraft.renay.bungeeauth.storage.entity.UserPassword;
 
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
-public class ChangePasswordCommand extends BungeeAuthCommand {
+public class ChangePasswordCommand extends BungeeAuthCommand implements TabExecutor {
 
     private final BungeeAuthPlugin plugin;
 
@@ -119,5 +122,22 @@ public class ChangePasswordCommand extends BungeeAuthCommand {
         }
 
         this.plugin.getPluginManager().callEvent(new ChangedPasswordEvent(sender, user.uniqueId, playerName));
+    }
+
+    @Override
+    public Iterable<String> onTabComplete(CommandSender sender, String[] args) {
+        if (!(sender instanceof ProxiedPlayer) || 2 < args.length) {
+            return Collections.emptyList();
+        }
+
+        List<String> result = new ArrayList<>();
+        String lastArg = args[args.length - 1];
+
+        if (2 == args.length) {
+            result.add(args[0]);
+        }
+
+        return result.stream().filter(r -> r.startsWith(lastArg))
+            .collect(Collectors.toList());
     }
 }

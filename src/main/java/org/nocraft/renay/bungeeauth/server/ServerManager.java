@@ -1,7 +1,5 @@
 package org.nocraft.renay.bungeeauth.server;
 
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import org.nocraft.renay.bungeeauth.BungeeAuthPlugin;
@@ -10,8 +8,12 @@ import org.nocraft.renay.bungeeauth.config.MessageKeys;
 import org.nocraft.renay.bungeeauth.scheduler.Scheduler;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -19,25 +21,25 @@ import java.util.concurrent.TimeUnit;
 public class ServerManager {
 
     private final Map<ServerInfo, ServerType> servers = new HashMap<>();
-    private final Map<ServerInfo, ServerType> actualServers = new ConcurrentHashMap<>();
+    private volatile Map<ServerInfo, ServerType> actualServers = new HashMap<>();
 
     private final BungeeAuthPlugin plugin;
 
     public ServerManager(BungeeAuthPlugin plugin, Scheduler scheduler) {
         this.plugin = plugin;
-        scheduler.asyncRepeating(this::actual, 500, TimeUnit.MILLISECONDS);
+        scheduler.asyncRepeating(this::actualServerList, 500, TimeUnit.MILLISECONDS);
     }
 
     public synchronized void addServer(ServerType type, ServerInfo server) {
         this.servers.put(server, type);
     }
 
-    private synchronized void actual() {
+    private synchronized void actualServerList() {
         this.servers.forEach((server, type) -> {
             try (Socket s = new Socket()) {
                 s.connect(server.getSocketAddress(), 10);
                 this.actualServers.put(server, type);
-            } catch (IOException e) {
+            } catch (IOException | IllegalArgumentException e) {
                 this.actualServers.remove(server);
             }
         });
@@ -57,7 +59,11 @@ public class ServerManager {
         }
 
         try {
-            p.connect(calculateRandomServer(filtered));
+            ServerInfo randomServer = getRandomServer(filtered);
+            InetSocketAddress address = randomServer.getAddress();
+            System.out.println(String.format("SocketAddress: %s:%d",
+                address.getHostString(), address.getPort()));
+            p.connect(randomServer);
         } catch (IllegalStateException ex) {
             ex.printStackTrace();
             disconnect(p);
@@ -80,7 +86,7 @@ public class ServerManager {
         p.disconnect(message.asComponent());
     }
 
-    private ServerInfo calculateRandomServer(Map<ServerInfo, ServerType> servers) throws IllegalStateException {
+    private ServerInfo getRandomServer(Map<ServerInfo, ServerType> servers) throws IllegalStateException {
         Iterator<Map.Entry<ServerInfo, ServerType>> iterator =
                 servers.entrySet().iterator();
         int index = new Random().nextInt(servers.size());
@@ -121,6 +127,6 @@ public class ServerManager {
     }
 
     public ServerInfo getServer(ServerType type) throws IllegalStateException {
-        return calculateRandomServer(filterActualByType(type));
+        return getRandomServer(filterActualByType(type));
     }
 }

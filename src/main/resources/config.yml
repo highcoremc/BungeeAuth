@@ -128,6 +128,7 @@ session:
 
 settings:
   max-auth-attempts: 6
+  max-auth-time: 500
   ban-time-minutes: 10
   min-password-length: 4
 

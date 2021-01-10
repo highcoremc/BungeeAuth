@@ -2,6 +2,7 @@ package org.nocraft.renay.bungeeauth;
 
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
+import org.nocraft.renay.bungeeauth.config.ConfigKeys;
 import org.nocraft.renay.bungeeauth.config.Message;
 import org.nocraft.renay.bungeeauth.config.MessageKeys;
 import org.nocraft.renay.bungeeauth.exception.AuthenticationException;
@@ -17,7 +18,7 @@ public class AsyncLoginChecker implements Runnable {
 
     private final Queue<ServerInfo> servers;
     private final BungeeAuthPlugin plugin;
-    private long maxAuthTime = 500;
+    private final long maxAuthTime;
 
     /**
      * Checks async players on auth servers.
@@ -27,6 +28,7 @@ public class AsyncLoginChecker implements Runnable {
     public AsyncLoginChecker(BungeeAuthPlugin plugin, List<String> servers) {
         this.plugin = plugin;
         this.servers = new ArrayBlockingQueue<>(servers.size());
+        this.maxAuthTime = plugin.getConfiguration().get(ConfigKeys.MAX_AUTH_TIME);
         for (String server : servers) {
             ServerInfo info = plugin.getProxy()
                     .getServerInfo(server);
@@ -53,9 +55,10 @@ public class AsyncLoginChecker implements Runnable {
                 }
 
                 long timeLeft = (now - bungeeAuthPlayer.joinedAt.getTime()) / 1000;
+
                 if (timeLeft >= this.maxAuthTime) {
-                    Message message = plugin.getMessageConfig().get(
-                            MessageKeys.LOGIN_TIMEOUT);
+                    Message message = plugin.getMessageConfig()
+                        .get(MessageKeys.LOGIN_TIMEOUT);
                     player.disconnect(message.asComponent());
                     continue;
                 }

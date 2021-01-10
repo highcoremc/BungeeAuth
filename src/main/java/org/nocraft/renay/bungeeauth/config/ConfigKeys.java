@@ -68,6 +68,9 @@ public final class ConfigKeys {
     public static final ConfigKey<Integer> MAX_AUTH_ATTEMPTS = enduringKey(customKey(
             c -> c.getInteger("settings.max-auth-attempts", 5)));
 
+    public static final ConfigKey<Integer> MAX_AUTH_TIME = enduringKey(customKey(
+        c -> c.getInteger("settings.max-auth-time", 500)));;
+
     public static final ConfigKey<Integer> BAN_TIME_MINUTES = enduringKey(customKey(
             c -> c.getInteger("settings.ban-time-minutes", 10)));
 
