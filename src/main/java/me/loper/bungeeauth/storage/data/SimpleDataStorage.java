@@ -13,8 +13,11 @@ import java.util.concurrent.CompletableFuture;
  * Provides a {@link CompletableFuture} based API for interacting with a {@link DataStorage}.
  */
 public class SimpleDataStorage extends AbstractStorage {
+
     private final BungeeAuthPlugin plugin;
     private final DataStorage implementation;
+
+    private boolean isLoaded = false;
 
     public SimpleDataStorage(BungeeAuthPlugin plugin, DataStorage implementation) {
         super(plugin);
@@ -37,13 +40,23 @@ public class SimpleDataStorage extends AbstractStorage {
     public void init() {
         try {
             this.implementation.init();
+            this.isLoaded = true;
         } catch (Exception e) {
             this.plugin.getLogger().severe("Failed to init storage implementation");
             e.printStackTrace();
         }
     }
 
+    @Override
+    public boolean isLoaded() {
+        return this.isLoaded;
+    }
+
     public void shutdown() {
+        if (!this.isLoaded) {
+            return;
+        }
+
         try {
             this.implementation.shutdown();
         } catch (Exception e) {

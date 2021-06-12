@@ -42,4 +42,8 @@ public abstract class AbstractStorage {
     }
 
     public abstract void shutdown();
+
+    public boolean isLoaded() {
+        throw new RuntimeException(String.format("Method '%s.isLoaded()' must be implemented.", getClass().getName()));
+    }
 }

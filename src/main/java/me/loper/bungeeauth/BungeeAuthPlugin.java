@@ -77,6 +77,12 @@ public class BungeeAuthPlugin extends Plugin {
 
         this.sessionStorage = sessionStorageFactory.getInstance();
         this.dataStorage = storageFactory.getInstance();
+
+        if (!this.sessionStorage.isLoaded() || !this.dataStorage.isLoaded()) {
+            this.getProxy().stop("BungeeAuth can not start up.");
+            return;
+        }
+
         Integer maxCountAttempts = this.getConfiguration()
                 .get(ConfigKeys.MAX_AUTH_ATTEMPTS);
         this.attemptCalculator = new AttemptCalculator(this, maxCountAttempts);

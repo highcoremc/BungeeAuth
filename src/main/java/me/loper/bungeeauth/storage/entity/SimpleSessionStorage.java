@@ -13,6 +13,8 @@ public class SimpleSessionStorage extends AbstractStorage {
     private final SessionStorage implementation;
     private final BungeeAuthPlugin plugin;
 
+    private boolean isLoaded = false;
+
     public SimpleSessionStorage(BungeeAuthPlugin plugin, SessionStorage implementation) {
         super(plugin);
         this.implementation = implementation;
@@ -22,10 +24,16 @@ public class SimpleSessionStorage extends AbstractStorage {
     public void init() {
         try {
             this.implementation.init();
+            this.isLoaded = true;
         } catch (Exception e) {
             this.plugin.getLogger().severe("Failed to init storage implementation");
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public boolean isLoaded() {
+        return this.isLoaded;
     }
 
     public CompletableFuture<Optional<Session>> loadSession(UUID uniqueId, String key) {
@@ -42,7 +50,16 @@ public class SimpleSessionStorage extends AbstractStorage {
 
     @Override
     public void shutdown() {
-        this.implementation.shutdown();
+        if (!this.isLoaded) {
+            return;
+        }
+
+        try {
+            this.implementation.shutdown();
+        } catch (Exception e) {
+            this.plugin.getLogger().severe("Failed to init storage implementation");
+            e.printStackTrace();
+        }
     }
 
     public CompletableFuture<Queue<Map<String, Session>>> loadAll() {
