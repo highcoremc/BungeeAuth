@@ -1,5 +1,5 @@
 name: BungeeAuth
 version: ${project.version}
 author: loperd
-main: org.nocraft.renay.bungeeauth.BungeeAuthPlugin
+main: me.loper.bungeeauth.BungeeAuthPlugin
 description: Simple authentication for bungeecord offline.
