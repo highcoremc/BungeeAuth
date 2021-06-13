@@ -8,7 +8,7 @@ import me.loper.bungeeauth.config.Message;
 import me.loper.bungeeauth.config.MessageKeys;
 import me.loper.bungeeauth.exception.AuthenticationException;
 import me.loper.bungeeauth.storage.data.SimpleDataStorage;
-import me.loper.bungeeauth.storage.entity.SimpleSessionStorage;
+import me.loper.bungeeauth.storage.session.SimpleSessionStorage;
 import me.loper.bungeeauth.storage.entity.User;
 import me.loper.bungeeauth.storage.session.Session;
 import me.loper.bungeeauth.util.ImmutableCollectors;

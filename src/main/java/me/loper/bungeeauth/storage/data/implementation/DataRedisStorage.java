@@ -3,7 +3,7 @@ package me.loper.bungeeauth.storage.data.implementation;
 import com.lambdaworks.redis.api.StatefulRedisConnection;
 import me.loper.bungeeauth.storage.entity.User;
 import me.loper.bungeeauth.storage.entity.UserPassword;
-import me.loper.bungeeauth.storage.implementation.nosql.RedisConnectionFactory;
+import me.loper.storage.nosql.redis.RedisConnectionFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import me.loper.bungeeauth.storage.data.DataStorage;
 
@@ -64,24 +64,30 @@ public class DataRedisStorage implements DataStorage {
 
     @Override
     public void changeUserPassword(UserPassword password) {
+        String methodName = getClass().getEnclosingMethod().getName();
+
+        throw new IllegalStateException(String.format("Method %s.%s", getClass().getName(), methodName));
     }
 
     @Override
     public Set<UUID> getUniqueUsers() {
-        // TODO: implement or delete this method
-        return null;
+        String methodName = getClass().getEnclosingMethod().getName();
+
+        throw new IllegalStateException(String.format("Method %s.%s", getClass().getName(), methodName));
     }
 
     @Override
     public @Nullable UUID getPlayerUniqueId(String username) {
-        // TODO: implement or delete this method
-        return null;
+        String methodName = getClass().getEnclosingMethod().getName();
+
+        throw new IllegalStateException(String.format("Method %s.%s", getClass().getName(), methodName));
     }
 
     @Override
     public @Nullable String getPlayerName(UUID uniqueId) {
-        // TODO: implement or delete this method
-        return null;
+        String methodName = getClass().getEnclosingMethod().getName();
+
+        throw new IllegalStateException(String.format("Method %s.%s", getClass().getName(), methodName));
     }
 
     @Override

@@ -2,7 +2,7 @@ package me.loper.bungeeauth.storage.session;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import me.loper.bungeeauth.storage.entity.User;
-import me.loper.bungeeauth.storage.entity.SessionTime;
+import me.loper.bungeeauth.storage.entity.SessionLifetime;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -17,37 +17,38 @@ public class Session implements Serializable {
     public final String username;
     public final @NonNull UUID userId;
     public final String ipAddress;
-    public final SessionTime time;
+    public final SessionLifetime lifeTime;
 
     private ReentrantLock ioLock = new ReentrantLock();
 
-    public Session(@NonNull String userName, @NonNull UUID uniqueId, @NonNull SessionTime sessionTime, String address) {
+    public Session(@NonNull String userName, @NonNull UUID uniqueId, @NonNull SessionLifetime lifeTime, String address) {
         this.ipAddress = address;
-        this.time = sessionTime;
+        this.lifeTime = lifeTime;
         this.userId = uniqueId;
         this.username = userName;
     }
 
-    public Session(@NonNull User user, @NonNull SessionTime sessionTime, String address) {
+    public Session(@NonNull User user, @NonNull SessionLifetime sessionTime, String address) {
         this.username = user.username + sessionTime.startTime.toString();
         this.userId = user.uniqueId;
         this.ipAddress = address;
-        this.time = sessionTime;
+        this.lifeTime = sessionTime;
     }
 
-    public Session(Session oldSession, SessionTime time) {
+    public Session(Session oldSession, SessionLifetime time) {
         this.username = oldSession.username;
         this.userId = oldSession.userId;
         this.ipAddress = oldSession.ipAddress;
-        this.time = time;
+        this.lifeTime = time;
     }
 
     public void close(Date time) {
-        this.time.closedAt(time);
+        this.lifeTime.closedAt(time);
     }
 
     public boolean isActive() {
-        return this.time.endTime.after(new Date());
+        return this.lifeTime.endTime.after(new Date())
+            && !this.lifeTime.isClosed();
     }
 
     public Lock getIOLock() {
@@ -69,23 +70,12 @@ public class Session implements Serializable {
 
         Session session = (Session) o;
 
-        if (!Objects.equals(username, session.username)) {
-            return false;
-        }
-
-        if (!userId.equals(session.userId)) {
-            return false;
-        }
-
-        if (!Objects.equals(ipAddress, session.ipAddress)) {
-            return false;
-        }
-
-        if (!Objects.equals(time, session.time)) {
-            return false;
-        }
-
-        return Objects.equals(ioLock, session.ioLock);
+        return Objects.equals(ipAddress, session.ipAddress)
+            && Objects.equals(username, session.username)
+            && Objects.equals(ioLock, session.ioLock)
+            && Objects.equals(lifeTime, session.lifeTime)
+            && userId.equals(session.userId)
+        ;
     }
 
     @Override
@@ -94,7 +84,7 @@ public class Session implements Serializable {
 
         result = 31 * result + userId.hashCode();
         result = 31 * result + (ipAddress != null ? ipAddress.hashCode() : 0);
-        result = 31 * result + (time != null ? time.hashCode() : 0);
+        result = 31 * result + (lifeTime != null ? lifeTime.hashCode() : 0);
         result = 31 * result + (ioLock != null ? ioLock.hashCode() : 0);
 
         return result;

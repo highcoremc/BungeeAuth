@@ -1,45 +1,43 @@
 package me.loper.bungeeauth.storage.data.implementation;
 
+import me.loper.bungeeauth.BungeeAuthPlugin;
+import me.loper.bungeeauth.authentication.hash.HashMethodType;
+import me.loper.bungeeauth.storage.data.DataStorage;
 import me.loper.bungeeauth.storage.entity.User;
 import me.loper.bungeeauth.storage.entity.UserPassword;
-import me.loper.bungeeauth.storage.implementation.sql.SchemaReader;
-import me.loper.bungeeauth.storage.implementation.sql.connection.SqlConnectionFactory;
+import me.loper.storage.sql.SchemaReader;
+import me.loper.storage.sql.connection.factory.HikariConnectionFactory;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import me.loper.bungeeauth.BungeeAuthPlugin;
-import me.loper.bungeeauth.storage.data.DataStorage;
-import org.sql2o.Connection;
-import org.sql2o.Query;
-import org.sql2o.Sql2oException;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.*;
+import java.sql.Date;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class DataSqlStorage implements DataStorage {
 
-    private static final String USER_SELECT_ID_BY_USERNAME = "SELECT id FROM '{prefix}players' WHERE username=:p1 LIMIT 1";
-    private static final String USER_SELECT_USERNAME_BY_ID = "SELECT username FROM '{prefix}players' WHERE unique_id=:p1 LIMIT 1";
-    private static final String USER_INSERT = "INSERT INTO '{prefix}users' (unique_id, username, realname, registered_ip) VALUES(:p1, :p2, :p3, :p4)";
-    private static final String USER_UPDATE = "UPDATE '{prefix}users' SET username = :p2, realname = :p3, registered_ip = :p4 WHERE unique_id = :p1";
-    private static final String USER_SELECT_BY_UID = "SELECT unique_id,username,realname,registered_at,registered_ip FROM '{prefix}users' WHERE unique_id=:p1";
-    private static final String USER_SELECT_BY_NAME = "SELECT unique_id,username,realname,registered_at,registered_ip FROM '{prefix}users' WHERE username=:p1";
-    private static final String USER_SELECT_ID_BY_UID = "SELECT id FROM '{prefix}users' WHERE unique_id=:p1";
+    private static final String USER_SELECT_ID_BY_USERNAME = "SELECT id FROM '{prefix}players' WHERE username=? LIMIT 1";
+    private static final String USER_SELECT_USERNAME_BY_ID = "SELECT username FROM '{prefix}players' WHERE unique_id=? LIMIT 1";
+    private static final String USER_INSERT = "INSERT INTO '{prefix}users' (unique_id, username, realname, registered_ip) VALUES(?, ?, ?, ?)";
+    private static final String USER_SELECT_BY_UID = "SELECT unique_id,username,realname,registered_at,registered_ip FROM '{prefix}users' WHERE unique_id=?";
+    private static final String USER_SELECT_BY_NAME = "SELECT unique_id,username,realname,registered_at,registered_ip FROM '{prefix}users' WHERE username=?";
+    private static final String USER_SELECT_ID_BY_UUID = "SELECT id FROM '{prefix}users' WHERE unique_id=?";
     private static final String USER_SELECT_ALL_IDS = "SELECT id FROM '{prefix}users'";
 
-    private static final String USER_PASSWORD_SELECT_ID = "SELECT id FROM '{prefix}user_password' WHERE unique_id = :p1";
-    private static final String USER_PASSWORD_SELECT = "SELECT unique_id,password,hash_method_type,updated_at,created_at FROM '{prefix}user_password' WHERE unique_id = :p1";
-    private static final String USER_PASSWORD_INSERT = "INSERT INTO '{prefix}user_password' (unique_id, password, hash_method_type) VALUES (:p1, :p2, :p3)";
-    private static final String USER_PASSWORD_UPDATE = "UPDATE '{prefix}user_password' SET password = :p2, hash_method_type = :p3 WHERE unique_id = :p1";
+    private static final String USER_PASSWORD_SELECT_ID = "SELECT id FROM '{prefix}user_password' WHERE unique_id = ?";
+    private static final String USER_PASSWORD_SELECT = "SELECT unique_id,password,hash_method_type,updated_at,created_at FROM '{prefix}user_password' WHERE unique_id = ?";
+    private static final String USER_PASSWORD_INSERT = "INSERT INTO '{prefix}user_password' (unique_id, password, hash_method_type) VALUES (?, ?, ?)";
+    private static final String USER_PASSWORD_UPDATE = "UPDATE '{prefix}user_password' SET password = ?, hash_method_type = ? WHERE unique_id = ?";
 
     private final BungeeAuthPlugin plugin;
 
-    private final SqlConnectionFactory connectionFactory;
+    private final HikariConnectionFactory connectionFactory;
     private final Function<String, String> statementProcessor;
 
-    public DataSqlStorage(BungeeAuthPlugin plugin, SqlConnectionFactory connectionFactory, String tablePrefix) {
+    public DataSqlStorage(BungeeAuthPlugin plugin, HikariConnectionFactory connectionFactory, String tablePrefix) {
         this.plugin = plugin;
         this.connectionFactory = connectionFactory;
         this.statementProcessor = connectionFactory.getStatementProcessor().compose(s -> s.replace("{prefix}", tablePrefix));
@@ -55,7 +53,7 @@ public class DataSqlStorage implements DataStorage {
         this.connectionFactory.init();
 
         boolean tableExists;
-        try (Connection c = this.connectionFactory.getConnection()) {
+        try (java.sql.Connection c = this.connectionFactory.getConnection()) {
             tableExists = tableExists(c, this.statementProcessor.apply("{prefix}users"));
         }
 
@@ -65,7 +63,7 @@ public class DataSqlStorage implements DataStorage {
     }
 
     private boolean tableExists(Connection connection, String table) throws SQLException {
-        try (ResultSet rs = connection.getJdbcConnection().getMetaData().getTables(null, null, "%", null)) {
+        try (ResultSet rs = connection.getMetaData().getTables(null, null, "%", null)) {
             while (rs.next()) {
                 if (rs.getString(3).equalsIgnoreCase(table)) {
                     return true;
@@ -78,7 +76,8 @@ public class DataSqlStorage implements DataStorage {
     private void applySchema() throws IOException, SQLException {
         List<String> statements;
 
-        String schemaFileName = "org/nocraft/renay/bungeeauth/schema/" + this.connectionFactory.getImplementationName().toLowerCase() + ".sql";
+        String schemaFileName = "me/loper/bungeeauth/schema/" + this.connectionFactory.getImplementationName().toLowerCase() + ".sql";
+
         try (InputStream is = this.plugin.getResourceStream(schemaFileName)) {
             if (is == null) {
                 throw new IOException("Couldn't locate schema file for " + this.connectionFactory.getImplementationName());
@@ -92,7 +91,7 @@ public class DataSqlStorage implements DataStorage {
         try (Connection connection = this.connectionFactory.getConnection()) {
             boolean utf8mb4Unsupported = false;
 
-            try (Statement s = connection.getJdbcConnection().createStatement()) {
+            try (Statement s = connection.createStatement()) {
                 for (String query : statements) {
                     s.addBatch(query);
                 }
@@ -110,7 +109,7 @@ public class DataSqlStorage implements DataStorage {
 
             // try again
             if (utf8mb4Unsupported) {
-                try (Statement s = connection.getJdbcConnection().createStatement()) {
+                try (Statement s = connection.createStatement()) {
                     for (String query : statements) {
                         s.addBatch(query.replace("utf8mb4", "utf8"));
                     }
@@ -133,17 +132,26 @@ public class DataSqlStorage implements DataStorage {
     @Override
     public Optional<User> loadUser(UUID uniqueId) {
         try (Connection c = this.connectionFactory.getConnection()) {
-            try (Query query = c.createQuery(this.statementProcessor.apply(USER_SELECT_BY_UID))) {
-                User user = query.withParams(uniqueId.toString()).executeAndFetchFirst(User.class);
+            String query = this.statementProcessor.apply(USER_SELECT_BY_UID);
+            try (PreparedStatement s = c.prepareStatement(query)) {
+                s.setString(1, uniqueId.toString());
+                try (ResultSet rs = s.executeQuery()) {
 
-                if (null == user) {
-                    return Optional.empty();
+                    if (!rs.next()) {
+                        return Optional.empty();
+                    }
+
+                    Date registeredAt = rs.getDate("registered_at");
+                    String registeredIp = rs.getString("registered_ip");
+                    String realname = rs.getString("realname");
+
+                    User user = new User(uniqueId, realname, registeredIp, registeredAt);
+
+                    Optional<UserPassword> password = loadUserPassword(uniqueId);
+                    password.ifPresent(user::changePassword);
+
+                    return Optional.of(user);
                 }
-
-                Optional<UserPassword> password = loadUserPassword(uniqueId);
-                password.ifPresent(user::changePassword);
-
-                return Optional.of(user);
             }
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -155,17 +163,27 @@ public class DataSqlStorage implements DataStorage {
     @Override
     public Optional<User> loadUser(String playerName) {
         try (Connection c = this.connectionFactory.getConnection()) {
-            try (Query query = c.createQuery(this.statementProcessor.apply(USER_SELECT_BY_NAME))) {
-                User user = query.withParams(playerName.toLowerCase()).executeAndFetchFirst(User.class);
+            String query = this.statementProcessor.apply(USER_SELECT_BY_NAME);
+            try (PreparedStatement s = c.prepareStatement(query)) {
+                s.setString(1, playerName.toLowerCase());
+                try (ResultSet rs = s.executeQuery()) {
 
-                if (null == user) {
-                    return Optional.empty();
+                    if (!rs.next()) {
+                        return Optional.empty();
+                    }
+
+                    UUID uniqueId = UUID.fromString(rs.getString("unique_id"));
+                    String registeredIp = rs.getString("registered_ip");
+                    Date registeredAt = rs.getDate("registered_at");
+                    String realname = rs.getString("realname");
+
+                    User user = new User(uniqueId, realname, registeredIp, registeredAt);
+
+                    Optional<UserPassword> password = loadUserPassword(uniqueId);
+                    password.ifPresent(user::changePassword);
+
+                    return Optional.of(user);
                 }
-
-                Optional<UserPassword> password = loadUserPassword(user.uniqueId);
-                password.ifPresent(user::changePassword);
-
-                return Optional.of(user);
             }
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -176,12 +194,32 @@ public class DataSqlStorage implements DataStorage {
 
     private Optional<UserPassword> loadUserPassword(UUID uniqueId) {
         try (Connection c = this.connectionFactory.getConnection()) {
-            try (Query query = c.createQuery(this.statementProcessor.apply(USER_PASSWORD_SELECT))) {
-                UserPassword password = query
-                        .withParams(uniqueId.toString())
-                        .executeAndFetchFirst(UserPassword.class);
+            String query = this.statementProcessor.apply(USER_PASSWORD_SELECT);
+            try (PreparedStatement s = c.prepareStatement(query)) {
+                s.setString(1, uniqueId.toString());
+                try (ResultSet rs = s.executeQuery()) {
 
-                return Optional.ofNullable(password);
+                    if (!rs.next()) {
+                        return Optional.empty();
+                    }
+
+                    HashMethodType hashmethodType = HashMethodType.valueOf(
+                        rs.getString("hash_method_type"));
+
+                    String passwordString = rs.getString("password");
+                    Date createdAt = rs.getDate("created_at");
+                    Date updatedAt = rs.getDate("updated_at");
+
+                    UserPassword password = new UserPassword(
+                        uniqueId,
+                        passwordString,
+                        hashmethodType,
+                        createdAt,
+                        updatedAt
+                    );
+
+                    return Optional.of(password);
+                }
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -193,19 +231,16 @@ public class DataSqlStorage implements DataStorage {
     public void changeUserPassword(@NonNull UserPassword password) {
         password.getIOLock().lock();
         try (Connection c = this.connectionFactory.getConnection()) {
-            String apply = this.statementProcessor
-                .apply(USER_PASSWORD_SELECT_ID);
-
-            try (Query query = c.createQuery(apply)) {
-                UserPassword result = query
-                        .withParams(password.uniqueId.toString())
-                        .executeAndFetchFirst(UserPassword.class);
-
-                String queryString = null == result
+            String query = this.statementProcessor.apply(USER_PASSWORD_SELECT_ID);
+            try (PreparedStatement s = c.prepareStatement(query)) {
+                s.setString(1, password.uniqueId.toString());
+                try (ResultSet rs = s.executeQuery()) {
+                    String resultQuery = !rs.next()
                         ? USER_PASSWORD_INSERT
                         : USER_PASSWORD_UPDATE;
 
-                saveUserPassword(c, queryString, password);
+                    saveUserPassword(c, resultQuery, password);
+                }
             }
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -214,12 +249,12 @@ public class DataSqlStorage implements DataStorage {
         }
     }
 
-    private void saveUserPassword(@NonNull Connection c, @NonNull String queryString, @NonNull UserPassword password) {
-        try (Query q = c.createQuery(this.statementProcessor.apply(queryString))) {
-            q.addParameter("p1", password.uniqueId.toString());
-            q.addParameter("p2", password.password);
-            q.addParameter("p3", password.hashMethodType);
-            q.executeUpdate();
+    private void saveUserPassword(@NonNull Connection c, @NonNull String query, @NonNull UserPassword password) throws SQLException {
+        try (PreparedStatement s = c.prepareStatement(this.statementProcessor.apply(query))) {
+            s.setString(1, password.uniqueId.toString());
+            s.setString(2, password.password);
+            s.setString(3, password.hashMethodType.toString());
+            s.executeUpdate();
         }
     }
 
@@ -227,12 +262,13 @@ public class DataSqlStorage implements DataStorage {
     public void saveUser(@NonNull User user) {
         user.getOILock().lock();
         try (Connection c = this.connectionFactory.getConnection()) {
-            try (Query query = c.createQuery(this.statementProcessor.apply(USER_SELECT_ID_BY_UID))) {
-                User result = query
-                        .withParams(user.uniqueId.toString())
-                        .executeAndFetchFirst(User.class);
-                if (result == null) {
-                    saveUser(c, user, USER_INSERT);
+            String query = this.statementProcessor.apply(USER_SELECT_ID_BY_UUID);
+            try (PreparedStatement s = c.prepareStatement(this.statementProcessor.apply(query))) {
+                s.setString(1, user.uniqueId.toString());
+                try (ResultSet rs = s.executeQuery()) {
+                    if (!rs.next()) {
+                        saveUser(c, user, USER_INSERT);
+                    }
                 }
             }
         } catch (Exception ex) {
@@ -242,13 +278,13 @@ public class DataSqlStorage implements DataStorage {
         }
     }
 
-    public void saveUser(Connection c, User user, String q) {
-        try (Query query = c.createQuery(this.statementProcessor.apply(q))) {
-            query.addParameter("p1", user.uniqueId.toString());
-            query.addParameter("p2", user.username);
-            query.addParameter("p3", user.realname);
-            query.addParameter("p4", user.registeredIp);
-            query.executeUpdate();
+    public void saveUser(Connection c, User user, String query) throws SQLException {
+        try (PreparedStatement s = c.prepareStatement(this.statementProcessor.apply(query))) {
+            s.setString(1, user.uniqueId.toString());
+            s.setString(2, user.username);
+            s.setString(3, user.realname);
+            s.setString(4, user.registeredIp);
+            s.executeUpdate();
         }
     }
 
@@ -257,14 +293,15 @@ public class DataSqlStorage implements DataStorage {
         Set<UUID> uuids = new HashSet<>();
 
         try (Connection c = this.connectionFactory.getConnection()) {
-            try (Query query = c.createQuery(this.statementProcessor.apply(USER_SELECT_ALL_IDS))) {
-                List<User> rs = query.executeAndFetch(User.class);
-
-                if (!rs.isEmpty()) {
-                    rs.forEach(u -> uuids.add(u.uniqueId));
+            String query = this.statementProcessor.apply(USER_SELECT_ALL_IDS);
+            try (Statement s = c.createStatement()) {
+                try (ResultSet rs = s.executeQuery(this.statementProcessor.apply(query))) {
+                    while (rs.next()) {
+                        uuids.add(UUID.fromString(rs.getString("unique_id")));
+                    }
                 }
             }
-        } catch (SQLException | Sql2oException ex) {
+        } catch (SQLException ex) {
             ex.printStackTrace();
         }
 
@@ -276,10 +313,18 @@ public class DataSqlStorage implements DataStorage {
         username = username.toLowerCase();
 
         try (Connection c = this.connectionFactory.getConnection()) {
-            try (Query query = c.createQuery(this.statementProcessor.apply(USER_SELECT_ID_BY_USERNAME))) {
-                return query.withParams(username).executeAndFetchFirst(User.class).uniqueId;
+            String query = this.statementProcessor.apply(USER_SELECT_ID_BY_USERNAME);
+            try (PreparedStatement s = c.prepareStatement(this.statementProcessor.apply(query))) {
+                s.setString(1, username);
+                try (ResultSet rs = s.executeQuery()) {
+                    if (!rs.next()) {
+                        return null;
+                    }
+
+                    return UUID.fromString(rs.getString("unique_id"));
+                }
             }
-        } catch (SQLException | Sql2oException ex) {
+        } catch (SQLException ex) {
             ex.printStackTrace();
         }
 
@@ -289,10 +334,18 @@ public class DataSqlStorage implements DataStorage {
     @Override
     public String getPlayerName(UUID uniqueId) {
         try (Connection c = this.connectionFactory.getConnection()) {
-            try (Query query = c.createQuery(this.statementProcessor.apply(USER_SELECT_USERNAME_BY_ID))) {
-                return query.withParams(uniqueId).executeAndFetchFirst(User.class).username;
+            String query = this.statementProcessor.apply(USER_SELECT_USERNAME_BY_ID);
+            try (PreparedStatement s = c.prepareStatement(this.statementProcessor.apply(query))) {
+                s.setString(1, uniqueId.toString());
+                try (ResultSet rs = s.executeQuery()) {
+                    if (!rs.next()) {
+                        return null;
+                    }
+
+                    return rs.getString("username");
+                }
             }
-        } catch (SQLException | Sql2oException ex) {
+        } catch (SQLException ex) {
             ex.printStackTrace();
         }
 

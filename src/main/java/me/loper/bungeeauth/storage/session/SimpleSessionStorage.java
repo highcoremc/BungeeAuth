@@ -1,14 +1,13 @@
-package me.loper.bungeeauth.storage.entity;
+package me.loper.bungeeauth.storage.session;
 
-import me.loper.bungeeauth.storage.AbstractStorage;
-import me.loper.bungeeauth.storage.session.Session;
-import me.loper.bungeeauth.storage.session.SessionStorage;
 import me.loper.bungeeauth.BungeeAuthPlugin;
+import me.loper.storage.AbstractStorageAdapter;
+import me.loper.storage.Storage;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
-public class SimpleSessionStorage extends AbstractStorage {
+public class SimpleSessionStorage extends AbstractStorageAdapter {
 
     private final SessionStorage implementation;
     private final BungeeAuthPlugin plugin;
@@ -16,9 +15,14 @@ public class SimpleSessionStorage extends AbstractStorage {
     private boolean isLoaded = false;
 
     public SimpleSessionStorage(BungeeAuthPlugin plugin, SessionStorage implementation) {
-        super(plugin);
+        super(plugin.getScheduler());
         this.implementation = implementation;
         this.plugin = plugin;
+    }
+
+    @Override
+    public Storage getImplementation() {
+        return this.implementation;
     }
 
     public void init() {
@@ -31,7 +35,6 @@ public class SimpleSessionStorage extends AbstractStorage {
         }
     }
 
-    @Override
     public boolean isLoaded() {
         return this.isLoaded;
     }

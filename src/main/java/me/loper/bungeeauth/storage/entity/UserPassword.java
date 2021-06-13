@@ -34,6 +34,14 @@ public class UserPassword {
         this.createdAt = new Date();
     }
 
+    public UserPassword(UUID uniqueId, String password, HashMethodType type, Date createdAt, Date updatedAt) {
+        this.hashMethodType = type;
+        this.uniqueId = uniqueId;
+        this.password = password;
+        this.updatedAt = createdAt;
+        this.createdAt = updatedAt;
+    }
+
     public boolean verify(@NonNull HashMethod method, @NonNull String entry) {
         return method.verify(entry, this.password);
     }

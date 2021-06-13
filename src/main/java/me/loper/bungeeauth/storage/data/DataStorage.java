@@ -1,11 +1,13 @@
 package me.loper.bungeeauth.storage.data;
 
-import me.loper.bungeeauth.storage.Storage;
 import me.loper.bungeeauth.storage.entity.User;
 import me.loper.bungeeauth.storage.entity.UserPassword;
+import me.loper.storage.Storage;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.*;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
 public interface DataStorage extends Storage {
     Optional<User> loadUser(UUID uniqueId) throws Exception;

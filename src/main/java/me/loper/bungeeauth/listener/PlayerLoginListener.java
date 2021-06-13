@@ -43,7 +43,7 @@ public class PlayerLoginListener extends BungeeAuthListener {
     }
 
     private void dropSession(String key, Session session) {
-        Date endTime = session.time.endTime;
+        Date endTime = session.lifeTime.endTime;
         if (System.currentTimeMillis() > endTime.getTime()) {
             this.plugin.getSessionStorage().remove(session.userId, key);
         }

@@ -5,7 +5,7 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 import me.loper.bungeeauth.BungeeAuthPlugin;
 import me.loper.bungeeauth.config.Message;
 import me.loper.bungeeauth.config.MessageKeys;
-import me.loper.bungeeauth.scheduler.Scheduler;
+import me.loper.bungeeauth.BungeeSchedulerAdapter;
 
 import java.net.InetSocketAddress;
 import java.util.HashMap;
@@ -23,7 +23,7 @@ public class ServerManager {
 
     private final BungeeAuthPlugin plugin;
 
-    public ServerManager(BungeeAuthPlugin plugin, Scheduler scheduler) {
+    public ServerManager(BungeeAuthPlugin plugin, BungeeSchedulerAdapter scheduler) {
         this.plugin = plugin;
 
         scheduler.asyncRepeating(this::actualServerList, 700, TimeUnit.MILLISECONDS);
@@ -63,11 +63,7 @@ public class ServerManager {
         }
 
         try {
-            ServerInfo randomServer = getRandomServer(filtered).getTarget();
-            InetSocketAddress address = randomServer.getAddress();
-            System.out.printf("SocketAddress: %s:%d%n",
-                address.getHostString(), address.getPort());
-            p.connect(randomServer);
+            p.connect(getRandomServer(filtered).getTarget());
         } catch (IllegalStateException ex) {
             ex.printStackTrace();
             disconnect(p);

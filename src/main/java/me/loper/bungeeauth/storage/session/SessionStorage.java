@@ -1,6 +1,6 @@
 package me.loper.bungeeauth.storage.session;
 
-import me.loper.bungeeauth.storage.Storage;
+import me.loper.storage.Storage;
 
 import java.util.*;
 

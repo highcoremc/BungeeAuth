@@ -2,9 +2,8 @@ package me.loper.bungeeauth.storage.session;
 
 import com.google.common.collect.ImmutableSet;
 import me.loper.bungeeauth.config.ConfigKeys;
-import me.loper.bungeeauth.storage.implementation.nosql.RedisConnectionFactory;
 import me.loper.bungeeauth.BungeeAuthPlugin;
-import me.loper.bungeeauth.storage.entity.SimpleSessionStorage;
+import me.loper.storage.nosql.redis.RedisConnectionFactory;
 
 import java.util.Set;
 
@@ -34,7 +33,7 @@ public class SessionStorageFactory {
             case REDIS:
                 return new SessionRedisStorage(
                         this.plugin,
-                        new RedisConnectionFactory<>(this.plugin.getConfiguration().get(ConfigKeys.CACHE_VALUES)),
+                        new RedisConnectionFactory<>(this.plugin.getConfiguration().get(ConfigKeys.CACHE_REDIS)),
                         this.plugin.getConfiguration().get(ConfigKeys.SESSION_CHANNEL_PREFIX)
                 );
             default:

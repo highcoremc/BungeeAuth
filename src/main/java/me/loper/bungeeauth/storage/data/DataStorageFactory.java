@@ -1,12 +1,11 @@
 package me.loper.bungeeauth.storage.data;
 
+import me.loper.bungeeauth.BungeeAuthPlugin;
 import me.loper.bungeeauth.config.ConfigKeys;
 import me.loper.bungeeauth.storage.data.implementation.DataRedisStorage;
 import me.loper.bungeeauth.storage.data.implementation.DataSqlStorage;
-import me.loper.bungeeauth.storage.implementation.nosql.RedisConnectionFactory;
-import me.loper.bungeeauth.storage.implementation.sql.connection.hikari.PostgreConnectionFactory;
-import me.loper.bungeeauth.storage.misc.DatabaseStorageCredentials;
-import me.loper.bungeeauth.BungeeAuthPlugin;
+import me.loper.storage.nosql.redis.RedisConnectionFactory;
+import me.loper.storage.sql.connection.factory.PostgreConnectionFactory;
 
 public class DataStorageFactory {
     private final BungeeAuthPlugin plugin;
@@ -25,16 +24,16 @@ public class DataStorageFactory {
     }
 
     private DataStorage createNewImplementation(DataStorageType method) {
-        DatabaseStorageCredentials credentials = this.plugin.getConfiguration()
-            .get(ConfigKeys.DATABASE_VALUES);
 
         switch (method) {
             case POSTGRESQL:
-                return new DataSqlStorage(this.plugin, new PostgreConnectionFactory(credentials),
-                        this.plugin.getConfiguration().get(ConfigKeys.DATA_SQL_TABLE_PREFIX)
+                return new DataSqlStorage(this.plugin, new PostgreConnectionFactory(
+                    this.plugin.getConfiguration().get(ConfigKeys.POSTGRES_CREDENTIALS)),
+                    this.plugin.getConfiguration().get(ConfigKeys.DATA_SQL_TABLE_PREFIX)
                 );
             case REDIS:
-                return new DataRedisStorage(new RedisConnectionFactory<>(credentials));
+                return new DataRedisStorage(new RedisConnectionFactory<>(
+                    this.plugin.getConfiguration().get(ConfigKeys.REDIS_CREDENTIALS)));
             default:
                 throw new RuntimeException("Unknown method: " + method);
         }

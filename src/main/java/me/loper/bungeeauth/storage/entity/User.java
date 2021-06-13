@@ -2,6 +2,8 @@ package me.loper.bungeeauth.storage.entity;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.Objects;
 import java.util.UUID;
@@ -30,6 +32,14 @@ public class User {
         this.registeredIp = registeredIp;
         this.realname = username;
         this.registeredAt = new Date();
+    }
+
+    public User(@NonNull UUID uniqueId, @NonNull String username, @NonNull String registeredIp, @NonNull Date registeredAt) {
+        this.uniqueId = uniqueId;
+        this.username = username.toLowerCase();
+        this.registeredIp = registeredIp;
+        this.registeredAt = registeredAt;
+        this.realname = username;
     }
 
     public boolean isRegistered() {

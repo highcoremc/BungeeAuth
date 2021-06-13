@@ -139,7 +139,10 @@ public class PlayerEnterListener extends BungeeAuthListener {
         UUID uniqueId = e.getPlayer().getUniqueId();
         BungeeAuthPlayer player = this.plugin.getAuthPlayer(uniqueId);
 
-        if (null == player.session || new Date().getTime() > player.session.time.endTime.getTime()) {
+        if (
+            null == player || null == player.session
+            || new Date().getTime() > player.session.lifeTime.endTime.getTime()
+        ) {
             handleUnauthorizedAction(e);
             return;
         }
@@ -196,9 +199,9 @@ public class PlayerEnterListener extends BungeeAuthListener {
             return;
         }
 
-        BungeeAuthPlayer player = this.plugin
-                .getAuthPlayer(uniqueId);
-        if (!player.isAuthenticated()) {
+        BungeeAuthPlayer player = this.plugin.getAuthPlayer(uniqueId);
+
+        if (null == player || !player.isAuthenticated()) {
             handlePlayerSession(e);
         }
     }

@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import me.loper.storage.Throwing;
 
 public final class Iterators {
     private Iterators() {}

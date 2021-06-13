@@ -1,8 +1,8 @@
 package me.loper.bungeeauth.storage.session;
 
 import com.lambdaworks.redis.api.StatefulRedisConnection;
-import me.loper.bungeeauth.storage.implementation.nosql.RedisConnectionFactory;
 import me.loper.bungeeauth.BungeeAuthPlugin;
+import me.loper.storage.nosql.redis.RedisConnectionFactory;
 
 import java.util.*;
 
@@ -48,7 +48,15 @@ public class SessionRedisStorage implements SessionStorage {
     public void saveSession(Session session) {
         session.getIOLock().lock();
         try (StatefulRedisConnection<String, Session> conn = this.connectionFactory.getConnection()) {
-            conn.sync().hset(craftKey(session.userId), session.ipAddress, session);
+            String key = craftKey(session.userId);
+
+            Date expires = session.lifeTime.endTime;
+            if (null != session.lifeTime.closedTime) {
+                expires = session.lifeTime.closedTime;
+            }
+
+            conn.sync().hset(key, session.ipAddress, session);
+            conn.sync().expireat(key, expires);
         } finally {
             session.getIOLock().unlock();
         }

@@ -11,24 +11,23 @@ import me.loper.bungeeauth.command.ChangePasswordCommand;
 import me.loper.bungeeauth.command.LoginCommand;
 import me.loper.bungeeauth.command.RegisterCommand;
 import me.loper.bungeeauth.config.ConfigKeys;
-import me.loper.bungeeauth.config.Configuration;
-import me.loper.bungeeauth.config.DefaultConfiguration;
-import me.loper.bungeeauth.config.MessageConfiguration;
-import me.loper.bungeeauth.config.adapter.ConfigurationAdapter;
+import me.loper.bungeeauth.config.MessageKeys;
 import me.loper.bungeeauth.listener.*;
-import me.loper.bungeeauth.scheduler.Scheduler;
 import me.loper.bungeeauth.server.Server;
 import me.loper.bungeeauth.server.ServerManager;
 import me.loper.bungeeauth.server.ServerType;
 import me.loper.bungeeauth.service.AuthManager;
 import me.loper.bungeeauth.storage.data.DataStorageFactory;
 import me.loper.bungeeauth.storage.data.SimpleDataStorage;
-import me.loper.bungeeauth.storage.entity.SimpleSessionStorage;
+import me.loper.bungeeauth.storage.session.SimpleSessionStorage;
 import me.loper.bungeeauth.storage.entity.User;
 import me.loper.bungeeauth.storage.entity.UserPassword;
 import me.loper.bungeeauth.storage.session.Session;
 import me.loper.bungeeauth.storage.session.SessionStorageFactory;
 import me.loper.bungeeauth.util.Composer;
+import me.loper.configuration.Configuration;
+import me.loper.configuration.PluginConfiguration;
+import me.loper.configuration.adapter.ConfigurationAdapter;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
@@ -57,8 +56,8 @@ public class BungeeAuthPlugin extends Plugin {
 
     private AuthFactory authFactory;
 
-    private final Configuration configuration = new DefaultConfiguration(this, provideConfigurationAdapter());
-    private final Configuration messages = new MessageConfiguration(this, provideMessageConfigurationAdapter());
+    private final Configuration configuration = new PluginConfiguration(provideConfigurationAdapter(), ConfigKeys.class);
+    private final Configuration messages = new PluginConfiguration(provideMessageConfigurationAdapter(), MessageKeys.class);
 
     private SimpleSessionStorage sessionStorage;
     private SimpleDataStorage dataStorage;
@@ -67,13 +66,13 @@ public class BungeeAuthPlugin extends Plugin {
 
     private ServerManager serverManager;
     private AuthManager authManager;
-    private Scheduler scheduler;
+    private BungeeSchedulerAdapter scheduler;
 
     public void onEnable() {
         SessionStorageFactory sessionStorageFactory = new SessionStorageFactory(this);
         DataStorageFactory storageFactory = new DataStorageFactory(this);
 
-        this.scheduler = new Scheduler(this);
+        this.scheduler = new BungeeSchedulerAdapter(this);
 
         this.sessionStorage = sessionStorageFactory.getInstance();
         this.dataStorage = storageFactory.getInstance();
@@ -87,10 +86,9 @@ public class BungeeAuthPlugin extends Plugin {
                 .get(ConfigKeys.MAX_AUTH_ATTEMPTS);
         this.attemptCalculator = new AttemptCalculator(this, maxCountAttempts);
 
-        HashMethodType hashMethodType = this.getConfiguration()
-                .get(ConfigKeys.HASH_METHOD_TYPE);
-        int sessionTimeout = this.getConfiguration()
-                .get(ConfigKeys.SESSION_TIMEOUT);
+        HashMethodType hashMethodType = this.getConfiguration().get(ConfigKeys.HASH_METHOD_TYPE);
+
+        int sessionTimeout = this.getConfiguration().get(ConfigKeys.SESSION_LIFETIME);
         this.authFactory = new AuthFactory(this, sessionTimeout, hashMethodType);
 
         Integer banTime = this.getConfiguration().get(ConfigKeys.BAN_TIME_MINUTES);
@@ -168,7 +166,7 @@ public class BungeeAuthPlugin extends Plugin {
         return configFile;
     }
 
-    public @NonNull Scheduler getScheduler() {
+    public @NonNull BungeeSchedulerAdapter getScheduler() {
         return this.scheduler;
     }
 
@@ -209,8 +207,8 @@ public class BungeeAuthPlugin extends Plugin {
         }
 
         UserPassword password = player.user.getPassword();
-        HashMethod hm = HashMethodFactory
-                .create(password.hashMethodType);
+        HashMethod hm = HashMethodFactory.create(
+            password.hashMethodType);
 
         if (!password.verify(hm, rawPassword)) {
             return Authentication.Result.WRONG_PASSWORD;

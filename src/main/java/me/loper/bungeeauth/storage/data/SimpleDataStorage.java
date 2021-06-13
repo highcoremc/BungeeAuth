@@ -1,8 +1,8 @@
 package me.loper.bungeeauth.storage.data;
 
-import me.loper.bungeeauth.storage.AbstractStorage;
 import me.loper.bungeeauth.storage.entity.User;
 import me.loper.bungeeauth.storage.entity.UserPassword;
+import me.loper.storage.AbstractStorageAdapter;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import me.loper.bungeeauth.BungeeAuthPlugin;
 
@@ -12,7 +12,7 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Provides a {@link CompletableFuture} based API for interacting with a {@link DataStorage}.
  */
-public class SimpleDataStorage extends AbstractStorage {
+public class SimpleDataStorage extends AbstractStorageAdapter {
 
     private final BungeeAuthPlugin plugin;
     private final DataStorage implementation;
@@ -20,17 +20,13 @@ public class SimpleDataStorage extends AbstractStorage {
     private boolean isLoaded = false;
 
     public SimpleDataStorage(BungeeAuthPlugin plugin, DataStorage implementation) {
-        super(plugin);
+        super(plugin.getScheduler());
         this.plugin = plugin;
         this.implementation = implementation;
     }
 
     public DataStorage getImplementation() {
         return this.implementation;
-    }
-
-    public Collection<DataStorage> getImplementations() {
-        return Collections.singleton(this.implementation);
     }
 
     public String getName() {
@@ -47,7 +43,6 @@ public class SimpleDataStorage extends AbstractStorage {
         }
     }
 
-    @Override
     public boolean isLoaded() {
         return this.isLoaded;
     }

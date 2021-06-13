@@ -1,6 +1,7 @@
 package me.loper.bungeeauth;
 
-import me.loper.bungeeauth.config.adapter.ConfigurationAdapter;
+import me.loper.configuration.adapter.ConfigurationAdapter;
+
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;
@@ -20,7 +21,6 @@ public class BungeeMessageAdapter implements ConfigurationAdapter {
         reload();
     }
 
-    @Override
     public BungeeAuthPlugin getPlugin() {
         return this.plugin;
     }

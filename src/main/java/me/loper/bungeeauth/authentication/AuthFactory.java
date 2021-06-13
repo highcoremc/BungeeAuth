@@ -3,14 +3,13 @@ package me.loper.bungeeauth.authentication;
 import me.loper.bungeeauth.authentication.hash.HashMethod;
 import me.loper.bungeeauth.authentication.hash.HashMethodFactory;
 import me.loper.bungeeauth.authentication.hash.HashMethodType;
-import net.md_5.bungee.api.connection.PendingConnection;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
 import me.loper.bungeeauth.BungeeAuthPlugin;
-import me.loper.bungeeauth.storage.entity.SessionTime;
+import me.loper.bungeeauth.storage.entity.SessionLifetime;
 import me.loper.bungeeauth.storage.entity.User;
 import me.loper.bungeeauth.storage.entity.UserPassword;
 import me.loper.bungeeauth.storage.session.Session;
-
+import net.md_5.bungee.api.connection.PendingConnection;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Calendar;
@@ -43,7 +42,7 @@ public class AuthFactory {
     public Session createSession(PendingConnection c) {
         String address = this.extractHostString(c.getSocketAddress());
         Date endTime = this.createEndTime(this.sessionTimeout);
-        SessionTime time = new SessionTime(endTime);
+        SessionLifetime time = new SessionLifetime(endTime);
 
         return new Session(c.getName(), c.getUniqueId(), time, address);
     }
