@@ -135,6 +135,7 @@ public class DataSqlStorage implements DataStorage {
             String query = this.statementProcessor.apply(USER_SELECT_BY_UID);
             try (PreparedStatement s = c.prepareStatement(query)) {
                 s.setString(1, uniqueId.toString());
+                s.setMaxRows(1);
                 try (ResultSet rs = s.executeQuery()) {
 
                     if (!rs.next()) {
@@ -166,6 +167,7 @@ public class DataSqlStorage implements DataStorage {
             String query = this.statementProcessor.apply(USER_SELECT_BY_NAME);
             try (PreparedStatement s = c.prepareStatement(query)) {
                 s.setString(1, playerName.toLowerCase());
+                s.setMaxRows(1);
                 try (ResultSet rs = s.executeQuery()) {
 
                     if (!rs.next()) {
@@ -197,6 +199,7 @@ public class DataSqlStorage implements DataStorage {
             String query = this.statementProcessor.apply(USER_PASSWORD_SELECT);
             try (PreparedStatement s = c.prepareStatement(query)) {
                 s.setString(1, uniqueId.toString());
+                s.setMaxRows(1);
                 try (ResultSet rs = s.executeQuery()) {
 
                     if (!rs.next()) {
@@ -234,6 +237,7 @@ public class DataSqlStorage implements DataStorage {
             String query = this.statementProcessor.apply(USER_PASSWORD_SELECT_ID);
             try (PreparedStatement s = c.prepareStatement(query)) {
                 s.setString(1, password.uniqueId.toString());
+                s.setMaxRows(1);
                 try (ResultSet rs = s.executeQuery()) {
                     String resultQuery = !rs.next()
                         ? USER_PASSWORD_INSERT
@@ -265,6 +269,7 @@ public class DataSqlStorage implements DataStorage {
             String query = this.statementProcessor.apply(USER_SELECT_ID_BY_UUID);
             try (PreparedStatement s = c.prepareStatement(this.statementProcessor.apply(query))) {
                 s.setString(1, user.uniqueId.toString());
+                s.setMaxRows(1);
                 try (ResultSet rs = s.executeQuery()) {
                     if (!rs.next()) {
                         saveUser(c, user, USER_INSERT);
@@ -316,6 +321,7 @@ public class DataSqlStorage implements DataStorage {
             String query = this.statementProcessor.apply(USER_SELECT_ID_BY_USERNAME);
             try (PreparedStatement s = c.prepareStatement(this.statementProcessor.apply(query))) {
                 s.setString(1, username);
+                s.setMaxRows(1);
                 try (ResultSet rs = s.executeQuery()) {
                     if (!rs.next()) {
                         return null;
@@ -337,6 +343,7 @@ public class DataSqlStorage implements DataStorage {
             String query = this.statementProcessor.apply(USER_SELECT_USERNAME_BY_ID);
             try (PreparedStatement s = c.prepareStatement(this.statementProcessor.apply(query))) {
                 s.setString(1, uniqueId.toString());
+                s.setMaxRows(1);
                 try (ResultSet rs = s.executeQuery()) {
                     if (!rs.next()) {
                         return null;
