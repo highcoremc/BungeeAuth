@@ -48,9 +48,9 @@ public final class ConfigKeys {
         int connectionTimeout = c.getInteger("redis.pool-settings.connection-timeout", 5000);
 
         return new RedisStorageCredentials(
-                c.getString("redis.address", null),
-                c.getString("data.password", null),
-                c.getInteger("redis.database", 0),
+                c.getString("session.redis.address", null),
+                c.getString("session.redis.password", null),
+                c.getInteger("session.redis.database", 0),
                 maxPoolSize, connectionTimeout
         );
     });

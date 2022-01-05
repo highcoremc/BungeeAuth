@@ -32,7 +32,6 @@ public class SessionStorageFactory {
         switch (method) {
             case REDIS:
                 return new SessionRedisStorage(
-                        this.plugin,
                         new RedisConnectionFactory<>(this.plugin.getConfiguration().get(ConfigKeys.CACHE_REDIS)),
                         this.plugin.getConfiguration().get(ConfigKeys.SESSION_CHANNEL_PREFIX)
                 );

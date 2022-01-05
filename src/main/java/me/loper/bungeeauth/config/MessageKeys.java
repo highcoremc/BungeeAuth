@@ -83,6 +83,9 @@ public class MessageKeys {
     public static final ConfigKey<Message> CHANGEPASSWORD_SELF_USAGE = messageKey(
         c -> c.getString("changepassword-usage-self", ""));
 
+    public static final ConfigKey<Message> CHANGEPASSWORD_OLD_INVALID = messageKey(
+        c -> c.getString("changepassword-old-password-invalid", ""));
+
     public static final ConfigKey<Message> CHANGEPASSWORD_OTHER_USAGE = messageKey(
         c -> c.getString("changepassword-usage-other", ""));
 

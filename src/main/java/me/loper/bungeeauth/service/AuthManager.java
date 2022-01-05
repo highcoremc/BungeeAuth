@@ -64,10 +64,11 @@ public class AuthManager {
 
         InetSocketAddress address = (InetSocketAddress) c.getSocketAddress();
 
-        String host = address.getHostString();
+        String connectionHostString = c.getVirtualHost().getHostString();
+        String addressHostString = address.getHostString();
         String userName = c.getName();
 
-        return new User(uniqueId, userName, host);
+        return new User(uniqueId, userName, addressHostString, connectionHostString);
     }
 
     public void authenticateOnlinePlayers() {

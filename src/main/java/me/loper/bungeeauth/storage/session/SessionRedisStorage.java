@@ -9,13 +9,11 @@ import java.util.*;
 public class SessionRedisStorage implements SessionStorage {
 
     private final RedisConnectionFactory<Session> connectionFactory;
-    private final BungeeAuthPlugin plugin;
 
     private final String SESSION_KEY;
 
-    public SessionRedisStorage(BungeeAuthPlugin plugin, RedisConnectionFactory<Session> factory, String channel) {
+    public SessionRedisStorage(RedisConnectionFactory<Session> factory, String channel) {
         this.connectionFactory = factory;
-        this.plugin = plugin;
 
         SESSION_KEY = channel + ":session";
     }

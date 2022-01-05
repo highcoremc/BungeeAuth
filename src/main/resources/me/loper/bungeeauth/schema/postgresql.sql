@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS "{prefix}users"
     "unique_id"     VARCHAR(36) UNIQUE                  NOT NULL,
     "username"      VARCHAR(36)                         NOT NULL,
     "realname"      VARCHAR(36)                         NOT NULL,
+    "registered_host"      TEXT                         NOT NULL,
     "registered_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     "registered_ip" VARCHAR(36)                         NOT NULL
 );

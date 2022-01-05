@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.nocraft.loperd</groupId>
-    <artifactId>bungeeauth</artifactId>
+    <groupId>me.loper</groupId>
+    <artifactId>BungeeAuth</artifactId>
     <version>1.0</version>
     <packaging>jar</packaging>
 
@@ -76,26 +76,26 @@
         <dependency>
             <groupId>net.md-5</groupId>
             <artifactId>bungeecord-api</artifactId>
-            <version>1.15-SNAPSHOT</version>
+            <version>1.16-R0.4</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
-            <version>2.6.1</version>
+            <version>5.0.0</version>
         </dependency>
 
         <dependency>
             <groupId>ninja.leaping.configurate</groupId>
             <artifactId>configurate-yaml</artifactId>
-            <version>3.3</version>
+            <version>3.7.1</version>
         </dependency>
 
         <dependency>
             <groupId>org.checkerframework</groupId>
             <artifactId>checker</artifactId>
-            <version>3.3.0</version>
+            <version>3.21.0</version>
         </dependency>
 
         <dependency>
@@ -107,26 +107,26 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>9.4-1206-jdbc42</version>
+            <version>42.3.1</version>
             <scope>сompile</scope>
         </dependency>
 
         <dependency>
             <groupId>de.svenkubiak</groupId>
             <artifactId>jBCrypt</artifactId>
-            <version>0.4.1</version>
+            <version>0.4.3</version>
         </dependency>
 
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
-            <version>1.7.21</version>
+            <version>1.7.32</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.10</version>
+            <version>3.12.0</version>
         </dependency>
 
         <dependency>

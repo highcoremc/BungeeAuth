@@ -92,15 +92,15 @@ tip-account-login: |-
   &f
 tip-account-register: |-
   &f
-  &b&lПОДСКАЗКА &8› &fПожалуйста, зарегистрируйтесь с помощью &b/reg &7<password>
+  &b&lПОДСКАЗКА &8› &fПожалуйста, зарегистрируйтесь с помощью &b/reg &7<пароль>
   &f
 changepassword-usage-self: |-
   &f
-  &b&lПОДСКАЗКА &8› &fИспользуйте &b/changepassword &7<password> <confirm_password>
+  &b&lПОДСКАЗКА &8› &fИспользуйте &b/changepassword &7<старый> <новый>
   &f
 changepassword-usage-other: |-
   &f
-  &b&lПОДСКАЗКА &8› &fИспользуйте &b/changepassword &7<player> <password>
+  &b&lПОДСКАЗКА &8› &fИспользуйте &b/changepassword &7<player> <пароль>
   &f
 changepassword-success-self: |-
   &f
@@ -110,6 +110,10 @@ changepassword-success-other: |-
   &f
   &a&lУСПЕХ &8› &fПароль для игрока &2{0}&f был успешно изменён!
   &f
+changepassword-old-password-invalid: |-
+  &f
+  &c&lОШИБКА &8› &fСтарый пароль неверный. Вы не можете поменять пароль.
+  &f
 account-not-registered: |-
   &f
   &c&lОШИБКА &8› &fПользователь с таким ником не зарегистрирован!
@@ -118,5 +122,5 @@ account-not-registered: |-
 login-title: "&b&l» &3&lС возвращением! &b&l«"
 login-subtitle: "&fАутентификация &b&l/l &7<password>"
 
-register-title: "&b&l» &3&lДобро пожаловать на &f&lZabbixmc &b&l«"
+register-title: "&b&l» &3&lДобро пожаловать на &b&l«"
 register-subtitle: "&fРегистрация &b&l/reg &7<password>"

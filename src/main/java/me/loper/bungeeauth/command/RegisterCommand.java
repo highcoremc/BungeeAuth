@@ -65,6 +65,7 @@ public class RegisterCommand extends BungeeAuthCommand {
             Message message = plugin.getMessageConfig()
                 .get(MessageKeys.FAILED_REGISTER);
             player.disconnect(message.asComponent());
+            return;
         }
 
         if (authPlayer.user.hasPassword()) {

@@ -7,8 +7,7 @@ import java.util.List;
 public enum DataStorageType {
 
     // Remote databases
-    POSTGRESQL("PostgreSQL", "postgresql"),
-    REDIS("Redis", "redis");
+    POSTGRESQL("PostgreSQL", "postgresql");
 
     private final String name;
 

@@ -1,22 +1,22 @@
 package me.loper.bungeeauth.command;
 
-import me.loper.bungeeauth.config.ConfigKeys;
-import me.loper.bungeeauth.config.Message;
-import me.loper.bungeeauth.event.ChangedPasswordEvent;
-import net.md_5.bungee.api.CommandSender;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
-import net.md_5.bungee.api.plugin.TabExecutor;
 import me.loper.bungeeauth.BungeeAuthPlayer;
 import me.loper.bungeeauth.BungeeAuthPlugin;
+import me.loper.bungeeauth.authentication.hash.HashMethod;
+import me.loper.bungeeauth.authentication.hash.HashMethodFactory;
+import me.loper.bungeeauth.config.ConfigKeys;
+import me.loper.bungeeauth.config.Message;
 import me.loper.bungeeauth.config.MessageKeys;
+import me.loper.bungeeauth.event.ChangedPasswordEvent;
 import me.loper.bungeeauth.storage.entity.User;
 import me.loper.bungeeauth.storage.entity.UserPassword;
+import net.md_5.bungee.api.CommandSender;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
 
-import java.util.*;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
-public class ChangePasswordCommand extends BungeeAuthCommand implements TabExecutor {
+public class ChangePasswordCommand extends BungeeAuthCommand {
 
     private final BungeeAuthPlugin plugin;
 
@@ -43,18 +43,27 @@ public class ChangePasswordCommand extends BungeeAuthCommand implements TabExecu
             return;
         }
 
-        int minLengthPassword = plugin.getConfiguration()
-            .get(ConfigKeys.MIN_PASSWORD_LENGTH);
+        BungeeAuthPlayer authPlayer = this.plugin.getAuthPlayer(player.getUniqueId());
 
-        String newPassword = args[0];
-        String confirmPassword = args[1];
+        if (null == authPlayer) {
+            this.plugin.getLogger().info(String.format("Player \"%s\" not found in the database.", player.getName()));
+            return;
+        }
 
-        if (!newPassword.equals(confirmPassword)) {
-            Message message = plugin.getMessageConfig()
-                .get(MessageKeys.PASSWORD_MISMATCH);
+        UserPassword currentPassword = authPlayer.user.getPassword();
+        HashMethod method = HashMethodFactory.create(currentPassword.hashMethodType);
+
+        if (!currentPassword.verify(method, args[0])) {
+            Message message = plugin.getMessageConfig().get(
+                MessageKeys.CHANGEPASSWORD_OLD_INVALID);
             player.sendMessage(message.asComponent());
             return;
         }
+
+        int minLengthPassword = plugin.getConfiguration()
+            .get(ConfigKeys.MIN_PASSWORD_LENGTH);
+
+        String newPassword = args[1];
 
         if (minLengthPassword > newPassword.length()) {
             Message message = plugin.getMessageConfig().get(
@@ -63,8 +72,6 @@ public class ChangePasswordCommand extends BungeeAuthCommand implements TabExecu
             return;
         }
 
-        BungeeAuthPlayer authPlayer =
-            this.plugin.getAuthPlayer(player.getUniqueId());
         UserPassword password = this.plugin.getAuthFactory()
             .createUserPassword(player, newPassword);
         authPlayer.user.changePassword(password);
@@ -72,8 +79,8 @@ public class ChangePasswordCommand extends BungeeAuthCommand implements TabExecu
         ChangedPasswordEvent event = new ChangedPasswordEvent(
             player, player.getUniqueId(), player.getName());
 
-        this.plugin.getDataStorage().changeUserPassword(authPlayer.user.getPassword())
-            .thenRun(() -> this.plugin.getPluginManager().callEvent(event));
+        this.plugin.getDataStorage().changeUserPassword(password)
+            .thenRunAsync(() -> this.plugin.getPluginManager().callEvent(event));
     }
 
     private void asConsole(CommandSender sender, String[] args) {
@@ -87,19 +94,11 @@ public class ChangePasswordCommand extends BungeeAuthCommand implements TabExecu
         String playerName = args[0];
         String newPassword = args[1];
 
-        this.plugin.getScheduler().async().execute(() -> handle(sender, playerName, newPassword));
+        this.plugin.loadUser(playerName).thenAccept(optionalUser ->
+            handleChangePassword(sender, playerName, newPassword, optionalUser));
     }
 
-    private void handle(CommandSender sender, String playerName, String newPassword) {
-        Optional<User> optionalUser;
-
-        try {
-            optionalUser = this.plugin.loadUser(playerName).get();
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-            return;
-        }
-
+    private void handleChangePassword(CommandSender sender, String playerName, String newPassword, Optional<User> optionalUser) {
         if (!optionalUser.isPresent()) {
             Message message = this.plugin.getMessageConfig()
                 .get(MessageKeys.ACCOUNT_NOT_REGISTERED);
@@ -108,7 +107,6 @@ public class ChangePasswordCommand extends BungeeAuthCommand implements TabExecu
         }
 
         User user = optionalUser.get();
-
         UserPassword password = this.plugin.getAuthFactory()
             .createUserPassword(user, newPassword);
         user.changePassword(password);
@@ -121,22 +119,5 @@ public class ChangePasswordCommand extends BungeeAuthCommand implements TabExecu
         }
 
         this.plugin.getPluginManager().callEvent(new ChangedPasswordEvent(sender, user.uniqueId, playerName));
-    }
-
-    @Override
-    public Iterable<String> onTabComplete(CommandSender sender, String[] args) {
-        if (!(sender instanceof ProxiedPlayer) || 2 < args.length) {
-            return Collections.emptyList();
-        }
-
-        List<String> result = new ArrayList<>();
-        String lastArg = args[args.length - 1];
-
-        if (2 == args.length) {
-            result.add(args[0]);
-        }
-
-        return result.stream().filter(r -> r.startsWith(lastArg))
-            .collect(Collectors.toList());
     }
 }

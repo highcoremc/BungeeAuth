@@ -1,9 +1,8 @@
 package me.loper.bungeeauth.storage.entity;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Date;
 import java.util.Objects;
 import java.util.UUID;
@@ -12,6 +11,8 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class User {
 
+    @Nullable
+    public final String registeredHost;
     public final UUID uniqueId;
     public final String username;
     public final String realname;
@@ -26,20 +27,22 @@ public class User {
     public final String registeredIp;
     public final Date registeredAt;
 
-    public User(@NonNull UUID uniqueId, @NonNull String username, @NonNull String registeredIp) {
+    public User(@NonNull UUID uniqueId, @NonNull String username, @NonNull String registeredIp, @Nullable String connectionHostString) {
         this.uniqueId = uniqueId;
+        this.registeredHost = connectionHostString;
         this.username = username.toLowerCase();
         this.registeredIp = registeredIp;
         this.realname = username;
         this.registeredAt = new Date();
     }
 
-    public User(@NonNull UUID uniqueId, @NonNull String username, @NonNull String registeredIp, @NonNull Date registeredAt) {
+    public User(@NonNull UUID uniqueId, @NonNull String username, @NonNull String registeredIp, @Nullable String connectionHostString, @NonNull Date registeredAt) {
         this.uniqueId = uniqueId;
         this.username = username.toLowerCase();
         this.registeredIp = registeredIp;
         this.registeredAt = registeredAt;
         this.realname = username;
+        this.registeredHost = connectionHostString;
     }
 
     public boolean isRegistered() {
@@ -51,7 +54,7 @@ public class User {
     }
 
     public UserPassword getPassword() {
-        return password;
+        return this.password;
     }
 
     public boolean hasPassword() {
@@ -59,11 +62,12 @@ public class User {
     }
 
     public String toString() {
-        String passwd = null == password ? null : password.toString();
+        String passwd = null == this.password ? null : this.password.toString();
 
-        return String.format("%s, %s, %s, %s, %s",
-                uniqueId.toString(), username,
-                realname, registeredIp, passwd);
+        return String.format("%s, %s, %s, %s, %s, %s",
+            this.uniqueId.toString(), this.username,
+            this.realname, this.registeredIp,
+            this.registeredHost, passwd);
     }
 
     public Lock getOILock() {
@@ -90,6 +94,7 @@ public class User {
             !Objects.equals(realname, user.realname) ||
             !uniqueId.equals(user.uniqueId) ||
             !password.equals(user.password) ||
+            !registeredHost.equals(user.registeredHost) ||
             !ioLock.equals(user.ioLock)) {
             return false;
         }
@@ -106,6 +111,7 @@ public class User {
         result = 31 * result + password.hashCode();
         result = 31 * result + ioLock.hashCode();
         result = 31 * result + registeredIp.hashCode();
+        result = 31 * result + registeredHost.hashCode();
         result = 31 * result + registeredAt.hashCode();
 
         return result;
