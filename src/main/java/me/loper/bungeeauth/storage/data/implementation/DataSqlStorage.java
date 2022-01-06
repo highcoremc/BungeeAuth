@@ -21,7 +21,8 @@ public class DataSqlStorage implements DataStorage {
 
     private static final String USER_SELECT_ID_BY_USERNAME = "SELECT id FROM '{prefix}players' WHERE username=? LIMIT 1";
     private static final String USER_SELECT_USERNAME_BY_ID = "SELECT username FROM '{prefix}players' WHERE unique_id=? LIMIT 1";
-    private static final String USER_INSERT = "INSERT INTO '{prefix}users' (unique_id, username, realname, registered_host, registered_ip) VALUES(?, ?, ?, ?, ?)";
+    private static final String USER_INSERT = "INSERT INTO '{prefix}users' (username, realname, registered_host, registered_ip, unique_id) VALUES(?, ?, ?, ?, ?)";
+    private static final String USER_UPDATE = "UPDATE '{prefix}users' set username = ?, realname = ?, registered_host = ?, registered_ip = ? where unique_id = ?";
     private static final String USER_SELECT_BY_UID = "SELECT unique_id, username, realname, registered_at, registered_host, registered_ip FROM '{prefix}users' WHERE unique_id=? LIMIT 1";
     private static final String USER_SELECT_BY_NAME = "SELECT unique_id, username, realname, registered_at, registered_host, registered_ip FROM '{prefix}users' WHERE username=? LIMIT 1";
     private static final String USER_SELECT_ID_BY_UUID = "SELECT id FROM '{prefix}users' WHERE unique_id=? LIMIT 1";
@@ -269,11 +270,12 @@ public class DataSqlStorage implements DataStorage {
             String query = this.statementProcessor.apply(USER_SELECT_ID_BY_UUID);
             try (PreparedStatement s = c.prepareStatement(this.statementProcessor.apply(query))) {
                 s.setString(1, user.uniqueId.toString());
-                s.setMaxRows(1);
                 try (ResultSet rs = s.executeQuery()) {
-                    if (!rs.next()) {
-                        saveUser(c, user, USER_INSERT);
-                    }
+                    String resultQuery = !rs.next()
+                        ? USER_INSERT
+                        : USER_UPDATE;
+
+                    saveUser(c, user, resultQuery);
                 }
             }
         } catch (Exception ex) {
@@ -285,11 +287,11 @@ public class DataSqlStorage implements DataStorage {
 
     public void saveUser(Connection c, User user, String query) throws SQLException {
         try (PreparedStatement s = c.prepareStatement(this.statementProcessor.apply(query))) {
-            s.setString(1, user.uniqueId.toString());
-            s.setString(2, user.username);
-            s.setString(3, user.realname);
-            s.setString(4, user.registeredHost);
-            s.setString(5, user.registeredIp);
+            s.setString(1, user.username);
+            s.setString(2, user.realname);
+            s.setString(3, user.registeredHost);
+            s.setString(4, user.registeredIp);
+            s.setString(5, user.uniqueId.toString());
             s.executeUpdate();
         }
     }

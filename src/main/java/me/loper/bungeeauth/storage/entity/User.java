@@ -12,7 +12,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class User {
 
     @Nullable
-    public final String registeredHost;
+    public String registeredHost;
     public final UUID uniqueId;
     public final String username;
     public final String realname;

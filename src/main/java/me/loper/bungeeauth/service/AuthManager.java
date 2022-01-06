@@ -37,6 +37,12 @@ public class AuthManager {
             UUID uniqueId = conn.getUniqueId();
             User user = loadUser(conn, uniqueId);
 
+            if (null == user.registeredHost) {
+                user.registeredHost = conn.getVirtualHost().getHostString();
+            }
+
+            this.dataStorage.saveUser(user);
+
             String host = conn.getAddress().getHostString();
             BungeeAuthPlayer player = new BungeeAuthPlayer(user);
 
@@ -55,6 +61,7 @@ public class AuthManager {
     }
 
     private User loadUser(PendingConnection c, UUID uniqueId) {
+        String connectionHostString = c.getVirtualHost().getHostString();
         Optional<User> userQuery = this.dataStorage
             .loadUser(uniqueId).join();
 
@@ -63,8 +70,6 @@ public class AuthManager {
         }
 
         InetSocketAddress address = (InetSocketAddress) c.getSocketAddress();
-
-        String connectionHostString = c.getVirtualHost().getHostString();
         String addressHostString = address.getHostString();
         String userName = c.getName();
 
