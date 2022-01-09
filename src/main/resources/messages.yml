@@ -122,5 +122,5 @@ account-not-registered: |-
 login-title: "&b&l» &3&lС возвращением! &b&l«"
 login-subtitle: "&fАутентификация &b&l/l &7<password>"
 
-register-title: "&b&l» &3&lДобро пожаловать на &b&l«"
+register-title: "&b&l» &3&lДобро пожаловать &b&l«"
 register-subtitle: "&fРегистрация &b&l/reg &7<password>"
